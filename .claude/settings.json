@@ -1,0 +1,68 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm dev)",
+      "Bash(pnpm dev:*)",
+      "Bash(pnpm build)",
+      "Bash(pnpm lint)",
+      "Bash(pnpm lint:*)",
+      "Bash(pnpm format)",
+      "Bash(pnpm typecheck)",
+      "Bash(pnpm test)",
+      "Bash(pnpm test:*)",
+      "Bash(pnpm api:sync)",
+      "Bash(pnpm api:generate)",
+      "Bash(pnpm dlx shadcn@latest *)",
+      "Bash(pnpm install *)",
+      "Bash(pnpm add *)",
+      "Bash(pnpm remove *)",
+      "Bash(npx tsc --noEmit*)",
+      "Bash(eslint *)",
+      "Bash(prettier *)",
+      "Bash(vitest *)",
+      "Bash(ls *)",
+      "Bash(find *)",
+      "Bash(cat *)",
+      "Bash(head *)",
+      "Bash(tail *)",
+      "Bash(wc *)",
+      "Bash(grep *)",
+      "Bash(rg *)",
+      "Bash(git status*)",
+      "Bash(git log*)",
+      "Bash(git diff*)",
+      "Bash(git branch*)",
+      "Bash(git show*)",
+      "Bash(git blame*)",
+      "Bash(git stash list*)",
+      "Bash(git rev-parse*)",
+      "Bash(git remote -v*)",
+      "Bash(git ls-files*)",
+      "Read(*)"
+    ],
+    "deny": []
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "FILE=$(jq -r '.tool_input.file_path // empty' < /dev/stdin); if [ -n \"$FILE\" ] && echo \"$FILE\" | grep -qE '\\.(ts|tsx)$'; then cd /Users/viktorlevine/Work/modulith-frontend && pnpm typecheck 2>&1 | head -30; fi"
+          }
+        ]
+      }
+    ],
+    "PreCommit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd /Users/viktorlevine/Work/modulith-frontend && pnpm typecheck && pnpm lint"
+          }
+        ]
+      }
+    ]
+  }
+}
