@@ -24,9 +24,22 @@ Permissions are NOT stored in the cookie (to avoid the 4KB limit). They're fetch
 
 ```
 app/
-  (public)/       — no auth required (login, register, forgot-password, reset-password, confirm-email)
+  (public)/       — no auth required (login, register, forgot-password, reset-password, confirm-email, goodbye)
   (onboarding)/   — requires auth, shown before onboarding is complete
-  (app)/          — requires auth + completed onboarding (all main app pages)
+  (app)/          — requires auth + completed onboarding
+    admin/        — permission-gated: users, invitations, audit trail
+    activity/     — personal audit feed (caller's own events)
+    settings/     — profile, password, email, connections, notifications, data
+    notifications/
   api/auth/       — BFF auth routes
   api/proxy/      — catch-all proxy
 ```
+
+## Admin access pattern
+
+Admin features live under `app/(app)/admin/*` and use two complementary layers of gating:
+
+- **Discoverability gating** — the shared `AdminShell` (`components/admin/admin-shell.tsx`) reads the user's permissions from React Query and hides sidebar links the user lacks. If no admin permissions resolve, the shell renders an "Access denied" card instead of children.
+- **Authorization** — the backend continues to enforce permissions on every endpoint. The frontend gate is a UX layer; it never replaces the API check.
+
+When adding a new admin page, place it in `app/(app)/admin/<feature>/`, declare its required permission as a sidebar entry in `AdminShell`, and rely on the generated React Query hook to surface the backend's 403 via `ProblemDetails` if the gate is bypassed.
