@@ -16,6 +16,24 @@ export function notificationTime(value: string) {
   return `${formatDistanceToNowStrict(new Date(value))} ago`;
 }
 
+export function safeNotificationHref(href: string | null | undefined) {
+  if (!href || typeof window === "undefined") {
+    return null;
+  }
+
+  try {
+    const url = new URL(href, window.location.origin);
+
+    if (url.origin !== window.location.origin) {
+      return null;
+    }
+
+    return `${url.pathname}${url.search}${url.hash}`;
+  } catch {
+    return null;
+  }
+}
+
 export function notificationQueryKeyPrefix() {
   return {
     predicate: (query: { queryKey: unknown }) => {

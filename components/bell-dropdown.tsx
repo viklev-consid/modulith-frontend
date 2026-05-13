@@ -17,6 +17,7 @@ import type { MyNotificationResponse } from "@/api/generated";
 import {
   notificationCategoryLabel,
   notificationQueryKeyPrefix,
+  safeNotificationHref,
   notificationTime,
   unreadCountQueryKeyPrefix,
 } from "@/components/notifications-utils";
@@ -62,7 +63,7 @@ function NotificationRow({
 }
 
 export function BellDropdown() {
-  const router = useRouter();
+  const { push } = useRouter();
   const queryClient = useQueryClient();
   const notificationsQuery = useQuery(
     listMyNotificationsOptions({
@@ -90,8 +91,9 @@ export function BellDropdown() {
       await refreshNotifications();
     }
 
-    if (notification.link?.href) {
-      router.push(notification.link.href);
+    const href = safeNotificationHref(notification.link?.href);
+    if (href) {
+      push(href);
     }
   }
 

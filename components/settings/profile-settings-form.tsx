@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "@tanstack/react-form";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -50,6 +50,16 @@ export function ProfileSettingsForm() {
       }
     },
   });
+
+  useEffect(() => {
+    if (!currentUser) {
+      return;
+    }
+
+    form.reset({
+      displayName: currentUser.displayName,
+    });
+  }, [currentUser, form]);
 
   return (
     <Card>
