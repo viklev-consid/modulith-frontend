@@ -20,7 +20,7 @@ declare global {
             element: HTMLElement,
             options: Record<string, string | boolean | number>,
           ) => void;
-          prompt: () => void;
+          prompt?: () => void;
         };
       };
     };
