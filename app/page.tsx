@@ -1,7 +1,15 @@
-import { LogOutIcon } from "lucide-react";
+import type { Metadata } from "next";
+import Link from "next/link";
+import { LogOutIcon, SettingsIcon } from "lucide-react";
 
+import { BellDropdown } from "@/components/bell-dropdown";
 import { Can } from "@/components/can";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
+export const metadata: Metadata = {
+  title: "Dashboard | Modulith",
+};
 
 export default function Page() {
   return (
@@ -13,12 +21,22 @@ export default function Page() {
             Auth foundation is ready for the next feature slice.
           </p>
         </div>
-        <form action="/api/auth/logout" method="post">
-          <Button size="sm" variant="outline" type="submit">
-            <LogOutIcon />
-            Sign out
-          </Button>
-        </form>
+        <div className="flex items-center gap-2">
+          <BellDropdown />
+          <Link
+            href="/settings"
+            className={cn(buttonVariants({ size: "sm", variant: "outline" }))}
+          >
+            <SettingsIcon />
+            Settings
+          </Link>
+          <form action="/api/auth/logout" method="post">
+            <Button size="sm" variant="outline" type="submit">
+              <LogOutIcon />
+              Sign out
+            </Button>
+          </form>
+        </div>
       </header>
       <div className="grid max-w-3xl gap-3 py-6 text-sm">
         <h2 className="font-medium">Dashboard</h2>

@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { Geist, JetBrains_Mono } from "next/font/google";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "@/components/auth-provider";
+import { NotificationToast } from "@/components/notification-toast";
 
 const fontSans = Geist({
   subsets: ["latin"],
@@ -33,7 +35,12 @@ export default function RootLayout({
     >
       <body>
         <ThemeProvider>
-          <AuthProvider>{children}</AuthProvider>
+          <NuqsAdapter>
+            <AuthProvider>
+              {children}
+              <NotificationToast />
+            </AuthProvider>
+          </NuqsAdapter>
         </ThemeProvider>
       </body>
     </html>
