@@ -21,6 +21,7 @@ export type SessionData = {
   refreshToken?: string;
   expiresAt?: number;
   user?: SessionUser;
+  hasCompletedOnboarding?: boolean;
 };
 
 const fallbackSecret = "development-session-secret-change-before-deploying";

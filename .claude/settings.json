@@ -17,6 +17,7 @@
       "Bash(pnpm add *)",
       "Bash(pnpm remove *)",
       "Bash(npx tsc --noEmit*)",
+      "Bash(npx -y react-doctor@latest *)",
       "Bash(eslint *)",
       "Bash(prettier *)",
       "Bash(vitest *)",
@@ -43,6 +44,17 @@
     "deny": []
   },
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "FILE=$(jq -r '.tool_input.file_path // empty' < /dev/stdin); if [ -n \"$FILE\" ] && echo \"$FILE\" | grep -q 'api/generated'; then echo 'BLOCKED: files in api/generated/ are auto-generated and must not be hand-edited. Run pnpm api:generate instead.' && exit 1; fi; exit 0"
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "Write|Edit",
@@ -50,6 +62,10 @@
           {
             "type": "command",
             "command": "FILE=$(jq -r '.tool_input.file_path // empty' < /dev/stdin); if [ -n \"$FILE\" ] && echo \"$FILE\" | grep -qE '\\.(ts|tsx)$'; then cd /Users/viktorlevine/Work/modulith-frontend && pnpm typecheck 2>&1 | head -30; fi"
+          },
+          {
+            "type": "command",
+            "command": "FILE=$(jq -r '.tool_input.file_path // empty' < /dev/stdin); if [ -n \"$FILE\" ] && echo \"$FILE\" | grep -qE '\\.(ts|tsx|js|jsx)$'; then cd /Users/viktorlevine/Work/modulith-frontend && npx eslint --no-warn-ignored \"$FILE\" 2>&1 | head -20; fi"
           }
         ]
       }
@@ -59,7 +75,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd /Users/viktorlevine/Work/modulith-frontend && pnpm typecheck && pnpm lint"
+            "command": "cd /Users/viktorlevine/Work/modulith-frontend && pnpm typecheck && pnpm lint && pnpm test --run 2>&1 | tail -20 && npx -y react-doctor@latest . --diff --staged --fail-on error 2>&1 | tail -30"
           }
         ]
       }

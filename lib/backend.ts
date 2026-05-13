@@ -159,9 +159,12 @@ export function decodeJwt(token: string): JwtClaims {
   return JSON.parse(decoded) as JwtClaims;
 }
 
-export function sessionFromTokenResponse(
-  tokens: TokenResponse,
-): Required<SessionData> {
+export function sessionFromTokenResponse(tokens: TokenResponse): SessionData & {
+  accessToken: string;
+  refreshToken: string;
+  expiresAt: number;
+  user: SessionUser;
+} {
   const claims = decodeJwt(tokens.accessToken);
   const expiresAt =
     claims.exp ??
@@ -214,4 +217,22 @@ export async function refreshSession(session: SessionData) {
   }
 
   return sessionFromTokenResponse((await response.json()) as TokenResponse);
+}
+
+export async function getHasCompletedOnboarding(accessToken: string) {
+  const response = await fetchBackend("/v1/users/me", {
+    headers: {
+      authorization: `Bearer ${accessToken}`,
+    },
+  });
+
+  if (!response.ok) {
+    return false;
+  }
+
+  const profile = (await response.json()) as {
+    hasCompletedOnboarding?: boolean;
+  };
+
+  return profile.hasCompletedOnboarding === true;
 }

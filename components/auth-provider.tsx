@@ -3,6 +3,7 @@
 import {
   createContext,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
@@ -13,7 +14,8 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 import { handleProblem, problemFromResponse } from "@/api/problems";
 import type { GetCurrentUserResponse } from "@/api/generated";
@@ -40,6 +42,19 @@ type AuthContextValue = {
   isLoading: boolean;
   login(email: string, password: string): Promise<void>;
   register(data: RegisterInput): Promise<void>;
+  googleLogin(idToken: string): Promise<void>;
+  googleConfirm(data: {
+    token: string;
+    invitationToken?: string | null;
+  }): Promise<void>;
+  completeOnboarding(data: {
+    acceptTerms: boolean;
+    acceptMarketingEmails: boolean;
+  }): Promise<void>;
+  setInitialPassword(data: {
+    password: string;
+    googleIdToken: string;
+  }): Promise<void>;
   logout(): Promise<void>;
 };
 
@@ -66,11 +81,17 @@ async function fetchJson<T>(
     throw problem;
   }
 
-  return (await response.json()) as T;
+  if (response.status === 204) {
+    return undefined as T;
+  }
+
+  const text = await response.text();
+  return (text ? JSON.parse(text) : undefined) as T;
 }
 
 function AuthProviderInner({ children }: { children: ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
   const queryClient = useQueryClient();
 
   const sessionQuery = useQuery({
@@ -89,6 +110,36 @@ function AuthProviderInner({ children }: { children: ReactNode }) {
     retry: false,
   });
 
+  useEffect(() => {
+    if (!sessionQuery.data || !currentUserQuery.data) {
+      return;
+    }
+
+    const isOnboarding = pathname === "/onboarding";
+    const isPublic =
+      pathname === "/login" ||
+      pathname === "/register" ||
+      pathname === "/forgot-password" ||
+      pathname === "/reset-password" ||
+      pathname === "/confirm-email" ||
+      pathname === "/goodbye" ||
+      pathname.startsWith("/auth/google/confirm");
+
+    if (!currentUserQuery.data.hasCompletedOnboarding && !isOnboarding) {
+      router.replace("/onboarding");
+      return;
+    }
+
+    if (
+      currentUserQuery.data.hasCompletedOnboarding &&
+      (isOnboarding || isPublic)
+    ) {
+      void fetch("/api/auth/onboarding", {
+        method: "PUT",
+      }).finally(() => router.replace("/"));
+    }
+  }, [currentUserQuery.data, pathname, router, sessionQuery.data]);
+
   const value = useMemo<AuthContextValue>(
     () => ({
       user: sessionQuery.data ?? null,
@@ -102,8 +153,12 @@ function AuthProviderInner({ children }: { children: ReactNode }) {
           body: JSON.stringify({ email, password }),
         });
         queryClient.setQueryData(["auth", "session"], user);
-        await queryClient.invalidateQueries({ queryKey: ["current-user"] });
-        router.push("/");
+        const profile = await queryClient.fetchQuery({
+          queryKey: ["current-user"],
+          queryFn: () =>
+            fetchJson<GetCurrentUserResponse>("/api/proxy/v1/users/me"),
+        });
+        router.push(profile.hasCompletedOnboarding ? "/" : "/onboarding");
       },
       async register(data) {
         const user = await fetchJson<AuthUser>("/api/auth/register", {
@@ -112,7 +167,84 @@ function AuthProviderInner({ children }: { children: ReactNode }) {
         });
         queryClient.setQueryData(["auth", "session"], user);
         await queryClient.invalidateQueries({ queryKey: ["current-user"] });
+        router.push("/onboarding");
+      },
+      async googleLogin(idToken) {
+        const response = await fetch("/api/auth/google/login", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ idToken }),
+        });
+
+        if (response.status === 202) {
+          const pending = (await response.json()) as {
+            pendingToken?: string;
+            email?: string;
+            displayName?: string;
+            detail?: string;
+          };
+          const params = new URLSearchParams();
+          if (pending.pendingToken) {
+            params.set("token", pending.pendingToken);
+          }
+          if (pending.email) {
+            params.set("email", pending.email);
+          }
+          if (pending.displayName) {
+            params.set("displayName", pending.displayName);
+          }
+
+          if (pending.pendingToken) {
+            router.push(`/auth/google/confirm?${params.toString()}`);
+            return;
+          }
+
+          toast.success("Check your email", {
+            description:
+              pending.detail ??
+              "Use the confirmation link to finish Google sign-in.",
+          });
+          return;
+        }
+
+        if (!response.ok) {
+          const problem = await problemFromResponse(response);
+          handleProblem(problem);
+          throw problem;
+        }
+
+        const user = (await response.json()) as AuthUser;
+        queryClient.setQueryData(["auth", "session"], user);
+        const profile = await queryClient.fetchQuery({
+          queryKey: ["current-user"],
+          queryFn: () =>
+            fetchJson<GetCurrentUserResponse>("/api/proxy/v1/users/me"),
+        });
+        router.push(profile.hasCompletedOnboarding ? "/" : "/onboarding");
+      },
+      async googleConfirm(data) {
+        const user = await fetchJson<AuthUser>("/api/auth/google/confirm", {
+          method: "POST",
+          body: JSON.stringify(data),
+        });
+        queryClient.setQueryData(["auth", "session"], user);
+        await queryClient.invalidateQueries({ queryKey: ["current-user"] });
+        router.push("/onboarding");
+      },
+      async completeOnboarding(data) {
+        await fetchJson<void>("/api/auth/onboarding", {
+          method: "POST",
+          body: JSON.stringify(data),
+        });
+        await queryClient.invalidateQueries({ queryKey: ["current-user"] });
         router.push("/");
+      },
+      async setInitialPassword(data) {
+        await fetchJson<void>("/api/proxy/v1/users/me/password/initial", {
+          method: "POST",
+          body: JSON.stringify(data),
+        });
+        await queryClient.invalidateQueries({ queryKey: ["current-user"] });
       },
       async logout() {
         await fetch("/api/auth/logout", { method: "POST" });
