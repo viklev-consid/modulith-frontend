@@ -3,6 +3,7 @@ import { Geist, JetBrains_Mono } from "next/font/google";
 
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
+import { AuthProvider } from "@/components/auth-provider";
 
 const fontSans = Geist({
   subsets: ["latin"],
@@ -31,7 +32,9 @@ export default function RootLayout({
       className={`${fontSans.variable} ${fontMono.variable} font-mono antialiased`}
     >
       <body>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <AuthProvider>{children}</AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

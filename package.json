@@ -13,7 +13,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "api:sync": "curl -sf -o openapi.json http://localhost:5000/openapi/v1.json && echo 'Spec synced from backend'",
+    "api:sync": "curl -ksf -o openapi.json https://localhost:7297/openapi/v1.json && echo 'Spec synced from backend'",
     "api:generate": "openapi-ts -f hey-api.config.ts",
     "prepare": "husky"
   },

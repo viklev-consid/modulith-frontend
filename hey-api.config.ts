@@ -18,6 +18,7 @@ export default defineConfig({
     },
     {
       name: "@hey-api/client-fetch",
+      baseUrl: "/api/proxy",
     },
     {
       name: "@tanstack/react-query",
