@@ -230,7 +230,7 @@ function AuthProviderInner({ children }: { children: ReactNode }) {
         router.push("/onboarding");
       },
       async completeOnboarding(data) {
-        await fetchJson<void>("/api/proxy/v1/users/me/onboarding", {
+        await fetchJson<void>("/api/auth/onboarding", {
           method: "POST",
           body: JSON.stringify(data),
         });
