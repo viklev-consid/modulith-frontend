@@ -1,13 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { CircleIcon } from "lucide-react";
 import { useForm } from "@tanstack/react-form";
 import { useState } from "react";
 
 import { mapProblemToFieldErrors, type ProblemDetails } from "@/api/problems";
 import { zLoginRequest } from "@/api/generated/zod.gen";
 import { useAuth } from "@/components/auth-provider";
+import { GoogleSignInButton } from "@/components/auth/google-sign-in-button";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -125,10 +125,7 @@ export default function LoginPage() {
 
             <FieldSeparator>or</FieldSeparator>
 
-            <Button className="w-full" type="button" variant="outline" disabled>
-              <CircleIcon />
-              Continue with Google
-            </Button>
+            <GoogleSignInButton />
 
             <p className="text-center text-xs text-muted-foreground">
               Don&apos;t have an account?{" "}

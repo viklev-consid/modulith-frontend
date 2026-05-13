@@ -9,6 +9,7 @@ import { Suspense, useState, type ReactNode } from "react";
 import { mapProblemToFieldErrors, type ProblemDetails } from "@/api/problems";
 import { zRegisterRequest } from "@/api/generated/zod.gen";
 import { useAuth } from "@/components/auth-provider";
+import { GoogleSignInButton } from "@/components/auth/google-sign-in-button";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -22,6 +23,7 @@ import {
   FieldError,
   FieldGroup,
   FieldLabel,
+  FieldSeparator,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
@@ -154,6 +156,10 @@ function RegisterContent() {
             <Button className="w-full" type="submit">
               Create account
             </Button>
+
+            <FieldSeparator>or</FieldSeparator>
+
+            <GoogleSignInButton />
 
             <p className="text-center text-xs text-muted-foreground">
               Already have an account?{" "}

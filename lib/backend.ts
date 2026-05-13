@@ -159,9 +159,12 @@ export function decodeJwt(token: string): JwtClaims {
   return JSON.parse(decoded) as JwtClaims;
 }
 
-export function sessionFromTokenResponse(
-  tokens: TokenResponse,
-): Required<SessionData> {
+export function sessionFromTokenResponse(tokens: TokenResponse): SessionData & {
+  accessToken: string;
+  refreshToken: string;
+  expiresAt: number;
+  user: SessionUser;
+} {
   const claims = decodeJwt(tokens.accessToken);
   const expiresAt =
     claims.exp ??
