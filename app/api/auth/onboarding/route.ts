@@ -1,4 +1,9 @@
-import { fetchBackend, problemResponse, readJsonBody } from "@/lib/backend";
+import {
+  fetchBackend,
+  getHasCompletedOnboarding,
+  problemResponse,
+  readJsonBody,
+} from "@/lib/backend";
 import { getSession } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
@@ -28,6 +33,24 @@ export async function POST(request: Request) {
   }
 
   session.hasCompletedOnboarding = true;
+  await session.save();
+
+  return new Response(null, { status: 204 });
+}
+
+export async function PUT() {
+  const session = await getSession();
+
+  if (!session.accessToken) {
+    return Response.json(
+      { title: "Unauthorized", status: 401 },
+      { status: 401 },
+    );
+  }
+
+  session.hasCompletedOnboarding = await getHasCompletedOnboarding(
+    session.accessToken,
+  );
   await session.save();
 
   return new Response(null, { status: 204 });

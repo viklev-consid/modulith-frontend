@@ -37,8 +37,9 @@ export async function proxy(request: NextRequest) {
 
   if (
     hasSession &&
-    session?.hasCompletedOnboarding === false &&
-    pathname !== "/onboarding"
+    session?.hasCompletedOnboarding !== true &&
+    pathname !== "/onboarding" &&
+    !isPublicRoute(pathname)
   ) {
     return NextResponse.redirect(new URL("/onboarding", request.url));
   }

@@ -134,7 +134,9 @@ function AuthProviderInner({ children }: { children: ReactNode }) {
       currentUserQuery.data.hasCompletedOnboarding &&
       (isOnboarding || isPublic)
     ) {
-      router.replace("/");
+      void fetch("/api/auth/onboarding", {
+        method: "PUT",
+      }).finally(() => router.replace("/"));
     }
   }, [currentUserQuery.data, pathname, router, sessionQuery.data]);
 

@@ -40,7 +40,7 @@ export default function ForgotPasswordPage() {
         return;
       }
 
-      const response = await fetch("/api/proxy/v1/users/password/forgot", {
+      const response = await fetch("/api/auth/password/forgot", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify(parsed.data),

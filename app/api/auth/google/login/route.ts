@@ -1,5 +1,6 @@
 import {
   fetchBackend,
+  getHasCompletedOnboarding,
   problemResponse,
   publicUser,
   readJsonBody,
@@ -57,7 +58,11 @@ export async function POST(request: Request) {
 
   const nextSession = sessionFromTokenResponse(googleResponse);
   const session = await getSession();
-  Object.assign(session, nextSession);
+  Object.assign(session, nextSession, {
+    hasCompletedOnboarding: await getHasCompletedOnboarding(
+      nextSession.accessToken,
+    ),
+  });
   await session.save();
 
   return Response.json(publicUser(nextSession.user));

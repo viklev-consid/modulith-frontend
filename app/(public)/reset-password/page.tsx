@@ -74,7 +74,7 @@ function ResetPasswordContent() {
         return;
       }
 
-      const response = await fetch("/api/proxy/v1/users/password/reset", {
+      const response = await fetch("/api/auth/password/reset", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify(parsed.data),
