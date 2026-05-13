@@ -270,7 +270,7 @@ export function InvitationsPage() {
                           </Button>
                         ) : (
                           <span className="text-xs text-muted-foreground">
-                            —
+                            ·
                           </span>
                         )}
                       </TableCell>

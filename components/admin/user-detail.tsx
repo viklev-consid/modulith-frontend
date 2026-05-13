@@ -128,7 +128,7 @@ export function UserDetail({ userId }: { userId: string }) {
                 ) : null}
                 {hasGoogle ? <Badge variant="outline">Google</Badge> : null}
                 {!user.hasPassword && !hasGoogle ? (
-                  <span className="text-muted-foreground">—</span>
+                  <span className="text-muted-foreground">None</span>
                 ) : null}
               </dd>
             </div>
