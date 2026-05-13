@@ -170,6 +170,9 @@ export type GetUserByIdResponse = {
   displayName: string;
   role: string;
   createdAt: string;
+  hasPassword: boolean;
+  hasCompletedOnboarding: boolean;
+  linkedProviders: Array<string>;
 };
 
 export type GoogleLoginConfirmRequest = {
@@ -218,6 +221,23 @@ export type LinkGoogleLoginRequest = {
   idToken: string;
 };
 
+export type ListInvitationsInvitationDto = {
+  invitationId: string;
+  email: string;
+  status: string;
+  invitedAt: string;
+  expiresAt: string;
+  acceptedAt: null | string;
+  revokedAt: null | string;
+};
+
+export type ListInvitationsResponse = {
+  invitations: Array<ListInvitationsInvitationDto>;
+  page: number | string;
+  pageSize: number | string;
+  totalCount: number | string;
+};
+
 export type ListMyNotificationsResponse = {
   items: Array<MyNotificationResponse>;
   nextBefore: null | string;
@@ -239,6 +259,7 @@ export type ListUsersUserDto = {
   email: string;
   displayName: string;
   role: string;
+  createdAt: string;
 };
 
 export type LoginRequest = {
@@ -938,6 +959,7 @@ export type GetAuditTrailData = {
   path?: never;
   query?: {
     actorId?: string;
+    eventType?: string;
     page?: number | string;
     pageSize?: number | string;
   };
@@ -1683,6 +1705,7 @@ export type ListUsersData = {
   query?: {
     page?: number | string;
     pageSize?: number | string;
+    search?: string;
   };
   url: "/v1/users";
 };
@@ -1736,6 +1759,37 @@ export type GetUserByIdResponses = {
 
 export type GetUserByIdResponse2 =
   GetUserByIdResponses[keyof GetUserByIdResponses];
+
+export type ListInvitationsData = {
+  body?: never;
+  path?: never;
+  query?: {
+    page?: number | string;
+    pageSize?: number | string;
+    status?: string;
+  };
+  url: "/v1/users/invitations";
+};
+
+export type ListInvitationsErrors = {
+  /**
+   * Forbidden
+   */
+  403: ProblemDetails;
+};
+
+export type ListInvitationsError =
+  ListInvitationsErrors[keyof ListInvitationsErrors];
+
+export type ListInvitationsResponses = {
+  /**
+   * OK
+   */
+  200: ListInvitationsResponse;
+};
+
+export type ListInvitationsResponse2 =
+  ListInvitationsResponses[keyof ListInvitationsResponses];
 
 export type CreateInvitationData = {
   body: CreateInvitationRequest;

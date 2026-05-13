@@ -124,6 +124,9 @@ import type {
   ListDeadLettersData,
   ListDeadLettersErrors,
   ListDeadLettersResponses,
+  ListInvitationsData,
+  ListInvitationsErrors,
+  ListInvitationsResponses,
   ListMyNotificationsData,
   ListMyNotificationsErrors,
   ListMyNotificationsResponses,
@@ -1250,6 +1253,22 @@ export const getUserById = <ThrowOnError extends boolean = false>(
   >({
     security: [{ scheme: "bearer", type: "http" }],
     url: "/v1/users/{userId}",
+    ...options,
+  });
+
+/**
+ * List user invitations. Requires users.invitations.write permission.
+ */
+export const listInvitations = <ThrowOnError extends boolean = false>(
+  options?: Options<ListInvitationsData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    ListInvitationsResponses,
+    ListInvitationsErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/v1/users/invitations",
     ...options,
   });
 
