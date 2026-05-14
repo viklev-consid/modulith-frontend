@@ -4,6 +4,7 @@ import "@/api/client";
 
 import { useMemo } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import {
   createColumnHelper,
@@ -36,6 +37,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useDebouncedValue } from "@/lib/use-debounced-value";
 
 const DEFAULT_PAGE_SIZE = 20;
 
@@ -44,8 +46,13 @@ const columnHelper = createColumnHelper<ListUsersUserDto>();
 const columns = [
   columnHelper.accessor("displayName", {
     header: "Name",
-    cell: ({ getValue }) => (
-      <span className="font-medium">{getValue() || "—"}</span>
+    cell: ({ row, getValue }) => (
+      <Link
+        href={`/admin/users/${row.original.userId}`}
+        className="font-medium underline-offset-4 hover:underline"
+      >
+        {getValue() || row.original.email}
+      </Link>
     ),
   }),
   columnHelper.accessor("email", {
@@ -65,6 +72,7 @@ function toNumber(value: number | string) {
 }
 
 export function UsersTable() {
+  const { push } = useRouter();
   const [page, setPage] = useQueryState(
     "page",
     parseAsInteger.withDefault(1).withOptions({ clearOnDefault: true }),
@@ -73,13 +81,14 @@ export function UsersTable() {
     "search",
     parseAsString.withDefault("").withOptions({ clearOnDefault: true }),
   );
+  const debouncedSearch = useDebouncedValue(search, 300);
 
   const query = useQuery({
     ...listUsersOptions({
       query: {
         page,
         pageSize: DEFAULT_PAGE_SIZE,
-        ...(search ? { search } : {}),
+        ...(debouncedSearch ? { search: debouncedSearch } : {}),
       },
     }),
     placeholderData: (previous) => previous,
@@ -157,18 +166,20 @@ export function UsersTable() {
                   <TableRow
                     key={row.id}
                     className="cursor-pointer hover:bg-accent/40"
+                    onClick={(event) => {
+                      const target = event.target as HTMLElement;
+                      if (target.closest("a, button")) {
+                        return;
+                      }
+                      push(`/admin/users/${row.original.userId}`);
+                    }}
                   >
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id} className="p-0">
-                        <Link
-                          href={`/admin/users/${row.original.userId}`}
-                          className="block px-4 py-2"
-                        >
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext(),
-                          )}
-                        </Link>
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext(),
+                        )}
                       </TableCell>
                     ))}
                   </TableRow>

@@ -1,9 +1,13 @@
 export function auditEventColor(eventType: string): string {
   const normalized = eventType.toLowerCase();
   if (
-    normalized.includes("password") ||
-    normalized.includes("password.changed")
+    normalized.includes("delete") ||
+    normalized.includes("revoke") ||
+    normalized.includes("error")
   ) {
+    return "bg-red-500";
+  }
+  if (normalized.includes("password")) {
     return "bg-amber-500";
   }
   if (normalized.includes("google") || normalized.includes("provider")) {
@@ -18,13 +22,6 @@ export function auditEventColor(eventType: string): string {
   }
   if (normalized.includes("role") || normalized.includes("invitation")) {
     return "bg-sky-500";
-  }
-  if (
-    normalized.includes("delete") ||
-    normalized.includes("revoke") ||
-    normalized.includes("error")
-  ) {
-    return "bg-red-500";
   }
   return "bg-muted-foreground";
 }

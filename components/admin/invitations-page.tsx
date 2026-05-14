@@ -90,6 +90,14 @@ export function InvitationsPage() {
 
   const invitationsQuery = useQuery(listInvitationsOptions());
 
+  const form = useForm({
+    defaultValues: { email: "" },
+    onSubmit: ({ value }) => {
+      setFieldErrors({});
+      createMutation.mutate({ body: { email: value.email } });
+    },
+  });
+
   const createMutation = useMutation({
     ...createInvitationMutation(),
     onSuccess: async (response) => {
@@ -128,14 +136,6 @@ export function InvitationsPage() {
     },
     onError: (error) => {
       handleProblem(error as unknown as ProblemDetails);
-    },
-  });
-
-  const form = useForm({
-    defaultValues: { email: "" },
-    onSubmit: ({ value }) => {
-      setFieldErrors({});
-      createMutation.mutate({ body: { email: value.email } });
     },
   });
 

@@ -2,11 +2,10 @@
 
 import "@/api/client";
 
-import { useState } from "react";
-import { useQuery, keepPreviousData } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { format, formatDistanceToNow, parseISO } from "date-fns";
 
-import { getAuditTrailOptions } from "@/api/generated/@tanstack/react-query.gen";
+import { getAuditTrailInfiniteOptions } from "@/api/generated/@tanstack/react-query.gen";
 import type { AuditEntryDto } from "@/api/generated";
 import { auditEventColor } from "@/components/admin/audit-event-color";
 import { Button } from "@/components/ui/button";
@@ -56,17 +55,25 @@ function TimelineEntry({ entry }: { entry: AuditEntryDto }) {
 }
 
 export function ActivityFeed() {
-  const [pageSize, setPageSize] = useState(PAGE_SIZE);
-  const query = useQuery({
-    ...getAuditTrailOptions({
-      query: { page: 1, pageSize },
+  const query = useInfiniteQuery({
+    ...getAuditTrailInfiniteOptions({
+      query: { pageSize: PAGE_SIZE },
     }),
-    placeholderData: keepPreviousData,
+    initialPageParam: 1,
+    getNextPageParam: (lastPage, allPages) => {
+      const loaded = allPages.reduce(
+        (sum, page) => sum + page.entries.length,
+        0,
+      );
+      const total = toNumber(lastPage.total);
+      if (loaded >= total) {
+        return undefined;
+      }
+      return allPages.length + 1;
+    },
   });
 
-  const entries = query.data?.entries ?? [];
-  const total = query.data ? toNumber(query.data.total) : 0;
-  const hasMore = entries.length < total;
+  const entries = query.data?.pages.flatMap((page) => page.entries) ?? [];
 
   if (query.isLoading) {
     return (
@@ -98,13 +105,13 @@ export function ActivityFeed() {
           ))}
         </ul>
         <div className="flex items-center justify-center gap-2 pt-4">
-          {query.isFetching ? <Spinner className="size-3" /> : null}
-          {hasMore ? (
+          {query.isFetchingNextPage ? <Spinner className="size-3" /> : null}
+          {query.hasNextPage ? (
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setPageSize((value) => value + PAGE_SIZE)}
-              disabled={query.isFetching}
+              onClick={() => query.fetchNextPage()}
+              disabled={query.isFetchingNextPage}
             >
               Load more
             </Button>

@@ -7,7 +7,11 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import { handleProblem, type ProblemDetails } from "@/api/problems";
-import { changeUserRoleMutation } from "@/api/generated/@tanstack/react-query.gen";
+import {
+  changeUserRoleMutation,
+  getUserByIdQueryKey,
+  listUsersQueryKey,
+} from "@/api/generated/@tanstack/react-query.gen";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -80,8 +84,10 @@ function RoleChangeForm({
       toast.success("Role updated", {
         description: `${userName} is now a ${role}.`,
       });
-      await queryClient.invalidateQueries({ queryKey: ["getUserById"] });
-      await queryClient.invalidateQueries({ queryKey: ["listUsers"] });
+      await queryClient.invalidateQueries({
+        queryKey: getUserByIdQueryKey({ path: { userId } }),
+      });
+      await queryClient.invalidateQueries({ queryKey: listUsersQueryKey() });
       onClose();
     },
     onError: (error) => {

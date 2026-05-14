@@ -2,7 +2,7 @@
 
 import "@/api/client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import { format, formatDistanceToNow, parseISO } from "date-fns";
@@ -22,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
+import { useDebouncedValue } from "@/lib/use-debounced-value";
 
 const PAGE_SIZE = 20;
 
@@ -47,6 +48,7 @@ function fullTime(iso: string) {
 
 function AuditRow({ entry }: { entry: AuditEntryDto }) {
   const [expanded, setExpanded] = useState(false);
+  const detailId = useId();
   return (
     <li className="border-b last:border-b-0">
       <div className="flex items-start gap-3 py-3">
@@ -67,6 +69,8 @@ function AuditRow({ entry }: { entry: AuditEntryDto }) {
               className="ml-auto inline-flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
               onClick={() => setExpanded((value) => !value)}
               aria-expanded={expanded}
+              aria-controls={detailId}
+              aria-label={`Toggle details for ${entry.eventType}`}
             >
               detail
               <ChevronDownIcon
@@ -89,7 +93,10 @@ function AuditRow({ entry }: { entry: AuditEntryDto }) {
             ) : null}
           </div>
           {expanded ? (
-            <pre className="overflow-x-auto rounded-none bg-muted p-3 text-[11px] leading-relaxed">
+            <pre
+              id={detailId}
+              className="overflow-x-auto rounded-none bg-muted p-3 text-[11px] leading-relaxed"
+            >
               {JSON.stringify(entry, null, 2)}
             </pre>
           ) : null}
@@ -112,14 +119,16 @@ export function AuditTrail() {
     "eventType",
     parseAsString.withDefault("").withOptions({ clearOnDefault: true }),
   );
+  const debouncedActorId = useDebouncedValue(actorId, 300);
+  const debouncedEventType = useDebouncedValue(eventType, 300);
 
   const query = useQuery({
     ...getAuditTrailOptions({
       query: {
         page,
         pageSize: PAGE_SIZE,
-        ...(actorId ? { actorId } : {}),
-        ...(eventType ? { eventType } : {}),
+        ...(debouncedActorId ? { actorId: debouncedActorId } : {}),
+        ...(debouncedEventType ? { eventType: debouncedEventType } : {}),
       },
     }),
     placeholderData: keepPreviousData,
