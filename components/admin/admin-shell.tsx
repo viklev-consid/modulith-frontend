@@ -2,33 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ClipboardListIcon, MailIcon, UsersIcon } from "lucide-react";
 
 import { useAuth } from "@/components/auth-provider";
 import { Card, CardContent } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
+import { adminRoutes } from "@/lib/admin-routes";
 import { cn } from "@/lib/utils";
-
-const adminLinks = [
-  {
-    href: "/admin/users",
-    label: "Users",
-    icon: UsersIcon,
-    permission: "users.users.read",
-  },
-  {
-    href: "/admin/invitations",
-    label: "Invitations",
-    icon: MailIcon,
-    permission: "users.invitations.write",
-  },
-  {
-    href: "/admin/audit",
-    label: "Audit trail",
-    icon: ClipboardListIcon,
-    permission: "audit.trail.read",
-  },
-] as const;
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -42,7 +21,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     );
   }
 
-  const visibleLinks = adminLinks.filter((link) =>
+  const visibleLinks = adminRoutes.filter((link) =>
     permissions.includes(link.permission),
   );
 
