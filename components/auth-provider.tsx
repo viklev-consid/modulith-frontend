@@ -1,14 +1,8 @@
 "use client";
 
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useMemo,
-  type ReactNode,
-} from "react";
+import { createContext, useMemo, use, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { handleProblem, problemFromResponse } from "@/api/problems";
@@ -90,8 +84,7 @@ async function fetchJson<T>(
 }
 
 function AuthProviderInner({ children }: { children: ReactNode }) {
-  const router = useRouter();
-  const pathname = usePathname();
+  const { push } = useRouter();
   const queryClient = useQueryClient();
 
   const sessionQuery = useQuery({
@@ -106,36 +99,6 @@ function AuthProviderInner({ children }: { children: ReactNode }) {
     enabled: Boolean(sessionQuery.data),
     retry: false,
   });
-
-  useEffect(() => {
-    if (!sessionQuery.data || !currentUserQuery.data) {
-      return;
-    }
-
-    const isOnboarding = pathname === "/onboarding";
-    const isPublic =
-      pathname === "/login" ||
-      pathname === "/register" ||
-      pathname === "/forgot-password" ||
-      pathname === "/reset-password" ||
-      pathname === "/confirm-email" ||
-      pathname === "/goodbye" ||
-      pathname.startsWith("/auth/google/confirm");
-
-    if (!currentUserQuery.data.hasCompletedOnboarding && !isOnboarding) {
-      router.replace("/onboarding");
-      return;
-    }
-
-    if (
-      currentUserQuery.data.hasCompletedOnboarding &&
-      (isOnboarding || isPublic)
-    ) {
-      void fetch("/api/auth/onboarding", {
-        method: "PUT",
-      }).finally(() => router.replace("/"));
-    }
-  }, [currentUserQuery.data, pathname, router, sessionQuery.data]);
 
   const value = useMemo<AuthContextValue>(
     () => ({
@@ -154,7 +117,7 @@ function AuthProviderInner({ children }: { children: ReactNode }) {
           queryKey: currentUserQueryKey,
           queryFn: fetchCurrentUserQuery,
         });
-        router.push(profile.hasCompletedOnboarding ? "/" : "/onboarding");
+        push(profile.hasCompletedOnboarding ? "/" : "/onboarding");
       },
       async register(data) {
         const user = await fetchJson<AuthUser>("/api/auth/register", {
@@ -163,7 +126,7 @@ function AuthProviderInner({ children }: { children: ReactNode }) {
         });
         queryClient.setQueryData(sessionQueryKey, user);
         await queryClient.invalidateQueries({ queryKey: currentUserQueryKey });
-        router.push("/onboarding");
+        push("/onboarding");
       },
       async googleLogin(idToken) {
         const response = await fetch("/api/auth/google/login", {
@@ -191,7 +154,7 @@ function AuthProviderInner({ children }: { children: ReactNode }) {
           }
 
           if (pending.pendingToken) {
-            router.push(`/auth/google/confirm?${params.toString()}`);
+            push(`/auth/google/confirm?${params.toString()}`);
             return;
           }
 
@@ -215,7 +178,7 @@ function AuthProviderInner({ children }: { children: ReactNode }) {
           queryKey: currentUserQueryKey,
           queryFn: fetchCurrentUserQuery,
         });
-        router.push(profile.hasCompletedOnboarding ? "/" : "/onboarding");
+        push(profile.hasCompletedOnboarding ? "/" : "/onboarding");
       },
       async googleConfirm(data) {
         const user = await fetchJson<AuthUser>("/api/auth/google/confirm", {
@@ -224,7 +187,7 @@ function AuthProviderInner({ children }: { children: ReactNode }) {
         });
         queryClient.setQueryData(sessionQueryKey, user);
         await queryClient.invalidateQueries({ queryKey: currentUserQueryKey });
-        router.push("/onboarding");
+        push("/onboarding");
       },
       async completeOnboarding(data) {
         await fetchJson<void>("/api/auth/onboarding", {
@@ -232,7 +195,7 @@ function AuthProviderInner({ children }: { children: ReactNode }) {
           body: JSON.stringify(data),
         });
         await queryClient.invalidateQueries({ queryKey: currentUserQueryKey });
-        router.push("/");
+        push("/");
       },
       async setInitialPassword(data) {
         await fetchJson<void>("/api/proxy/v1/users/me/password/initial", {
@@ -244,14 +207,14 @@ function AuthProviderInner({ children }: { children: ReactNode }) {
       async logout() {
         await fetch("/api/auth/logout", { method: "POST" });
         queryClient.clear();
-        router.push("/login");
+        push("/login");
       },
     }),
     [
       currentUserQuery.data,
       currentUserQuery.isFetching,
+      push,
       queryClient,
-      router,
       sessionQuery.data,
       sessionQuery.isLoading,
     ],
@@ -270,7 +233,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext);
+  const context = use(AuthContext);
 
   if (!context) {
     throw new Error("useAuth must be used within AuthProvider");
