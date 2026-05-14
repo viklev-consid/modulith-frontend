@@ -11,14 +11,27 @@ All API communication goes through a Next.js server-side proxy. The browser neve
 
 ## Permission model
 
-Permissions are NOT stored in the cookie (to avoid the 4KB limit). They're fetched via `GET /v1/users/me` and cached client-side in React Query.
+Permissions are NOT stored in the cookie (to avoid the 4KB limit). They're fetched via `GET /v1/users/me` through the BFF boundary and hydrated into React Query for protected routes.
 
 | Layer             | Reads from                  | Can check                               |
 | ----------------- | --------------------------- | --------------------------------------- |
 | Middleware        | Cookie (existence + expiry) | Authenticated? Onboarded?               |
-| Server components | Cookie (decrypt for role)   | Coarse role-level layout                |
-| Client components | React Query cache           | Everything — role, permissions, profile |
+| Server components | Cookie + backend profile    | Route data, redirects, permissions      |
+| Client components | Hydrated React Query cache  | Everything — role, permissions, profile |
 | `<Can>` component | React Query cache           | `hasPermission("audit.trail.read")`     |
+
+## Server-default query pattern
+
+Route-critical reads default to server prefetch with React Query hydration:
+
+1. Server pages/layouts create a per-request `QueryClient` with `createQueryClient()`.
+2. Generated TanStack Query options are prefetched with `client: serverClient`.
+3. The dehydrated state is passed through `HydrationBoundary`.
+4. Client components keep using the same generated `useQuery` options for cache reads, invalidation, and client transitions.
+
+Use client-only queries for hidden, lazy, polling, or highly interactive data. Examples include notification dropdown contents and background refreshes after a mutation.
+
+`AuthHydration` is the protected-layout entry point for session/current-user data. `AuthProvider` still exposes `useAuth()` to client components, but protected routes should not depend on a client effect to discover the current user.
 
 ## Route groups
 
@@ -39,7 +52,8 @@ app/
 
 Admin features live under `app/(app)/admin/*` and use two complementary layers of gating:
 
-- **Discoverability gating** — the shared `AdminShell` (`components/admin/admin-shell.tsx`) reads the user's permissions from React Query and hides sidebar links the user lacks. If no admin permissions resolve, the shell renders an "Access denied" card instead of children.
+- **Discoverability gating** — the shared `AdminShell` (`components/admin/admin-shell.tsx`) reads the user's hydrated permissions from React Query and hides sidebar links the user lacks. If no admin permissions resolve, the shell renders an "Access denied" card instead of children.
+- **Server routing** — the admin landing page reads the current user on the server and redirects to the first route listed in `lib/admin-routes.ts` that the user can access.
 - **Authorization** — the backend continues to enforce permissions on every endpoint. The frontend gate is a UX layer; it never replaces the API check.
 
-When adding a new admin page, place it in `app/(app)/admin/<feature>/`, declare its required permission as a sidebar entry in `AdminShell`, and rely on the generated React Query hook to surface the backend's 403 via `ProblemDetails` if the gate is bypassed.
+When adding a new admin page, place it in `app/(app)/admin/<feature>/`, declare its required permission in `lib/admin-routes.ts`, server-prefetch route-critical reads, and rely on the backend's 403 if the gate is bypassed.
