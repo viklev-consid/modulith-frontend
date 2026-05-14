@@ -1,6 +1,13 @@
 import type { Metadata } from "next";
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 
+import { serverClient } from "@/api/server-client";
+import {
+  getAuditTrailOptions,
+  getUserByIdOptions,
+} from "@/api/generated/@tanstack/react-query.gen";
 import { UserDetail } from "@/components/admin/user-detail";
+import { createQueryClient } from "@/lib/query-client";
 
 export const metadata: Metadata = {
   title: "User detail | Admin | Modulith",
@@ -12,5 +19,26 @@ export default async function AdminUserDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  return <UserDetail userId={id} />;
+  const queryClient = createQueryClient();
+
+  await Promise.all([
+    queryClient.prefetchQuery(
+      getUserByIdOptions({
+        client: serverClient,
+        path: { userId: id },
+      }),
+    ),
+    queryClient.prefetchQuery(
+      getAuditTrailOptions({
+        client: serverClient,
+        query: { actorId: id, page: 1, pageSize: 5 },
+      }),
+    ),
+  ]);
+
+  return (
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <UserDetail userId={id} />
+    </HydrationBoundary>
+  );
 }
