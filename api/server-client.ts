@@ -3,7 +3,7 @@ import "server-only";
 import { createClient, createConfig } from "@/api/generated/client";
 import type { ClientOptions } from "@/api/generated/client/types.gen";
 import { backendFetch, backendUrl } from "@/lib/backend";
-import { getSession, hasUsableSession } from "@/lib/session";
+import { getUsableServerSession } from "@/lib/server-auth";
 
 function proxyPathFromUrl(input: RequestInfo | URL) {
   const value = input instanceof Request ? input.url : input.toString();
@@ -26,9 +26,9 @@ async function serverProxyFetch(
     return fetch(input, init);
   }
 
-  const session = await getSession();
+  const session = await getUsableServerSession();
 
-  if (!hasUsableSession(session)) {
+  if (!session) {
     return Response.json(
       { title: "Unauthorized", status: 401 },
       { status: 401 },

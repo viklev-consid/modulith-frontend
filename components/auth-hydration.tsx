@@ -4,7 +4,11 @@ import type { ReactNode } from "react";
 
 import { currentUserQueryKey, sessionQueryKey } from "@/lib/auth-query";
 import { createQueryClient } from "@/lib/query-client";
-import { getServerCurrentUser, getServerSessionUser } from "@/lib/server-auth";
+import {
+  getServerCurrentUser,
+  getServerSessionUser,
+  syncServerOnboardingState,
+} from "@/lib/server-auth";
 
 export async function AuthHydration({
   children,
@@ -27,6 +31,7 @@ export async function AuthHydration({
   }
 
   if (!requireCompletedOnboarding && currentUser.hasCompletedOnboarding) {
+    await syncServerOnboardingState(true);
     redirect("/");
   }
 
