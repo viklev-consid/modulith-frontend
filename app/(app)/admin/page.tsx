@@ -1,31 +1,17 @@
-"use client";
+import { redirect } from "next/navigation";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { adminRoutes } from "@/lib/admin-routes";
+import { getServerCurrentUser } from "@/lib/server-auth";
 
-import { useAuth } from "@/components/auth-provider";
+export default async function AdminIndexPage() {
+  const currentUser = await getServerCurrentUser();
+  const firstRoute = adminRoutes.find((route) =>
+    currentUser?.permissions.includes(route.permission),
+  );
 
-const ADMIN_LANDING_ROUTES = [
-  { href: "/admin/users", permission: "users.users.read" },
-  { href: "/admin/invitations", permission: "users.invitations.write" },
-  { href: "/admin/audit", permission: "audit.trail.read" },
-] as const;
-
-export default function AdminIndexPage() {
-  const { replace } = useRouter();
-  const { isLoading, currentUser, permissions } = useAuth();
-
-  useEffect(() => {
-    if (isLoading || !currentUser) {
-      return;
-    }
-    const first = ADMIN_LANDING_ROUTES.find((route) =>
-      permissions.includes(route.permission),
-    );
-    if (first) {
-      replace(first.href);
-    }
-  }, [isLoading, currentUser, permissions, replace]);
+  if (firstRoute) {
+    redirect(firstRoute.href);
+  }
 
   return null;
 }
