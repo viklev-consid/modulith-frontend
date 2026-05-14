@@ -11,7 +11,7 @@ This repository provides the Next.js user interface layer for that backend. It i
 - TypeScript
 - Tailwind CSS v4
 - shadcn/ui (style `base-lyra`) from `components/ui` for component primitives
-- TanStack Query, Table, and Form
+- TanStack Query, Table, and Form, with route-critical reads prefetched on the server and hydrated into the client cache
 - nuqs for URL-synced state (pagination, filters)
 - Hey API OpenAPI code generation
 - Vitest, Testing Library, jsdom, and MSW
@@ -64,6 +64,16 @@ pnpm api:generate
 
 Do not hand-edit generated API files. Change the backend contract, sync `openapi.json`, then regenerate.
 
+## Data Fetching Model
+
+Route-critical reads default to server prefetch plus React Query hydration. Server pages and layouts create a request-scoped query client, prefetch generated TanStack Query options with the server API client, and pass the dehydrated state to client components.
+
+Client components still use generated `useQuery` options for cache reads, background refresh, transitions, and mutation invalidation. Use client-only queries for hidden, lazy, polling, or strongly interactive data such as dropdown contents and live notification surfaces.
+
+Protected routes hydrate session and current-user data before rendering. The browser never receives backend tokens; server-side reads and browser reads both keep the BFF/session boundary.
+
+See [ADR 0009](docs/adr/0009-server-default-query-hydration.md) for the full convention.
+
 ## Scripts
 
 ```bash
@@ -103,6 +113,7 @@ openapi.json         Synced backend OpenAPI contract
 - Use `cn` from `@/lib/utils` for class merging.
 - Keep tests as `*.test.ts` or `*.test.tsx`.
 - Prefer MSW-backed tests for API behavior instead of calling live services in unit tests.
+- Prefer server prefetch plus React Query hydration for first-paint page data; keep React Query for client transitions, live data, and mutations.
 
 Before opening a change, run the narrowest checks that match the work:
 
