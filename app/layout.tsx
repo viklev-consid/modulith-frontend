@@ -6,6 +6,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "@/components/auth-provider";
 import { NotificationToast } from "@/components/notification-toast";
+import { QueryProvider } from "@/components/query-provider";
 
 const fontSans = Geist({
   subsets: ["latin"],
@@ -36,10 +37,12 @@ export default function RootLayout({
       <body>
         <ThemeProvider>
           <NuqsAdapter>
-            <AuthProvider>
-              {children}
-              <NotificationToast />
-            </AuthProvider>
+            <QueryProvider>
+              <AuthProvider>
+                {children}
+                <NotificationToast />
+              </AuthProvider>
+            </QueryProvider>
           </NuqsAdapter>
         </ThemeProvider>
       </body>

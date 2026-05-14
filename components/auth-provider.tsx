@@ -5,15 +5,9 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useState,
   type ReactNode,
 } from "react";
-import {
-  QueryClient,
-  QueryClientProvider,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { usePathname, useRouter } from "next/navigation";
 import { toast } from "sonner";
 
@@ -266,22 +260,11 @@ function AuthProviderInner({ children }: { children: ReactNode }) {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [queryClient] = useState(
-    () =>
-      new QueryClient({
-        defaultOptions: {
-          queries: {
-            staleTime: 30_000,
-          },
-        },
-      }),
-  );
-
   return (
-    <QueryClientProvider client={queryClient}>
+    <>
       <AuthProviderInner>{children}</AuthProviderInner>
       <Toaster />
-    </QueryClientProvider>
+    </>
   );
 }
 
