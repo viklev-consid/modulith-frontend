@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { LogOutIcon, SettingsIcon } from "lucide-react";
+import {
+  ActivityIcon,
+  LogOutIcon,
+  SettingsIcon,
+  ShieldIcon,
+} from "lucide-react";
 
 import { BellDropdown } from "@/components/bell-dropdown";
 import { Can } from "@/components/can";
@@ -10,6 +15,12 @@ import { cn } from "@/lib/utils";
 export const metadata: Metadata = {
   title: "Dashboard | Modulith",
 };
+
+const ADMIN_PERMISSIONS = [
+  "users.users.read",
+  "users.invitations.write",
+  "audit.trail.read",
+] as const;
 
 export default function Page() {
   return (
@@ -23,6 +34,22 @@ export default function Page() {
         </div>
         <div className="flex items-center gap-2">
           <BellDropdown />
+          <Can anyOf={ADMIN_PERMISSIONS}>
+            <Link
+              href="/admin"
+              className={cn(buttonVariants({ size: "sm", variant: "outline" }))}
+            >
+              <ShieldIcon />
+              Admin
+            </Link>
+          </Can>
+          <Link
+            href="/activity"
+            className={cn(buttonVariants({ size: "sm", variant: "outline" }))}
+          >
+            <ActivityIcon />
+            Activity
+          </Link>
           <Link
             href="/settings"
             className={cn(buttonVariants({ size: "sm", variant: "outline" }))}
@@ -44,11 +71,6 @@ export default function Page() {
           The application shell will grow here once profile, notifications, and
           admin workflows are wired.
         </p>
-        <Can permission="audit.trail.read">
-          <p className="text-xs text-muted-foreground">
-            Audit permissions detected for this user.
-          </p>
-        </Can>
       </div>
     </div>
   );

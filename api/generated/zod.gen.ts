@@ -222,6 +222,9 @@ export const zGetUserByIdResponse = z.object({
   displayName: z.string(),
   role: z.string(),
   createdAt: z.iso.datetime(),
+  hasPassword: z.boolean(),
+  hasCompletedOnboarding: z.boolean(),
+  linkedProviders: z.array(z.string()),
 });
 
 export const zGoogleLoginConfirmRequest = z.object({
@@ -280,11 +283,59 @@ export const zLinkGoogleLoginRequest = z.object({
   idToken: z.string(),
 });
 
+export const zListInvitationsInvitationDto = z.object({
+  invitationId: z.uuid(),
+  email: z.string(),
+  status: z.string(),
+  invitedAt: z.iso.datetime(),
+  expiresAt: z.iso.datetime(),
+  acceptedAt: z.iso.datetime().nullable(),
+  revokedAt: z.iso.datetime().nullable(),
+});
+
+export const zListInvitationsResponse = z.object({
+  invitations: z.array(zListInvitationsInvitationDto),
+  page: z.union([
+    z
+      .int()
+      .min(-2147483648, {
+        error: "Invalid value: Expected int32 to be >= -2147483648",
+      })
+      .max(2147483647, {
+        error: "Invalid value: Expected int32 to be <= 2147483647",
+      }),
+    z.string().regex(/^-?(?:0|[1-9]\d*)$/),
+  ]),
+  pageSize: z.union([
+    z
+      .int()
+      .min(-2147483648, {
+        error: "Invalid value: Expected int32 to be >= -2147483648",
+      })
+      .max(2147483647, {
+        error: "Invalid value: Expected int32 to be <= 2147483647",
+      }),
+    z.string().regex(/^-?(?:0|[1-9]\d*)$/),
+  ]),
+  totalCount: z.union([
+    z
+      .int()
+      .min(-2147483648, {
+        error: "Invalid value: Expected int32 to be >= -2147483648",
+      })
+      .max(2147483647, {
+        error: "Invalid value: Expected int32 to be <= 2147483647",
+      }),
+    z.string().regex(/^-?(?:0|[1-9]\d*)$/),
+  ]),
+});
+
 export const zListUsersUserDto = z.object({
   userId: z.uuid(),
   email: z.string(),
   displayName: z.string(),
   role: z.string(),
+  createdAt: z.iso.datetime(),
 });
 
 export const zListUsersResponse = z.object({
@@ -799,6 +850,7 @@ export const zGetTickerRequestQuery = z.object({
 
 export const zGetAuditTrailQuery = z.object({
   actorId: z.uuid().optional(),
+  eventType: z.string().optional(),
   page: z
     .union([
       z
@@ -1049,6 +1101,7 @@ export const zListUsersQuery = z.object({
     ])
     .optional()
     .default(20),
+  search: z.string().optional(),
 });
 
 /**
@@ -1064,6 +1117,43 @@ export const zGetUserByIdPath = z.object({
  * OK
  */
 export const zGetUserByIdResponse2 = zGetUserByIdResponse;
+
+export const zListInvitationsQuery = z.object({
+  page: z
+    .union([
+      z
+        .int()
+        .min(-2147483648, {
+          error: "Invalid value: Expected int32 to be >= -2147483648",
+        })
+        .max(2147483647, {
+          error: "Invalid value: Expected int32 to be <= 2147483647",
+        }),
+      z.string().regex(/^-?(?:0|[1-9]\d*)$/),
+    ])
+    .optional()
+    .default(1),
+  pageSize: z
+    .union([
+      z
+        .int()
+        .min(-2147483648, {
+          error: "Invalid value: Expected int32 to be >= -2147483648",
+        })
+        .max(2147483647, {
+          error: "Invalid value: Expected int32 to be <= 2147483647",
+        }),
+      z.string().regex(/^-?(?:0|[1-9]\d*)$/),
+    ])
+    .optional()
+    .default(20),
+  status: z.string().optional().default("pending"),
+});
+
+/**
+ * OK
+ */
+export const zListInvitationsResponse2 = zListInvitationsResponse;
 
 export const zCreateInvitationBody = zCreateInvitationRequest;
 

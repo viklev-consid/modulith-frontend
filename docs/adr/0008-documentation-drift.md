@@ -16,6 +16,8 @@ Some current project docs contain drift that should be resolved deliberately:
 - `CLAUDE.md` refers to generated files under `src/api/generated`, while this repository uses `api/generated`.
 - `CLAUDE.md` mentions `middleware.ts`, while this Next.js 16 project uses `proxy.ts`.
 - `README.md` mentions Base UI primitives, but the practical component convention is to reuse existing shadcn/ui components from `components/ui`.
+- The admin shell gates the audit-trail nav on `audit.trail.read`, but `GET /v1/audit/trail` in `openapi.json` documents no required permission. The endpoint defaults to the caller's own trail and only admins can pass `actorId`. Resolution requires either the backend advertising the permission claim or the frontend switching to a different gate; do not silently rename the string without confirming which side is canonical.
+- `AuditEntryDto` exposes `id`, `eventType`, `actorId`, `resourceType`, `resourceId`, and `occurredAt` but no `payload` field. The phase 4 admin audit-trail UI was specified to render an expanded JSON detail block (e.g. `oldRole`/`newRole`/`changedBy` for `user.role.changed`). The current expanded view shows only the fields the DTO has — adding payload requires either widening `AuditEntryDto` or exposing a per-event detail endpoint. Do not synthesize fields client-side.
 
 ## Decision
 

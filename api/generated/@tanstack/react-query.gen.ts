@@ -60,6 +60,7 @@ import {
   googleLoginConfirm,
   linkGoogleLogin,
   listDeadLetters,
+  listInvitations,
   listMyNotifications,
   listProducts,
   listUsers,
@@ -181,6 +182,9 @@ import type {
   ListDeadLettersData,
   ListDeadLettersError,
   ListDeadLettersResponse,
+  ListInvitationsData,
+  ListInvitationsError,
+  ListInvitationsResponse2,
   ListMyNotificationsData,
   ListMyNotificationsError,
   ListMyNotificationsResponse2,
@@ -2110,6 +2114,85 @@ export const getUserByIdOptions = (options: Options<GetUserByIdData>) =>
     },
     queryKey: getUserByIdQueryKey(options),
   });
+
+export const listInvitationsQueryKey = (
+  options?: Options<ListInvitationsData>,
+) => createQueryKey("listInvitations", options);
+
+/**
+ * List user invitations. Requires users.invitations.write permission.
+ */
+export const listInvitationsOptions = (
+  options?: Options<ListInvitationsData>,
+) =>
+  queryOptions<
+    ListInvitationsResponse2,
+    ListInvitationsError,
+    ListInvitationsResponse2,
+    ReturnType<typeof listInvitationsQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await listInvitations({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: listInvitationsQueryKey(options),
+  });
+
+export const listInvitationsInfiniteQueryKey = (
+  options?: Options<ListInvitationsData>,
+): QueryKey<Options<ListInvitationsData>> =>
+  createQueryKey("listInvitations", options, true);
+
+/**
+ * List user invitations. Requires users.invitations.write permission.
+ */
+export const listInvitationsInfiniteOptions = (
+  options?: Options<ListInvitationsData>,
+) =>
+  infiniteQueryOptions<
+    ListInvitationsResponse2,
+    ListInvitationsError,
+    InfiniteData<ListInvitationsResponse2>,
+    QueryKey<Options<ListInvitationsData>>,
+    | number
+    | string
+    | Pick<
+        QueryKey<Options<ListInvitationsData>>[0],
+        "body" | "headers" | "path" | "query"
+      >
+  >(
+    // @ts-ignore
+    {
+      queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<
+          QueryKey<Options<ListInvitationsData>>[0],
+          "body" | "headers" | "path" | "query"
+        > =
+          typeof pageParam === "object"
+            ? pageParam
+            : {
+                query: {
+                  page: pageParam,
+                },
+              };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await listInvitations({
+          ...options,
+          ...params,
+          signal,
+          throwOnError: true,
+        });
+        return data;
+      },
+      queryKey: listInvitationsInfiniteQueryKey(options),
+    },
+  );
 
 /**
  * Create a user invitation. Admin only.

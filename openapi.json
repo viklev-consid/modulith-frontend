@@ -910,6 +910,13 @@
             }
           },
           {
+            "name": "eventType",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "page",
             "in": "query",
             "schema": {
@@ -2082,6 +2089,13 @@
               "format": "int32",
               "default": 20
             }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -2169,6 +2183,68 @@
       }
     },
     "/v1/users/invitations": {
+      "get": {
+        "tags": ["Modulith.Api"],
+        "summary": "List user invitations. Requires users.invitations.write permission.",
+        "operationId": "ListInvitations",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": ["integer", "string"],
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": ["integer", "string"],
+              "format": "int32",
+              "default": 20
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": "pending"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListInvitationsResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      },
       "post": {
         "tags": ["Modulith.Api"],
         "summary": "Create a user invitation. Admin only.",
@@ -3302,7 +3378,16 @@
         }
       },
       "GetUserByIdResponse": {
-        "required": ["userId", "email", "displayName", "role", "createdAt"],
+        "required": [
+          "userId",
+          "email",
+          "displayName",
+          "role",
+          "createdAt",
+          "hasPassword",
+          "hasCompletedOnboarding",
+          "linkedProviders"
+        ],
         "type": "object",
         "properties": {
           "userId": {
@@ -3321,6 +3406,18 @@
           "createdAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "hasPassword": {
+            "type": "boolean"
+          },
+          "hasCompletedOnboarding": {
+            "type": "boolean"
+          },
+          "linkedProviders": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
@@ -3455,6 +3552,73 @@
           }
         }
       },
+      "ListInvitationsInvitationDto": {
+        "required": [
+          "invitationId",
+          "email",
+          "status",
+          "invitedAt",
+          "expiresAt",
+          "acceptedAt",
+          "revokedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "invitationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "email": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "invitedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "acceptedAt": {
+            "type": ["null", "string"],
+            "format": "date-time"
+          },
+          "revokedAt": {
+            "type": ["null", "string"],
+            "format": "date-time"
+          }
+        }
+      },
+      "ListInvitationsResponse": {
+        "required": ["invitations", "page", "pageSize", "totalCount"],
+        "type": "object",
+        "properties": {
+          "invitations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ListInvitationsInvitationDto"
+            }
+          },
+          "page": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": ["integer", "string"],
+            "format": "int32"
+          },
+          "pageSize": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": ["integer", "string"],
+            "format": "int32"
+          },
+          "totalCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": ["integer", "string"],
+            "format": "int32"
+          }
+        }
+      },
       "ListMyNotificationsResponse": {
         "required": ["items", "nextBefore"],
         "type": "object",
@@ -3511,7 +3675,7 @@
         }
       },
       "ListUsersUserDto": {
-        "required": ["userId", "email", "displayName", "role"],
+        "required": ["userId", "email", "displayName", "role", "createdAt"],
         "type": "object",
         "properties": {
           "userId": {
@@ -3526,6 +3690,10 @@
           },
           "role": {
             "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },

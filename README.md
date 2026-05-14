@@ -10,9 +10,9 @@ This repository provides the Next.js user interface layer for that backend. It i
 - React 19
 - TypeScript
 - Tailwind CSS v4
-- shadcn/ui with the `base-lyra` style
-- Base UI primitives
+- shadcn/ui (style `base-lyra`) from `components/ui` for component primitives
 - TanStack Query, Table, and Form
+- nuqs for URL-synced state (pagination, filters)
 - Hey API OpenAPI code generation
 - Vitest, Testing Library, jsdom, and MSW
 
