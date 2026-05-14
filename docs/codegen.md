@@ -4,8 +4,8 @@ Types are generated, not hand-written. The OpenAPI spec is the single source of 
 
 - `openapi.json` is **committed** in the repo as the contract snapshot.
 - `pnpm api:sync` — fetches the spec from the running backend (`http://localhost:5000/openapi/v1.json`).
-- `pnpm api:generate` — runs `@hey-api/openapi-ts` against the local `openapi.json`, outputs to `src/api/generated/`.
-- **Never hand-edit files in `src/api/generated/`** — they are overwritten on every codegen run.
+- `pnpm api:generate` — runs `@hey-api/openapi-ts` against the local `openapi.json`, outputs to `api/generated/`.
+- **Never hand-edit files in `api/generated/`** — they are overwritten on every codegen run.
 - CI runs `api:generate` against the committed spec. Builds are fully decoupled from the backend.
 
 ## Generated outputs

@@ -16,6 +16,12 @@ export const metadata: Metadata = {
   title: "Dashboard | Modulith",
 };
 
+const ADMIN_PERMISSIONS = [
+  "users.users.read",
+  "users.invitations.write",
+  "audit.trail.read",
+] as const;
+
 export default function Page() {
   return (
     <div className="min-h-svh px-6 py-5">
@@ -28,7 +34,7 @@ export default function Page() {
         </div>
         <div className="flex items-center gap-2">
           <BellDropdown />
-          <Can permission="users.users.read">
+          <Can anyOf={ADMIN_PERMISSIONS}>
             <Link
               href="/admin"
               className={cn(buttonVariants({ size: "sm", variant: "outline" }))}

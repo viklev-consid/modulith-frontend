@@ -11,12 +11,19 @@ export function usePermission(permission: string) {
 
 export function Can({
   permission,
+  anyOf,
   children,
   fallback = null,
 }: {
-  permission: string;
+  permission?: string;
+  anyOf?: readonly string[];
   children: ReactNode;
   fallback?: ReactNode;
 }) {
-  return usePermission(permission) ? children : fallback;
+  const { permissions } = useAuth();
+  const isAllowed =
+    (permission ? permissions.includes(permission) : false) ||
+    (anyOf ? anyOf.some((item) => permissions.includes(item)) : false);
+
+  return isAllowed ? children : fallback;
 }
