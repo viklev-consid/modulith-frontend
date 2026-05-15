@@ -2,6 +2,7 @@
 
 import { Slot as SlotPrimitive } from "radix-ui";
 import * as React from "react";
+import { use } from "react";
 import { useComposedRefs } from "@/lib/compose-refs";
 import { cn } from "@/lib/utils";
 import { useLazyRef } from "@/hooks/use-lazy-ref";
@@ -58,7 +59,7 @@ interface QRCodeContextValue {
 const StoreContext = React.createContext<Store | null>(null);
 
 function useStore<T>(selector: (state: StoreState) => T): T {
-  const store = React.useContext(StoreContext);
+  const store = use(StoreContext);
   if (!store) {
     throw new Error(`\`useQRCode\` must be used within \`${ROOT_NAME}\``);
   }
@@ -74,7 +75,7 @@ function useStore<T>(selector: (state: StoreState) => T): T {
 const QRCodeContext = React.createContext<QRCodeContextValue | null>(null);
 
 function useQRCodeContext(consumerName: string) {
-  const context = React.useContext(QRCodeContext);
+  const context = use(QRCodeContext);
   if (!context) {
     throw new Error(`\`${consumerName}\` must be used within \`${ROOT_NAME}\``);
   }
@@ -121,6 +122,7 @@ function QRCode(props: QRCodeProps) {
     error: null,
     generationKey: "",
   }));
+  const requestedGenerationKeyRef = React.useRef("");
 
   const store = React.useMemo<Store>(() => {
     return {
@@ -189,13 +191,9 @@ function QRCode(props: QRCodeProps) {
   const onQRCodeGenerate = React.useCallback(
     async (targetGenerationKey: string) => {
       if (!value || !targetGenerationKey) return;
+      requestedGenerationKeyRef.current = targetGenerationKey;
 
-      const currentState = store.getState();
-      if (
-        currentState.isGenerating ||
-        currentState.generationKey === targetGenerationKey
-      )
-        return;
+      if (store.getState().generationKey === targetGenerationKey) return;
 
       store.setStates({
         isGenerating: true,
@@ -213,8 +211,10 @@ function QRCode(props: QRCodeProps) {
           dataUrl = null;
         }
 
-        if (canvasRef.current) {
-          await QRCode.toCanvas(canvasRef.current, value, canvasOpts);
+        let canvas: HTMLCanvasElement | null = null;
+        if (typeof document !== "undefined") {
+          canvas = document.createElement("canvas");
+          await QRCode.toCanvas(canvas, value, canvasOpts);
         }
 
         const svgString = await QRCode.toString(value, {
@@ -225,24 +225,40 @@ function QRCode(props: QRCodeProps) {
           type: "svg",
         });
 
-        store.setStates({
-          dataUrl,
-          svgString,
-          isGenerating: false,
-          generationKey: targetGenerationKey,
-        });
+        if (requestedGenerationKeyRef.current === targetGenerationKey) {
+          if (canvasRef.current && canvas) {
+            canvasRef.current.width = canvas.width;
+            canvasRef.current.height = canvas.height;
+            canvasRef.current
+              .getContext("2d")
+              ?.drawImage(canvas, 0, 0, canvas.width, canvas.height);
+          }
 
-        onGenerated?.();
+          store.setStates({
+            dataUrl,
+            svgString,
+            isGenerating: false,
+            generationKey: targetGenerationKey,
+          });
+
+          onGenerated?.();
+        } else {
+          store.setStates({ isGenerating: false });
+        }
       } catch (error) {
         const parsedError =
           error instanceof Error
             ? error
             : new Error("Failed to generate QR code");
-        store.setStates({
-          error: parsedError,
-          isGenerating: false,
-        });
-        onError?.(parsedError);
+        if (requestedGenerationKeyRef.current === targetGenerationKey) {
+          store.setStates({
+            error: parsedError,
+            isGenerating: false,
+          });
+          onError?.(parsedError);
+        } else {
+          store.setStates({ isGenerating: false });
+        }
       }
     },
     [value, canvasOpts, store, onError, onGenerated],
@@ -393,6 +409,7 @@ function QRCodeDownload(props: QRCodeDownloadProps) {
     asChild,
     className,
     children,
+    onClick: onDownloadClick,
     ...buttonProps
   } = props;
 
@@ -401,7 +418,7 @@ function QRCodeDownload(props: QRCodeDownloadProps) {
 
   const onClick = React.useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
-      buttonProps.onClick?.(event);
+      onDownloadClick?.(event);
       if (event.defaultPrevented) return;
 
       const link = document.createElement("a");
@@ -425,7 +442,7 @@ function QRCodeDownload(props: QRCodeDownloadProps) {
         URL.revokeObjectURL(link.href);
       }
     },
-    [dataUrl, svgString, filename, format, buttonProps.onClick],
+    [dataUrl, svgString, filename, format, onDownloadClick],
   );
 
   const ButtonPrimitive = asChild ? SlotPrimitive.Slot : "button";

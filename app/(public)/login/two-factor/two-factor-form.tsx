@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
 import { mapProblemToFieldErrors, type ProblemDetails } from "@/api/problems";
 import { useAuth } from "@/components/auth-provider";
@@ -27,7 +26,9 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 import {
-  readTwoFactorChallenge,
+  getTwoFactorChallengeServerSnapshot,
+  getTwoFactorChallengeSnapshot,
+  subscribeTwoFactorChallenge,
   type TwoFactorChallenge,
 } from "@/lib/two-factor-challenge";
 
@@ -35,19 +36,41 @@ const TOTP_LENGTH = 6;
 
 type Mode = "totp" | "recovery";
 
-function useChallengeOrRedirect(): TwoFactorChallenge | null {
-  const { replace } = useRouter();
-  const [challenge] = useState<TwoFactorChallenge | null>(() =>
-    typeof window === "undefined" ? null : readTwoFactorChallenge(),
+function useChallenge(): TwoFactorChallenge | null {
+  // useSyncExternalStore handles SSR cleanly: server snapshot is null (matches
+  // the static HTML), client snapshot reads sessionStorage post-hydration.
+  return useSyncExternalStore(
+    subscribeTwoFactorChallenge,
+    getTwoFactorChallengeSnapshot,
+    getTwoFactorChallengeServerSnapshot,
   );
+}
 
+function useHasMounted() {
+  const [mounted, setMounted] = useState(false);
   useEffect(() => {
-    if (!challenge) {
-      replace("/login");
-    }
-  }, [challenge, replace]);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional one-shot post-hydration flag; tells callers it's now safe to render client-only content
+    setMounted(true);
+  }, []);
+  return mounted;
+}
 
-  return challenge;
+function NoChallengeShell() {
+  return (
+    <main className="flex min-h-svh items-center justify-center px-4 py-10">
+      <div className="w-full max-w-sm space-y-4 text-center">
+        <p className="text-sm text-muted-foreground">
+          No active verification challenge.
+        </p>
+        <Link
+          href="/login"
+          className="text-sm underline underline-offset-4 hover:text-foreground"
+        >
+          Back to sign in
+        </Link>
+      </div>
+    </main>
+  );
 }
 
 function ExpiryCountdown({ expiresAt }: { expiresAt: string }) {
@@ -86,7 +109,8 @@ function ExpiryCountdown({ expiresAt }: { expiresAt: string }) {
 
 export function TwoFactorForm() {
   const { completeTwoFactorLogin } = useAuth();
-  const challenge = useChallengeOrRedirect();
+  const challenge = useChallenge();
+  const mounted = useHasMounted();
 
   const [mode, setMode] = useState<Mode>("totp");
   const [code, setCode] = useState("");
@@ -112,6 +136,10 @@ export function TwoFactorForm() {
     } finally {
       setSubmitting(false);
     }
+  }
+
+  if (mounted && !challenge) {
+    return <NoChallengeShell />;
   }
 
   return (
