@@ -35,5 +35,8 @@ export async function POST(request: Request) {
   });
   await session.save();
 
-  return Response.json(publicUser(nextSession.user));
+  return Response.json({
+    status: "Authenticated",
+    user: publicUser(nextSession.user),
+  });
 }

@@ -156,14 +156,18 @@ function AuthProviderInner({ children }: { children: ReactNode }) {
       async completeTwoFactorLogin(code, nextPath) {
         const challenge = readTwoFactorChallenge();
         if (!challenge) {
+          // The challenge was cleared (another tab, expiry, etc.). The page
+          // already redirects on mount when it's missing; this is just a
+          // belt-and-braces fallback. Resolve cleanly so the caller's catch
+          // doesn't paint a stale error before navigation completes.
           push("/login");
-          throw {
-            title: "Verification challenge expired",
-            status: 401,
-          };
+          return;
         }
 
-        const user = await fetchJson<AuthUser>("/api/auth/login/two-factor", {
+        const result = await fetchJson<{
+          status: "Authenticated";
+          user: AuthUser;
+        }>("/api/auth/login/two-factor", {
           method: "POST",
           redirectOnUnauthorized: false,
           body: JSON.stringify({
@@ -173,7 +177,7 @@ function AuthProviderInner({ children }: { children: ReactNode }) {
         });
 
         clearTwoFactorChallenge();
-        queryClient.setQueryData(sessionQueryKey, user);
+        queryClient.setQueryData(sessionQueryKey, result.user);
         const profile = await queryClient.fetchQuery({
           queryKey: currentUserQueryKey,
           queryFn: fetchCurrentUserQuery,
