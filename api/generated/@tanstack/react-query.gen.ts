@@ -17,6 +17,7 @@ import {
   changeUserRole,
   completeOnboarding,
   confirmEmailChange,
+  confirmTotp,
   createChainJobs,
   createInvitation,
   createProduct,
@@ -25,6 +26,7 @@ import {
   deleteCronTickerOccurrence,
   deleteTimeTicker,
   deleteTimeTickersBatch,
+  disableTwoFactor,
   discardDeadLetters,
   exportPersonalData,
   forgotPassword,
@@ -65,12 +67,14 @@ import {
   listProducts,
   listUsers,
   login,
+  loginTwoFactor,
   logout,
   logoutAll,
   markAllNotificationsAsRead,
   markNotificationAsRead,
   type Options,
   refreshToken,
+  regenerateRecoveryCodes,
   register,
   replayDeadLetters,
   requestEmailChange,
@@ -79,12 +83,14 @@ import {
   revokeInvitation,
   runCronTickerOnDemand,
   setInitialPassword,
+  setupTotp,
   startTickerHost,
   stopTickerHost,
   streamMyNotifications,
   unlinkGoogleLogin,
   updateCronTicker,
   updateMyNotificationPreferences,
+  updateProfile,
   updateTimeTicker,
   validateAuth,
 } from "../sdk.gen";
@@ -106,6 +112,9 @@ import type {
   ConfirmEmailChangeData,
   ConfirmEmailChangeError,
   ConfirmEmailChangeResponse2,
+  ConfirmTotpData,
+  ConfirmTotpError,
+  ConfirmTotpResponse2,
   CreateChainJobsData,
   CreateInvitationData,
   CreateInvitationError,
@@ -120,6 +129,9 @@ import type {
   DeleteCronTickerOccurrenceData,
   DeleteTimeTickerData,
   DeleteTimeTickersBatchData,
+  DisableTwoFactorData,
+  DisableTwoFactorError,
+  DisableTwoFactorResponse2,
   DiscardDeadLettersData,
   DiscardDeadLettersError,
   DiscardDeadLettersResponse,
@@ -196,6 +208,9 @@ import type {
   LoginData,
   LoginError,
   LoginResponse2,
+  LoginTwoFactorData,
+  LoginTwoFactorError,
+  LoginTwoFactorResponse2,
   LogoutAllData,
   LogoutAllError,
   LogoutAllResponse2,
@@ -211,6 +226,9 @@ import type {
   RefreshTokenData,
   RefreshTokenError,
   RefreshTokenResponse2,
+  RegenerateRecoveryCodesData,
+  RegenerateRecoveryCodesError,
+  RegenerateRecoveryCodesResponse2,
   RegisterData,
   RegisterError,
   RegisterResponse2,
@@ -230,6 +248,9 @@ import type {
   SetInitialPasswordData,
   SetInitialPasswordError,
   SetInitialPasswordResponse,
+  SetupTotpData,
+  SetupTotpError,
+  SetupTotpResponse2,
   StartTickerHostData,
   StopTickerHostData,
   StreamMyNotificationsData,
@@ -241,6 +262,9 @@ import type {
   UpdateMyNotificationPreferencesData,
   UpdateMyNotificationPreferencesError,
   UpdateMyNotificationPreferencesResponse,
+  UpdateProfileData,
+  UpdateProfileError,
+  UpdateProfileResponse2,
   UpdateTimeTickerData,
   ValidateAuthData,
 } from "../types.gen";
@@ -1698,6 +1722,33 @@ export const loginMutation = (
 };
 
 /**
+ * Complete a two-factor login challenge and receive tokens.
+ */
+export const loginTwoFactorMutation = (
+  options?: Partial<Options<LoginTwoFactorData>>,
+): UseMutationOptions<
+  LoginTwoFactorResponse2,
+  LoginTwoFactorError,
+  Options<LoginTwoFactorData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    LoginTwoFactorResponse2,
+    LoginTwoFactorError,
+    Options<LoginTwoFactorData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await loginTwoFactor({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
  * Permanently delete the authenticated user's account and all associated personal data.
  */
 export const deleteAccountMutation = (
@@ -1748,6 +1799,33 @@ export const getCurrentUserOptions = (options?: Options<GetCurrentUserData>) =>
     },
     queryKey: getCurrentUserQueryKey(options),
   });
+
+/**
+ * Update the authenticated user's profile.
+ */
+export const updateProfileMutation = (
+  options?: Partial<Options<UpdateProfileData>>,
+): UseMutationOptions<
+  UpdateProfileResponse2,
+  UpdateProfileError,
+  Options<UpdateProfileData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    UpdateProfileResponse2,
+    UpdateProfileError,
+    Options<UpdateProfileData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await updateProfile({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
 
 export const exportPersonalDataQueryKey = (
   options?: Options<ExportPersonalDataData>,
@@ -2400,6 +2478,114 @@ export const completeOnboardingMutation = (
   > = {
     mutationFn: async (fnOptions) => {
       const { data } = await completeOnboarding({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * Start authenticator-app two-factor setup for the current user.
+ */
+export const setupTotpMutation = (
+  options?: Partial<Options<SetupTotpData>>,
+): UseMutationOptions<
+  SetupTotpResponse2,
+  SetupTotpError,
+  Options<SetupTotpData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    SetupTotpResponse2,
+    SetupTotpError,
+    Options<SetupTotpData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await setupTotp({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * Confirm authenticator-app two-factor setup and receive recovery codes.
+ */
+export const confirmTotpMutation = (
+  options?: Partial<Options<ConfirmTotpData>>,
+): UseMutationOptions<
+  ConfirmTotpResponse2,
+  ConfirmTotpError,
+  Options<ConfirmTotpData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    ConfirmTotpResponse2,
+    ConfirmTotpError,
+    Options<ConfirmTotpData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await confirmTotp({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * Disable two-factor authentication for the current user.
+ */
+export const disableTwoFactorMutation = (
+  options?: Partial<Options<DisableTwoFactorData>>,
+): UseMutationOptions<
+  DisableTwoFactorResponse2,
+  DisableTwoFactorError,
+  Options<DisableTwoFactorData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    DisableTwoFactorResponse2,
+    DisableTwoFactorError,
+    Options<DisableTwoFactorData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await disableTwoFactor({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * Regenerate recovery codes for the current user.
+ */
+export const regenerateRecoveryCodesMutation = (
+  options?: Partial<Options<RegenerateRecoveryCodesData>>,
+): UseMutationOptions<
+  RegenerateRecoveryCodesResponse2,
+  RegenerateRecoveryCodesError,
+  Options<RegenerateRecoveryCodesData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    RegenerateRecoveryCodesResponse2,
+    RegenerateRecoveryCodesError,
+    Options<RegenerateRecoveryCodesData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await regenerateRecoveryCodes({
         ...options,
         ...fnOptions,
         throwOnError: true,

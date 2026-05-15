@@ -42,6 +42,14 @@ export const zConfirmEmailChangeResponse = z.object({
   message: z.string().optional().default("Email address changed successfully."),
 });
 
+export const zConfirmTotpRequest = z.object({
+  code: z.string(),
+});
+
+export const zConfirmTotpResponse = z.object({
+  recoveryCodes: z.array(z.string()),
+});
+
 export const zCreateInvitationRequest = z.object({
   email: z.string(),
 });
@@ -124,6 +132,18 @@ export const zDeadLetterSummaryResultsDto = z.object({
   envelopes: z.array(zDeadLetterSummaryDto),
 });
 
+export const zDisableTwoFactorRequest = z.object({
+  currentPassword: z.string(),
+  code: z.string(),
+});
+
+export const zDisableTwoFactorResponse = z.object({
+  message: z
+    .string()
+    .optional()
+    .default("Two-factor authentication has been disabled."),
+});
+
 export const zForgotPasswordRequest = z.object({
   email: z.string(),
 });
@@ -187,6 +207,7 @@ export const zGetCurrentUserResponse = z.object({
   permissionsVersion: z.string(),
   hasPassword: z.boolean(),
   hasCompletedOnboarding: z.boolean(),
+  twoFactorEnabled: z.boolean(),
   linkedProviders: z.array(z.string()),
 });
 
@@ -227,6 +248,11 @@ export const zGetUserByIdResponse = z.object({
   linkedProviders: z.array(z.string()),
 });
 
+export const zGoogleLoginChallengeResponse = z.object({
+  challengeToken: z.string(),
+  expiresAt: z.iso.datetime(),
+});
+
 export const zGoogleLoginConfirmRequest = z.object({
   token: z.string(),
   invitationToken: z.string().nullish(),
@@ -249,13 +275,18 @@ export const zGoogleLoginRequest = z.object({
   idToken: z.string(),
 });
 
+export const zGoogleLoginSessionResponse = z.object({
+  userId: z.uuid(),
+  accessToken: z.string(),
+  accessTokenExpiresAt: z.iso.datetime(),
+  refreshToken: z.string(),
+  refreshTokenExpiresAt: z.iso.datetime(),
+});
+
 export const zGoogleLoginResponse = z.object({
-  isPending: z.boolean(),
-  userId: z.uuid().nullish(),
-  accessToken: z.string().nullish(),
-  accessTokenExpiresAt: z.iso.datetime().nullish(),
-  refreshToken: z.string().nullish(),
-  refreshTokenExpiresAt: z.iso.datetime().nullish(),
+  status: z.string(),
+  session: zGoogleLoginSessionResponse.nullish(),
+  challenge: zGoogleLoginChallengeResponse.nullish(),
 });
 
 export const zHttpValidationProblemDetails = z.object({
@@ -375,12 +406,36 @@ export const zListUsersResponse = z.object({
   ]),
 });
 
+export const zLoginChallengeResponse = z.object({
+  challengeToken: z.string(),
+  expiresAt: z.iso.datetime(),
+});
+
 export const zLoginRequest = z.object({
   email: z.string(),
   password: z.string(),
 });
 
+export const zLoginSessionResponse = z.object({
+  userId: z.uuid(),
+  accessToken: z.string(),
+  accessTokenExpiresAt: z.iso.datetime(),
+  refreshToken: z.string(),
+  refreshTokenExpiresAt: z.iso.datetime(),
+});
+
 export const zLoginResponse = z.object({
+  status: z.string(),
+  session: zLoginSessionResponse.nullish(),
+  challenge: zLoginChallengeResponse.nullish(),
+});
+
+export const zLoginTwoFactorRequest = z.object({
+  challengeToken: z.string(),
+  code: z.string(),
+});
+
+export const zLoginTwoFactorResponse = z.object({
   userId: z.uuid(),
   accessToken: z.string(),
   accessTokenExpiresAt: z.iso.datetime(),
@@ -501,6 +556,15 @@ export const zRefreshTokenResponse = z.object({
   refreshTokenExpiresAt: z.iso.datetime(),
 });
 
+export const zRegenerateRecoveryCodesRequest = z.object({
+  currentPassword: z.string(),
+  code: z.string(),
+});
+
+export const zRegenerateRecoveryCodesResponse = z.object({
+  recoveryCodes: z.array(z.string()),
+});
+
 export const zRegisterRequest = z.object({
   email: z.string(),
   password: z.string(),
@@ -556,6 +620,11 @@ export const zSetInitialPasswordRequest = z.object({
   googleIdToken: z.string(),
 });
 
+export const zSetupTotpResponse = z.object({
+  secret: z.string(),
+  otpAuthUri: z.string(),
+});
+
 export const zTickerType = z.int();
 
 export const zTimeRange = z.object({
@@ -607,6 +676,16 @@ export const zUpdateMyNotificationPreferenceRequest = z.object({
 
 export const zUpdateMyNotificationPreferencesRequest = z.object({
   preferences: z.array(zUpdateMyNotificationPreferenceRequest),
+});
+
+export const zUpdateProfileRequest = z.object({
+  displayName: z.string(),
+});
+
+export const zUpdateProfileResponse = z.object({
+  userId: z.uuid(),
+  email: z.string(),
+  displayName: z.string(),
 });
 
 export const zGetTimeTickersPaginatedQuery = z.object({
@@ -992,6 +1071,13 @@ export const zLoginBody = zLoginRequest;
  */
 export const zLoginResponse2 = zLoginResponse;
 
+export const zLoginTwoFactorBody = zLoginTwoFactorRequest;
+
+/**
+ * OK
+ */
+export const zLoginTwoFactorResponse2 = zLoginTwoFactorResponse;
+
 /**
  * No Content
  */
@@ -1001,6 +1087,13 @@ export const zDeleteAccountResponse = z.void();
  * OK
  */
 export const zGetCurrentUserResponse2 = zGetCurrentUserResponse;
+
+export const zUpdateProfileBody = zUpdateProfileRequest;
+
+/**
+ * OK
+ */
+export const zUpdateProfileResponse2 = zUpdateProfileResponse;
 
 /**
  * OK
@@ -1210,6 +1303,33 @@ export const zCompleteOnboardingBody = zCompleteOnboardingRequest;
  * No Content
  */
 export const zCompleteOnboardingResponse = z.void();
+
+/**
+ * OK
+ */
+export const zSetupTotpResponse2 = zSetupTotpResponse;
+
+export const zConfirmTotpBody = zConfirmTotpRequest;
+
+/**
+ * OK
+ */
+export const zConfirmTotpResponse2 = zConfirmTotpResponse;
+
+export const zDisableTwoFactorBody = zDisableTwoFactorRequest;
+
+/**
+ * OK
+ */
+export const zDisableTwoFactorResponse2 = zDisableTwoFactorResponse;
+
+export const zRegenerateRecoveryCodesBody = zRegenerateRecoveryCodesRequest;
+
+/**
+ * OK
+ */
+export const zRegenerateRecoveryCodesResponse2 =
+  zRegenerateRecoveryCodesResponse;
 
 export const zListDeadLettersQuery = z.object({
   pageNumber: z

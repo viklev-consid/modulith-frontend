@@ -22,6 +22,9 @@ import type {
   ConfirmEmailChangeData,
   ConfirmEmailChangeErrors,
   ConfirmEmailChangeResponses,
+  ConfirmTotpData,
+  ConfirmTotpErrors,
+  ConfirmTotpResponses,
   CreateChainJobsData,
   CreateChainJobsResponses,
   CreateInvitationData,
@@ -41,6 +44,9 @@ import type {
   DeleteTimeTickerResponses,
   DeleteTimeTickersBatchData,
   DeleteTimeTickersBatchResponses,
+  DisableTwoFactorData,
+  DisableTwoFactorErrors,
+  DisableTwoFactorResponses,
   DiscardDeadLettersData,
   DiscardDeadLettersErrors,
   DiscardDeadLettersResponses,
@@ -138,6 +144,9 @@ import type {
   LoginData,
   LoginErrors,
   LoginResponses,
+  LoginTwoFactorData,
+  LoginTwoFactorErrors,
+  LoginTwoFactorResponses,
   LogoutAllData,
   LogoutAllErrors,
   LogoutAllResponses,
@@ -153,6 +162,9 @@ import type {
   RefreshTokenData,
   RefreshTokenErrors,
   RefreshTokenResponses,
+  RegenerateRecoveryCodesData,
+  RegenerateRecoveryCodesErrors,
+  RegenerateRecoveryCodesResponses,
   RegisterData,
   RegisterErrors,
   RegisterResponses,
@@ -175,6 +187,9 @@ import type {
   SetInitialPasswordData,
   SetInitialPasswordErrors,
   SetInitialPasswordResponses,
+  SetupTotpData,
+  SetupTotpErrors,
+  SetupTotpResponses,
   StartTickerHostData,
   StartTickerHostResponses,
   StopTickerHostData,
@@ -190,6 +205,9 @@ import type {
   UpdateMyNotificationPreferencesData,
   UpdateMyNotificationPreferencesErrors,
   UpdateMyNotificationPreferencesResponses,
+  UpdateProfileData,
+  UpdateProfileErrors,
+  UpdateProfileResponses,
   UpdateTimeTickerData,
   UpdateTimeTickerResponses,
   ValidateAuthData,
@@ -1008,6 +1026,25 @@ export const login = <ThrowOnError extends boolean = false>(
   });
 
 /**
+ * Complete a two-factor login challenge and receive tokens.
+ */
+export const loginTwoFactor = <ThrowOnError extends boolean = false>(
+  options: Options<LoginTwoFactorData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    LoginTwoFactorResponses,
+    LoginTwoFactorErrors,
+    ThrowOnError
+  >({
+    url: "/v1/users/login/2fa",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
  * Permanently delete the authenticated user's account and all associated personal data.
  */
 export const deleteAccount = <ThrowOnError extends boolean = false>(
@@ -1037,6 +1074,26 @@ export const getCurrentUser = <ThrowOnError extends boolean = false>(
     security: [{ scheme: "bearer", type: "http" }],
     url: "/v1/users/me",
     ...options,
+  });
+
+/**
+ * Update the authenticated user's profile.
+ */
+export const updateProfile = <ThrowOnError extends boolean = false>(
+  options: Options<UpdateProfileData, ThrowOnError>,
+) =>
+  (options.client ?? client).patch<
+    UpdateProfileResponses,
+    UpdateProfileErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/v1/users/me/profile",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
   });
 
 /**
@@ -1415,6 +1472,82 @@ export const completeOnboarding = <ThrowOnError extends boolean = false>(
   >({
     security: [{ scheme: "bearer", type: "http" }],
     url: "/v1/users/me/onboarding",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * Start authenticator-app two-factor setup for the current user.
+ */
+export const setupTotp = <ThrowOnError extends boolean = false>(
+  options?: Options<SetupTotpData, ThrowOnError>,
+) =>
+  (options?.client ?? client).post<
+    SetupTotpResponses,
+    SetupTotpErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/v1/users/me/2fa/totp/setup",
+    ...options,
+  });
+
+/**
+ * Confirm authenticator-app two-factor setup and receive recovery codes.
+ */
+export const confirmTotp = <ThrowOnError extends boolean = false>(
+  options: Options<ConfirmTotpData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    ConfirmTotpResponses,
+    ConfirmTotpErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/v1/users/me/2fa/totp/confirm",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * Disable two-factor authentication for the current user.
+ */
+export const disableTwoFactor = <ThrowOnError extends boolean = false>(
+  options: Options<DisableTwoFactorData, ThrowOnError>,
+) =>
+  (options.client ?? client).delete<
+    DisableTwoFactorResponses,
+    DisableTwoFactorErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/v1/users/me/2fa",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * Regenerate recovery codes for the current user.
+ */
+export const regenerateRecoveryCodes = <ThrowOnError extends boolean = false>(
+  options: Options<RegenerateRecoveryCodesData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    RegenerateRecoveryCodesResponses,
+    RegenerateRecoveryCodesErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/v1/users/me/2fa/recovery-codes/regenerate",
     ...options,
     headers: {
       "Content-Type": "application/json",
