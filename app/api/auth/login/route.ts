@@ -1,3 +1,4 @@
+import type { LoginResponse } from "@/api/generated";
 import {
   fetchBackend,
   getHasCompletedOnboarding,
@@ -5,7 +6,6 @@ import {
   publicUser,
   readJsonBody,
   sessionFromTokenResponse,
-  type TokenResponse,
 } from "@/lib/backend";
 import { getSession } from "@/lib/session";
 
@@ -25,9 +25,27 @@ export async function POST(request: Request) {
     return problemResponse(response);
   }
 
-  const nextSession = sessionFromTokenResponse(
-    (await response.json()) as TokenResponse,
-  );
+  const payload = (await response.json()) as LoginResponse;
+
+  if (payload.status === "TwoFactorRequired" && payload.challenge) {
+    return Response.json({
+      status: "TwoFactorRequired",
+      challengeToken: payload.challenge.challengeToken,
+      expiresAt: payload.challenge.expiresAt,
+    });
+  }
+
+  if (payload.status !== "Authenticated" || !payload.session) {
+    return Response.json(
+      {
+        title: "Unexpected login response",
+        status: 502,
+      },
+      { status: 502, headers: { "content-type": "application/problem+json" } },
+    );
+  }
+
+  const nextSession = sessionFromTokenResponse(payload.session);
   const session = await getSession();
   Object.assign(session, nextSession, {
     hasCompletedOnboarding: await getHasCompletedOnboarding(
@@ -36,5 +54,8 @@ export async function POST(request: Request) {
   });
   await session.save();
 
-  return Response.json(publicUser(nextSession.user));
+  return Response.json({
+    status: "Authenticated",
+    user: publicUser(nextSession.user),
+  });
 }
