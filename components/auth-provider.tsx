@@ -236,8 +236,27 @@ function AuthProviderInner({ children }: { children: ReactNode }) {
           throw problem;
         }
 
-        const user = (await response.json()) as AuthUser;
-        queryClient.setQueryData(sessionQueryKey, user);
+        type GoogleLoginResult =
+          | { status: "Authenticated"; user: AuthUser }
+          | {
+              status: "TwoFactorRequired";
+              challengeToken: string;
+              expiresAt: string;
+            };
+
+        const result = (await response.json()) as GoogleLoginResult;
+
+        if (result.status === "TwoFactorRequired") {
+          saveTwoFactorChallenge({
+            challengeToken: result.challengeToken,
+            expiresAt: result.expiresAt,
+            nextPath: nextPath ?? null,
+          });
+          push("/login/two-factor");
+          return;
+        }
+
+        queryClient.setQueryData(sessionQueryKey, result.user);
         const profile = await queryClient.fetchQuery({
           queryKey: currentUserQueryKey,
           queryFn: fetchCurrentUserQuery,
