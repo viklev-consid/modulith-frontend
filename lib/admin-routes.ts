@@ -14,19 +14,19 @@ export type AdminRoute = {
 
 export const adminRoutes = [
   {
-    href: "/admin/users",
+    href: "/app/admin/users",
     label: "Users",
     icon: UsersIcon,
     permission: "users.users.read",
   },
   {
-    href: "/admin/invitations",
+    href: "/app/admin/invitations",
     label: "Invitations",
     icon: MailIcon,
     permission: "users.invitations.write",
   },
   {
-    href: "/admin/audit",
+    href: "/app/admin/audit",
     label: "Audit trail",
     icon: ClipboardListIcon,
     permission: "audit.trail.read",

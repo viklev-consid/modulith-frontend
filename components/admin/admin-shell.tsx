@@ -36,7 +36,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
               think this is a mistake, contact a workspace administrator.
             </p>
             <Link
-              href="/"
+              href="/app"
               className="text-sm font-medium underline underline-offset-4"
             >
               Back to dashboard

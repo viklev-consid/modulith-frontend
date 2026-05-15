@@ -153,7 +153,7 @@ export function BellDropdown() {
         <Separator />
         <div className="p-2">
           <Link
-            href="/notifications"
+            href="/app/notifications"
             className={buttonVariants({
               variant: "ghost",
               className: "w-full justify-center",

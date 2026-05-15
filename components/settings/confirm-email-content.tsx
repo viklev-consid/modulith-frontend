@@ -68,7 +68,7 @@ export function ConfirmEmailContent() {
       {!isLoading && (
         <CardContent className="flex justify-center">
           <Link
-            href={isConfirmed ? "/" : "/settings/email"}
+            href={isConfirmed ? "/app" : "/app/settings/email"}
             className={buttonVariants()}
           >
             {isConfirmed ? "Go to app" : "Back to Email settings"}
