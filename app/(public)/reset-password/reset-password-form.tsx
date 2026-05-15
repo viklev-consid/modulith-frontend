@@ -31,8 +31,8 @@ import {
 import { Input } from "@/components/ui/input";
 
 export function ResetPasswordContent() {
-  const { get } = useSearchParams();
-  const token = get("token") ?? "";
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token") ?? "";
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [pageError, setPageError] = useState("");
 

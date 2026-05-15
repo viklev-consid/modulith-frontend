@@ -42,8 +42,8 @@ export function LoginShell({ children }: { children?: React.ReactNode }) {
 
 export function LoginForm() {
   const { login } = useAuth();
-  const { get } = useSearchParams();
-  const nextPath = get("next");
+  const searchParams = useSearchParams();
+  const nextPath = searchParams.get("next");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const form = useForm({

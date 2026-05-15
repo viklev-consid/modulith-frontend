@@ -18,8 +18,8 @@ import {
 type Status = "loading" | "success" | "error";
 
 export function ConfirmEmailContent() {
-  const { get } = useSearchParams();
-  const token = get("token");
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token");
   const [status, setStatus] = useState<Status>(token ? "loading" : "error");
 
   useEffect(() => {

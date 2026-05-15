@@ -34,8 +34,8 @@ const registrationMode = (process.env.NEXT_PUBLIC_REGISTRATION_MODE ??
 
 export function RegisterContent() {
   const { register } = useAuth();
-  const { get } = useSearchParams();
-  const invitationToken = get("token");
+  const searchParams = useSearchParams();
+  const invitationToken = searchParams.get("token");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const form = useForm({
