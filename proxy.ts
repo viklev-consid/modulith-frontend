@@ -6,7 +6,6 @@ import { hasUsableSession, unsealSessionCookie } from "@/lib/session";
 const publicRoutes = new Set([
   "/",
   "/login",
-  "/login/two-factor",
   "/register",
   "/forgot-password",
   "/reset-password",
@@ -14,9 +13,12 @@ const publicRoutes = new Set([
   "/goodbye",
 ]);
 
+const publicPrefixes = ["/login/", "/auth/google/confirm"];
+
 function isPublicRoute(pathname: string) {
   return (
-    publicRoutes.has(pathname) || pathname.startsWith("/auth/google/confirm")
+    publicRoutes.has(pathname) ||
+    publicPrefixes.some((prefix) => pathname.startsWith(prefix))
   );
 }
 
@@ -33,7 +35,12 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  if (hasSession && (pathname === "/login" || pathname === "/register")) {
+  if (
+    hasSession &&
+    (pathname === "/login" ||
+      pathname.startsWith("/login/") ||
+      pathname === "/register")
+  ) {
     return NextResponse.redirect(new URL("/app", request.url));
   }
 
