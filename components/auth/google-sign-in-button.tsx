@@ -27,7 +27,11 @@ declare global {
   }
 }
 
-export function GoogleSignInButton() {
+export function GoogleSignInButton({
+  nextPath,
+}: {
+  nextPath?: string | null;
+} = {}) {
   const id = useId().replace(/:/g, "");
   const { googleLogin } = useAuth();
   const [isReady, setIsReady] = useState(false);
@@ -42,7 +46,7 @@ export function GoogleSignInButton() {
       client_id: clientId,
       callback: ({ credential }) => {
         if (credential) {
-          void googleLogin(credential);
+          void googleLogin(credential, nextPath);
         }
       },
     });

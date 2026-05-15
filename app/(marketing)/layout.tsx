@@ -1,0 +1,58 @@
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import type { ReactNode } from "react";
+
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { getUsableServerSession } from "@/lib/server-auth";
+
+export default async function MarketingLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  const session = await getUsableServerSession();
+
+  if (session && session.hasCompletedOnboarding !== true) {
+    redirect("/onboarding");
+  }
+
+  const isSignedIn = Boolean(session);
+
+  return (
+    <div className="flex min-h-svh flex-col">
+      <header className="border-b">
+        <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-4 md:px-6">
+          <Link href="/" className="text-sm font-medium">
+            Modulith
+          </Link>
+          <nav className="flex items-center gap-2">
+            {isSignedIn ? (
+              <Link href="/app" className={cn(buttonVariants({ size: "sm" }))}>
+                Open app
+              </Link>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className={cn(
+                    buttonVariants({ size: "sm", variant: "ghost" }),
+                  )}
+                >
+                  Sign in
+                </Link>
+                <Link
+                  href="/register"
+                  className={cn(buttonVariants({ size: "sm" }))}
+                >
+                  Get started
+                </Link>
+              </>
+            )}
+          </nav>
+        </div>
+      </header>
+      <main className="flex-1">{children}</main>
+    </div>
+  );
+}

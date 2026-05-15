@@ -32,7 +32,7 @@ export async function AuthHydration({
 
   if (!requireCompletedOnboarding && currentUser.hasCompletedOnboarding) {
     await syncServerOnboardingState(true);
-    redirect("/");
+    redirect("/app");
   }
 
   const queryClient = createQueryClient();

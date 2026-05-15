@@ -199,7 +199,7 @@ export function UserDetail({ userId }: { userId: string }) {
 function BackLink() {
   return (
     <Link
-      href="/admin/users"
+      href="/app/admin/users"
       className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
     >
       <ArrowLeftIcon className="size-4" />

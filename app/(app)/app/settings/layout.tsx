@@ -16,12 +16,16 @@ export const metadata: Metadata = {
 };
 
 const links = [
-  { href: "/settings", label: "Profile", icon: UserIcon },
-  { href: "/settings/password", label: "Password", icon: KeyRoundIcon },
-  { href: "/settings/email", label: "Email", icon: MailIcon },
-  { href: "/settings/connections", label: "Connections", icon: LinkIcon },
-  { href: "/settings/notifications", label: "Notifications", icon: BellIcon },
-  { href: "/settings/data", label: "Your data", icon: DatabaseIcon },
+  { href: "/app/settings", label: "Profile", icon: UserIcon },
+  { href: "/app/settings/password", label: "Password", icon: KeyRoundIcon },
+  { href: "/app/settings/email", label: "Email", icon: MailIcon },
+  { href: "/app/settings/connections", label: "Connections", icon: LinkIcon },
+  {
+    href: "/app/settings/notifications",
+    label: "Notifications",
+    icon: BellIcon,
+  },
+  { href: "/app/settings/data", label: "Your data", icon: DatabaseIcon },
 ];
 
 export default function SettingsLayout({

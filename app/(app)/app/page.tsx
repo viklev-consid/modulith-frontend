@@ -9,7 +9,6 @@ import {
 
 import { BellDropdown } from "@/components/bell-dropdown";
 import { Can } from "@/components/can";
-import { AuthHydration } from "@/components/auth-hydration";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -25,14 +24,6 @@ const ADMIN_PERMISSIONS = [
 
 export default function Page() {
   return (
-    <AuthHydration>
-      <Dashboard />
-    </AuthHydration>
-  );
-}
-
-function Dashboard() {
-  return (
     <div className="min-h-svh px-6 py-5">
       <header className="flex items-center justify-between border-b pb-4">
         <div>
@@ -45,7 +36,7 @@ function Dashboard() {
           <BellDropdown />
           <Can anyOf={ADMIN_PERMISSIONS}>
             <Link
-              href="/admin"
+              href="/app/admin"
               className={cn(buttonVariants({ size: "sm", variant: "outline" }))}
             >
               <ShieldIcon />
@@ -53,14 +44,14 @@ function Dashboard() {
             </Link>
           </Can>
           <Link
-            href="/activity"
+            href="/app/activity"
             className={cn(buttonVariants({ size: "sm", variant: "outline" }))}
           >
             <ActivityIcon />
             Activity
           </Link>
           <Link
-            href="/settings"
+            href="/app/settings"
             className={cn(buttonVariants({ size: "sm", variant: "outline" }))}
           >
             <SettingsIcon />

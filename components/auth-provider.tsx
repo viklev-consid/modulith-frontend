@@ -13,6 +13,7 @@ import {
   fetchSessionQuery,
   sessionQueryKey,
 } from "@/lib/auth-query";
+import { safeNextPath } from "@/lib/safe-next-path";
 import { Toaster } from "@/components/ui/sonner";
 
 export type AuthUser = {
@@ -34,9 +35,13 @@ type AuthContextValue = {
   permissions: string[];
   isAuthenticated: boolean;
   isLoading: boolean;
-  login(email: string, password: string): Promise<void>;
+  login(
+    email: string,
+    password: string,
+    nextPath?: string | null,
+  ): Promise<void>;
   register(data: RegisterInput): Promise<void>;
-  googleLogin(idToken: string): Promise<void>;
+  googleLogin(idToken: string, nextPath?: string | null): Promise<void>;
   googleConfirm(data: {
     token: string;
     invitationToken?: string | null;
@@ -107,7 +112,7 @@ function AuthProviderInner({ children }: { children: ReactNode }) {
       permissions: currentUserQuery.data?.permissions ?? [],
       isAuthenticated: Boolean(sessionQuery.data),
       isLoading: sessionQuery.isLoading || currentUserQuery.isFetching,
-      async login(email, password) {
+      async login(email, password, nextPath) {
         const user = await fetchJson<AuthUser>("/api/auth/login", {
           method: "POST",
           body: JSON.stringify({ email, password }),
@@ -117,7 +122,11 @@ function AuthProviderInner({ children }: { children: ReactNode }) {
           queryKey: currentUserQueryKey,
           queryFn: fetchCurrentUserQuery,
         });
-        push(profile.hasCompletedOnboarding ? "/" : "/onboarding");
+        push(
+          profile.hasCompletedOnboarding
+            ? safeNextPath(nextPath)
+            : "/onboarding",
+        );
       },
       async register(data) {
         const user = await fetchJson<AuthUser>("/api/auth/register", {
@@ -128,7 +137,7 @@ function AuthProviderInner({ children }: { children: ReactNode }) {
         await queryClient.invalidateQueries({ queryKey: currentUserQueryKey });
         push("/onboarding");
       },
-      async googleLogin(idToken) {
+      async googleLogin(idToken, nextPath) {
         const response = await fetch("/api/auth/google/login", {
           method: "POST",
           headers: { "content-type": "application/json" },
@@ -178,7 +187,11 @@ function AuthProviderInner({ children }: { children: ReactNode }) {
           queryKey: currentUserQueryKey,
           queryFn: fetchCurrentUserQuery,
         });
-        push(profile.hasCompletedOnboarding ? "/" : "/onboarding");
+        push(
+          profile.hasCompletedOnboarding
+            ? safeNextPath(nextPath)
+            : "/onboarding",
+        );
       },
       async googleConfirm(data) {
         const user = await fetchJson<AuthUser>("/api/auth/google/confirm", {
@@ -195,7 +208,7 @@ function AuthProviderInner({ children }: { children: ReactNode }) {
           body: JSON.stringify(data),
         });
         await queryClient.invalidateQueries({ queryKey: currentUserQueryKey });
-        push("/");
+        push("/app");
       },
       async setInitialPassword(data) {
         await fetchJson<void>("/api/proxy/v1/users/me/password/initial", {
