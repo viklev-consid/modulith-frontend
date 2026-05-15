@@ -170,10 +170,9 @@ function DisabledPanel({
     }
   }
 
-  async function finishConfirm(codes: string[]) {
+  function finishConfirm(codes: string[]) {
     setRecoveryCodes(codes);
     setStep("codes");
-    await queryClient.invalidateQueries({ queryKey: currentUserQueryKey });
   }
 
   if (step === "scan" && setup) {
@@ -202,10 +201,15 @@ function DisabledPanel({
     return (
       <SetupCodesStep
         codes={recoveryCodes}
-        onDone={() => {
+        onDone={async () => {
+          // Invalidate AFTER acknowledgement so the parent doesn't swap to
+          // EnabledPanel and unmount this screen while codes are still visible.
           setSetup(null);
           setRecoveryCodes([]);
           setStep(null);
+          await queryClient.invalidateQueries({
+            queryKey: currentUserQueryKey,
+          });
         }}
       />
     );
@@ -286,7 +290,7 @@ function SetupScanStep({
             Cancel
           </Button>
           <Button type="button" onClick={onContinue}>
-            I&apos;ve added it — continue
+            I&apos;ve added it, continue
           </Button>
         </div>
       </CardContent>
@@ -402,21 +406,25 @@ function SetupCodesStep({
       <CardHeader>
         <CardTitle>Save your recovery codes</CardTitle>
         <CardDescription>
-          Each code works once. Store them somewhere safe — they will not be
+          Each code works once. Store them somewhere safe, they will not be
           shown again.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <RecoveryCodeList codes={codes} />
-        <label className="flex items-center gap-2 text-sm">
+        <label
+          htmlFor="recovery-codes-acknowledged"
+          className="flex items-center gap-2 text-sm"
+        >
           <Checkbox
+            id="recovery-codes-acknowledged"
             checked={acknowledged}
             onCheckedChange={(checked) => setAcknowledged(checked === true)}
           />
           I have saved my recovery codes
         </label>
         <Button type="button" disabled={!acknowledged} onClick={onDone}>
-          <CheckIcon className="size-4" /> Done
+          <CheckIcon className="size-4" /> Finish setup
         </Button>
       </CardContent>
     </Card>
@@ -437,8 +445,8 @@ function EnabledPanel() {
         <CardHeader>
           <CardTitle>New recovery codes</CardTitle>
           <CardDescription>
-            Your old recovery codes have been invalidated. Save these new codes
-            — they will not be shown again.
+            Your old recovery codes have been invalidated. Save these new codes,
+            they will not be shown again.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -533,15 +541,19 @@ function SaveAcknowledgeButton({ onDone }: { onDone: () => void }) {
   const [ack, setAck] = useState(false);
   return (
     <div className="space-y-3">
-      <label className="flex items-center gap-2 text-sm">
+      <label
+        htmlFor="new-recovery-codes-acknowledged"
+        className="flex items-center gap-2 text-sm"
+      >
         <Checkbox
+          id="new-recovery-codes-acknowledged"
           checked={ack}
           onCheckedChange={(checked) => setAck(checked === true)}
         />
         I have saved my new recovery codes
       </label>
       <Button type="button" disabled={!ack} onClick={onDone}>
-        Done
+        Finish saving codes
       </Button>
     </div>
   );
@@ -578,13 +590,14 @@ function ConfirmFieldsForm({
     } catch (error) {
       const problem = error as ProblemDetails;
       const mapped = mapProblemToFieldErrors(problem);
+      // When the backend returns a bare `detail` (no field errors), surface it
+      // on the code input — the only "free-text" error path here is "wrong
+      // verification code".
+      const detailFallback =
+        !problem.errors && problem.detail ? problem.detail : "";
       setFieldErrors({
-        currentPassword:
-          mapped.currentPassword ?? problem.errors?.currentPassword?.[0] ?? "",
-        code:
-          mapped.code ??
-          problem.errors?.code?.[0] ??
-          (problem.detail && !problem.errors ? problem.detail : ""),
+        currentPassword: mapped.currentPassword ?? "",
+        code: mapped.code ?? detailFallback,
       });
     } finally {
       setSubmitting(false);
