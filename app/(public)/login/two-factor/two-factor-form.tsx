@@ -170,9 +170,7 @@ export function TwoFactorForm() {
                     autoComplete="one-time-code"
                     value={code}
                     aria-invalid={Boolean(fieldErrors.code)}
-                    onChange={(event) =>
-                      setCode(event.target.value.trim().toLowerCase())
-                    }
+                    onChange={(event) => setCode(event.target.value.trim())}
                     placeholder="abcd-efgh-ij"
                   />
                 )}
