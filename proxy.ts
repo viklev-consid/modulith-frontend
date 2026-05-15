@@ -4,6 +4,7 @@ import { SESSION_COOKIE_NAME } from "@/lib/constants";
 import { hasUsableSession, unsealSessionCookie } from "@/lib/session";
 
 const publicRoutes = new Set([
+  "/",
   "/login",
   "/register",
   "/forgot-password",
@@ -32,7 +33,7 @@ export async function proxy(request: NextRequest) {
   }
 
   if (hasSession && (pathname === "/login" || pathname === "/register")) {
-    return NextResponse.redirect(new URL("/", request.url));
+    return NextResponse.redirect(new URL("/app", request.url));
   }
 
   if (
