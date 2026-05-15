@@ -41,14 +41,19 @@ src/lib/sse.ts           — SSE client (EventSource + reconnect + query invalid
 components/auth-provider  — React context: useCurrentUser, isAuthenticated, hasPermission
 components/can.tsx       — <Can permission="..."> for permission-gated rendering
 components/ui/           — shadcn/ui components (managed by shadcn CLI)
-middleware.ts            — route protection (auth redirect, onboarding gate)
+proxy.ts                 — Next.js Proxy (formerly middleware): route protection, onboarding gate, and `?next=` param for post-login redirects
+lib/safe-next-path.ts    — validator for the `?next=` post-login redirect target
 ```
 
 ## Conventions
 
 ### File organization
 
-- Pages go in `app/(public)/`, `app/(onboarding)/`, or `app/(app)/` based on auth requirements.
+- Pages go in `app/(marketing)/`, `app/(public)/`, `app/(onboarding)/`, or `app/(app)/app/` based on auth requirements:
+  - `(marketing)/` — public, branded pages served at `/` (landing, future pricing/about).
+  - `(public)/` — unauthenticated auth flows (login, register, password reset, confirm email, goodbye).
+  - `(onboarding)/onboarding/` — post-signup onboarding step.
+  - `(app)/app/` — authenticated application; everything inside renders under the `/app` URL prefix and is gated by the `(app)` group layout (server-side `AuthHydration`).
 - BFF API routes go in `app/api/auth/` or `app/api/proxy/`.
 - Shared components go in `components/`. Page-specific components stay in the page's directory.
 

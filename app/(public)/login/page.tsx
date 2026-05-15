@@ -50,8 +50,8 @@ function LoginShell({ children }: { children?: React.ReactNode }) {
 
 function LoginForm() {
   const { login } = useAuth();
-  const searchParams = useSearchParams();
-  const nextPath = searchParams.get("next");
+  const { get } = useSearchParams();
+  const nextPath = get("next");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const form = useForm({
