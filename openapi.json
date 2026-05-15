@@ -1519,6 +1519,55 @@
         }
       }
     },
+    "/v1/users/login/2fa": {
+      "post": {
+        "tags": ["Modulith.Api"],
+        "summary": "Complete a two-factor login challenge and receive tokens.",
+        "operationId": "LoginTwoFactor",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginTwoFactorRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginTwoFactorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/users/me": {
       "get": {
         "tags": ["Modulith.Api"],
@@ -1559,6 +1608,70 @@
         "responses": {
           "204": {
             "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/v1/users/me/profile": {
+      "patch": {
+        "tags": ["Modulith.Api"],
+        "summary": "Update the authenticated user's profile.",
+        "operationId": "UpdateProfile",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProfileRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateProfileResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
           },
           "401": {
             "description": "Unauthorized",
@@ -2679,6 +2792,202 @@
         ]
       }
     },
+    "/v1/users/me/2fa/totp/setup": {
+      "post": {
+        "tags": ["Modulith.Api"],
+        "summary": "Start authenticator-app two-factor setup for the current user.",
+        "operationId": "SetupTotp",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetupTotpResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/v1/users/me/2fa/totp/confirm": {
+      "post": {
+        "tags": ["Modulith.Api"],
+        "summary": "Confirm authenticator-app two-factor setup and receive recovery codes.",
+        "operationId": "ConfirmTotp",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfirmTotpRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfirmTotpResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/v1/users/me/2fa": {
+      "delete": {
+        "tags": ["Modulith.Api"],
+        "summary": "Disable two-factor authentication for the current user.",
+        "operationId": "DisableTwoFactor",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DisableTwoFactorRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DisableTwoFactorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/v1/users/me/2fa/recovery-codes/regenerate": {
+      "post": {
+        "tags": ["Modulith.Api"],
+        "summary": "Regenerate recovery codes for the current user.",
+        "operationId": "RegenerateRecoveryCodes",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegenerateRecoveryCodesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegenerateRecoveryCodesResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
     "/v1/admin/dead-letters": {
       "get": {
         "tags": ["Admin — Dead Letters"],
@@ -3029,6 +3338,27 @@
           }
         }
       },
+      "ConfirmTotpRequest": {
+        "required": ["code"],
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          }
+        }
+      },
+      "ConfirmTotpResponse": {
+        "required": ["recoveryCodes"],
+        "type": "object",
+        "properties": {
+          "recoveryCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
       "CreateInvitationRequest": {
         "required": ["email"],
         "type": "object",
@@ -3214,6 +3544,27 @@
         },
         "description": "Redacted projection of DeadLetterEnvelopeResults.\n`DatabaseUri` is excluded to avoid leaking internal infrastructure details."
       },
+      "DisableTwoFactorRequest": {
+        "required": ["currentPassword", "code"],
+        "type": "object",
+        "properties": {
+          "currentPassword": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          }
+        }
+      },
+      "DisableTwoFactorResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "default": "Two-factor authentication has been disabled."
+          }
+        }
+      },
       "ExportPersonalDataResponse": {
         "required": ["exports"],
         "type": "object",
@@ -3283,6 +3634,7 @@
           "permissionsVersion",
           "hasPassword",
           "hasCompletedOnboarding",
+          "twoFactorEnabled",
           "linkedProviders"
         ],
         "type": "object",
@@ -3317,6 +3669,9 @@
             "type": "boolean"
           },
           "hasCompletedOnboarding": {
+            "type": "boolean"
+          },
+          "twoFactorEnabled": {
             "type": "boolean"
           },
           "linkedProviders": {
@@ -3421,6 +3776,19 @@
           }
         }
       },
+      "GoogleLoginChallengeResponse": {
+        "required": ["challengeToken", "expiresAt"],
+        "type": "object",
+        "properties": {
+          "challengeToken": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
       "GoogleLoginConfirmRequest": {
         "required": ["token"],
         "type": "object",
@@ -3486,28 +3854,60 @@
         }
       },
       "GoogleLoginResponse": {
-        "required": ["isPending"],
+        "required": ["status"],
         "type": "object",
         "properties": {
-          "isPending": {
-            "type": "boolean"
+          "status": {
+            "type": "string"
           },
+          "session": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/GoogleLoginSessionResponse"
+              }
+            ]
+          },
+          "challenge": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/GoogleLoginChallengeResponse"
+              }
+            ]
+          }
+        }
+      },
+      "GoogleLoginSessionResponse": {
+        "required": [
+          "userId",
+          "accessToken",
+          "accessTokenExpiresAt",
+          "refreshToken",
+          "refreshTokenExpiresAt"
+        ],
+        "type": "object",
+        "properties": {
           "userId": {
-            "type": ["null", "string"],
+            "type": "string",
             "format": "uuid"
           },
           "accessToken": {
-            "type": ["null", "string"]
+            "type": "string"
           },
           "accessTokenExpiresAt": {
-            "type": ["null", "string"],
+            "type": "string",
             "format": "date-time"
           },
           "refreshToken": {
-            "type": ["null", "string"]
+            "type": "string"
           },
           "refreshTokenExpiresAt": {
-            "type": ["null", "string"],
+            "type": "string",
             "format": "date-time"
           }
         }
@@ -3697,6 +4097,19 @@
           }
         }
       },
+      "LoginChallengeResponse": {
+        "required": ["challengeToken", "expiresAt"],
+        "type": "object",
+        "properties": {
+          "challengeToken": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
       "LoginRequest": {
         "required": ["email", "password"],
         "type": "object",
@@ -3710,6 +4123,77 @@
         }
       },
       "LoginResponse": {
+        "required": ["status"],
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "session": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/LoginSessionResponse"
+              }
+            ]
+          },
+          "challenge": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/LoginChallengeResponse"
+              }
+            ]
+          }
+        }
+      },
+      "LoginSessionResponse": {
+        "required": [
+          "userId",
+          "accessToken",
+          "accessTokenExpiresAt",
+          "refreshToken",
+          "refreshTokenExpiresAt"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "accessToken": {
+            "type": "string"
+          },
+          "accessTokenExpiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "refreshToken": {
+            "type": "string"
+          },
+          "refreshTokenExpiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "LoginTwoFactorRequest": {
+        "required": ["challengeToken", "code"],
+        "type": "object",
+        "properties": {
+          "challengeToken": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          }
+        }
+      },
+      "LoginTwoFactorResponse": {
         "required": [
           "userId",
           "accessToken",
@@ -3959,6 +4443,30 @@
           }
         }
       },
+      "RegenerateRecoveryCodesRequest": {
+        "required": ["currentPassword", "code"],
+        "type": "object",
+        "properties": {
+          "currentPassword": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          }
+        }
+      },
+      "RegenerateRecoveryCodesResponse": {
+        "required": ["recoveryCodes"],
+        "type": "object",
+        "properties": {
+          "recoveryCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
       "RegisterRequest": {
         "required": ["email", "password", "displayName"],
         "type": "object",
@@ -4079,6 +4587,18 @@
           }
         }
       },
+      "SetupTotpResponse": {
+        "required": ["secret", "otpAuthUri"],
+        "type": "object",
+        "properties": {
+          "secret": {
+            "type": "string"
+          },
+          "otpAuthUri": {
+            "type": "string"
+          }
+        }
+      },
       "TickerType": {
         "type": "integer"
       },
@@ -4120,6 +4640,31 @@
             "items": {
               "$ref": "#/components/schemas/UpdateMyNotificationPreferenceRequest"
             }
+          }
+        }
+      },
+      "UpdateProfileRequest": {
+        "required": ["displayName"],
+        "type": "object",
+        "properties": {
+          "displayName": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdateProfileResponse": {
+        "required": ["userId", "email", "displayName"],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "email": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
           }
         }
       }

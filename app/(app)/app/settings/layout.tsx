@@ -6,6 +6,7 @@ import {
   KeyRoundIcon,
   LinkIcon,
   MailIcon,
+  ShieldIcon,
   UserIcon,
 } from "lucide-react";
 
@@ -19,6 +20,7 @@ const links = [
   { href: "/app/settings", label: "Profile", icon: UserIcon },
   { href: "/app/settings/password", label: "Password", icon: KeyRoundIcon },
   { href: "/app/settings/email", label: "Email", icon: MailIcon },
+  { href: "/app/settings/security", label: "Security", icon: ShieldIcon },
   { href: "/app/settings/connections", label: "Connections", icon: LinkIcon },
   {
     href: "/app/settings/notifications",

@@ -1,4 +1,4 @@
-import type { LoginResponse } from "@/api/generated";
+import type { LoginTwoFactorResponse } from "@/api/generated";
 import {
   fetchBackend,
   getHasCompletedOnboarding,
@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
   const body = await readJsonBody(request);
-  const response = await fetchBackend("/v1/users/login", {
+  const response = await fetchBackend("/v1/users/login/2fa", {
     method: "POST",
     body: JSON.stringify(body),
     headers: {
@@ -25,27 +25,8 @@ export async function POST(request: Request) {
     return problemResponse(response);
   }
 
-  const payload = (await response.json()) as LoginResponse;
-
-  if (payload.status === "TwoFactorRequired" && payload.challenge) {
-    return Response.json({
-      status: "TwoFactorRequired",
-      challengeToken: payload.challenge.challengeToken,
-      expiresAt: payload.challenge.expiresAt,
-    });
-  }
-
-  if (payload.status !== "Authenticated" || !payload.session) {
-    return Response.json(
-      {
-        title: "Unexpected login response",
-        status: 502,
-      },
-      { status: 502, headers: { "content-type": "application/problem+json" } },
-    );
-  }
-
-  const nextSession = sessionFromTokenResponse(payload.session);
+  const tokens = (await response.json()) as LoginTwoFactorResponse;
+  const nextSession = sessionFromTokenResponse(tokens);
   const session = await getSession();
   Object.assign(session, nextSession, {
     hasCompletedOnboarding: await getHasCompletedOnboarding(

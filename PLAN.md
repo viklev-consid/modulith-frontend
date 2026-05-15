@@ -62,15 +62,25 @@ Every endpoint the frontend consumes. All proxied through the BFF.
 
 ### Auth (BFF-handled)
 
-| Method | Endpoint                        | Notes                                                            |
-| ------ | ------------------------------- | ---------------------------------------------------------------- |
-| POST   | `/v1/users/register`            | Accepts optional `invitationToken` (required in InviteOnly mode) |
-| POST   | `/v1/users/login`               |                                                                  |
-| POST   | `/v1/users/token/refresh`       |                                                                  |
-| POST   | `/v1/users/logout`              |                                                                  |
-| POST   | `/v1/users/logout/all`          |                                                                  |
-| POST   | `/v1/users/auth/google/login`   |                                                                  |
-| POST   | `/v1/users/auth/google/confirm` |                                                                  |
+| Method | Endpoint                        | Notes                                                                                                     |
+| ------ | ------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| POST   | `/v1/users/register`            | Accepts optional `invitationToken` (required in InviteOnly mode)                                          |
+| POST   | `/v1/users/login`               | Dual response: `{ status: "Authenticated", session }` **or** `{ status: "TwoFactorRequired", challenge }` |
+| POST   | `/v1/users/login/2fa`           | Completes a 2FA login challenge with `{ challengeToken, code }` → tokens                                  |
+| POST   | `/v1/users/token/refresh`       |                                                                                                           |
+| POST   | `/v1/users/logout`              |                                                                                                           |
+| POST   | `/v1/users/logout/all`          |                                                                                                           |
+| POST   | `/v1/users/auth/google/login`   | Same dual `status` response shape as `/login` (2FA challenge possible)                                    |
+| POST   | `/v1/users/auth/google/confirm` |                                                                                                           |
+
+### Two-factor authentication
+
+| Method | Endpoint                                     | Notes                                                                              |
+| ------ | -------------------------------------------- | ---------------------------------------------------------------------------------- |
+| POST   | `/v1/users/me/2fa/totp/setup`                | Start authenticator-app enrollment → returns `{ secret, otpAuthUri }` (QR payload) |
+| POST   | `/v1/users/me/2fa/totp/confirm`              | Confirm enrollment with `{ code }` → returns `{ recoveryCodes }` (one-time view)   |
+| DELETE | `/v1/users/me/2fa`                           | Disable 2FA. Body: `{ currentPassword, code }`                                     |
+| POST   | `/v1/users/me/2fa/recovery-codes/regenerate` | Body: `{ currentPassword, code }` → returns fresh `{ recoveryCodes }`              |
 
 ### Password management
 
@@ -90,12 +100,13 @@ Every endpoint the frontend consumes. All proxied through the BFF.
 
 ### Profile and onboarding
 
-| Method | Endpoint                          | Notes                                                 |
-| ------ | --------------------------------- | ----------------------------------------------------- |
-| GET    | `/v1/users/me`                    | Returns profile + permissions array                   |
-| POST   | `/v1/users/me/onboarding`         | Complete onboarding (accept terms, optional password) |
-| POST   | `/v1/users/me/auth/google/link`   |                                                       |
-| DELETE | `/v1/users/me/auth/google/unlink` |                                                       |
+| Method | Endpoint                          | Notes                                                                                                        |
+| ------ | --------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| GET    | `/v1/users/me`                    | Returns profile, permissions, `hasPassword`, `twoFactorEnabled`, `hasCompletedOnboarding`, `linkedProviders` |
+| PATCH  | `/v1/users/me/profile`            | Update profile. Body: `{ displayName }` → returns updated user                                               |
+| POST   | `/v1/users/me/onboarding`         | Complete onboarding (accept terms, optional password)                                                        |
+| POST   | `/v1/users/me/auth/google/link`   |                                                                                                              |
+| DELETE | `/v1/users/me/auth/google/unlink` |                                                                                                              |
 
 ### Notifications
 
@@ -155,6 +166,7 @@ modulith-frontend/
 │   ├── api/                          ← BFF routes
 │   │   ├── auth/
 │   │   │   ├── login/route.ts
+│   │   │   ├── login/two-factor/route.ts   ← 2FA challenge → tokens (Phase 2.5)
 │   │   │   ├── register/route.ts
 │   │   │   ├── logout/route.ts
 │   │   │   ├── refresh/route.ts
@@ -167,6 +179,7 @@ modulith-frontend/
 │   │
 │   ├── (public)/                     ← no auth required
 │   │   ├── login/page.tsx
+│   │   ├── login/two-factor/page.tsx ← 2FA challenge (Phase 2.5)
 │   │   ├── register/page.tsx
 │   │   ├── forgot-password/page.tsx
 │   │   ├── reset-password/page.tsx
@@ -183,6 +196,7 @@ modulith-frontend/
 │   │   │   ├── page.tsx              ← profile
 │   │   │   ├── password/page.tsx
 │   │   │   ├── email/page.tsx
+│   │   │   ├── security/page.tsx     ← 2FA management (Phase 2.5)
 │   │   │   ├── connections/page.tsx
 │   │   │   ├── notifications/page.tsx
 │   │   │   └── data/page.tsx         ← GDPR export + delete
@@ -345,13 +359,14 @@ interface ProblemDetails {
 
 **Route behavior:**
 
-| Route                | Method | Does what                                                                                                                                                                                                     |
-| -------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/auth/login`    | POST   | Receives `{email, password}` from client. Forwards to `POST /v1/users/login` on backend. On success, seals `{accessToken, refreshToken, expiresAt, user}` into cookie. Returns `{id, email, role}` to client. |
-| `/api/auth/register` | POST   | Receives `{email, password, displayName, invitationToken?}`. Forwards to `POST /v1/users/register`. Same cookie behavior as login.                                                                            |
-| `/api/auth/logout`   | POST   | Forwards to `POST /v1/users/logout` with Bearer token. Clears session cookie.                                                                                                                                 |
-| `/api/auth/refresh`  | POST   | Reads cookie, calls `POST /v1/users/token/refresh` with refresh token. Updates cookie with new tokens. Internal — never called by client code directly.                                                       |
-| `/api/auth/session`  | GET    | Reads cookie, returns `{id, email, role}` without hitting backend. Used by auth provider on mount. Returns 401 if no valid session.                                                                           |
+| Route                        | Method | Does what                                                                                                                                                                                                                                                                                                                                                                    |
+| ---------------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/auth/login`            | POST   | Receives `{email, password}` from client. Forwards to `POST /v1/users/login` on backend. **If response `status === "Authenticated"`** → seal cookie, return `{id, email, role}`. **If `status === "TwoFactorRequired"`** → do NOT seal cookie; return `{status: "TwoFactorRequired", challengeToken, expiresAt}` to the client so the UI can navigate to the challenge page. |
+| `/api/auth/login/two-factor` | POST   | Receives `{challengeToken, code}`. Forwards to `POST /v1/users/login/2fa`. On success, seals cookie and returns `{id, email, role}`. Maps validation errors (wrong/expired code) via ProblemDetails.                                                                                                                                                                         |
+| `/api/auth/register`         | POST   | Receives `{email, password, displayName, invitationToken?}`. Forwards to `POST /v1/users/register`. Same cookie behavior as login.                                                                                                                                                                                                                                           |
+| `/api/auth/logout`           | POST   | Forwards to `POST /v1/users/logout` with Bearer token. Clears session cookie.                                                                                                                                                                                                                                                                                                |
+| `/api/auth/refresh`          | POST   | Reads cookie, calls `POST /v1/users/token/refresh` with refresh token. Updates cookie with new tokens. Internal — never called by client code directly.                                                                                                                                                                                                                      |
+| `/api/auth/session`          | GET    | Reads cookie, returns `{id, email, role}` without hitting backend. Used by auth provider on mount. Returns 401 if no valid session.                                                                                                                                                                                                                                          |
 
 **All auth routes must:**
 
@@ -709,6 +724,86 @@ Multi-step wizard with a stepper indicator (Terms → Password → Complete):
 
 ---
 
+## Phase 2.5 — Two-factor authentication
+
+Adds an optional second factor (TOTP authenticator app) plus recovery codes. Lives between auth lifecycle (Phase 2) and self-service settings (Phase 3) because the **login challenge** must work before the **management UI** is reachable for a 2FA-enabled user.
+
+### 2.5.1 Login challenge handling (BFF + client)
+
+**Goal:** Email/password and Google login can both finish in a 2FA challenge state. The client must navigate to a challenge page without ever sealing a session cookie for the half-authenticated user.
+
+**Backend response shape (from updated spec):**
+
+```typescript
+type LoginResponse =
+  | { status: "Authenticated"; session: TokenSet }
+  | {
+      status: "TwoFactorRequired";
+      challenge: { challengeToken: string; expiresAt: string };
+    };
+```
+
+**Files to modify:**
+
+- `app/api/auth/login/route.ts` — branch on `status`; only seal cookie for `Authenticated`; for `TwoFactorRequired` return `{status, challengeToken, expiresAt}` (no cookie, no user info).
+- `app/api/auth/google/login/route.ts` — apply the same branching to the 200 OK path. (The 202 "pending email confirmation" branch is unchanged.)
+- `components/auth-provider.tsx` — `login()` and `googleLogin()` resolve a discriminated union: on `TwoFactorRequired`, push to `/login/two-factor?challenge=…` (challenge token stored in `sessionStorage`, not URL, to avoid leaks in browser history/logs); on success, behave as today.
+
+**Files to create:**
+
+- `app/api/auth/login/two-factor/route.ts` — POST `{challengeToken, code}` → forwards to `/v1/users/login/2fa` → seals cookie → returns user.
+- `app/(public)/login/two-factor/page.tsx` — 6-digit code input (autocomplete `one-time-code`, `inputmode="numeric"`), "Use a recovery code instead" link that swaps the input for an 8–10 char code field. Submits to the new BFF route. Maps the standard 401 ProblemDetails ("invalid code") to the field error. Shows "this challenge expires at HH:MM" using `challenge.expiresAt`.
+
+**Edge cases:**
+
+- Expired or unknown `challengeToken` → toast + redirect to `/login`.
+- User navigates directly to `/login/two-factor` with no challenge in `sessionStorage` → redirect to `/login`.
+- Recovery code submission uses the same `code` field — backend disambiguates by format/length.
+
+### 2.5.2 Security settings panel
+
+**Files to create:**
+
+- `app/(app)/settings/security/page.tsx` — entry in the settings sidebar (add link in `settings/layout.tsx`).
+
+**States:**
+
+State is selected by `useCurrentUser().twoFactorEnabled`:
+
+| State              | Reads / shows                                                                                                                                                                                                                                                                                                       |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Disabled**       | `twoFactorEnabled === false`. "Two-factor authentication is off" + "Set up authenticator app" button → opens setup wizard.                                                                                                                                                                                          |
+| **Setup wizard**   | Step 1: call `POST /v1/users/me/2fa/totp/setup`, render QR code from `otpAuthUri` (use `qrcode` lib) + show `secret` as a copyable code with "Enter this in your authenticator app if you can't scan". Step 2: confirm 6-digit code input → `POST /v1/users/me/2fa/totp/confirm` → renders recovery codes (Step 3). |
+| **Recovery codes** | Read-only list of one-time codes, "Download as text", "Copy all" actions, "I saved my codes" button to dismiss. **The backend never returns these again** — make this clear in copy.                                                                                                                                |
+| **Enabled**        | `twoFactorEnabled === true`. "Two-factor authentication is on" + buttons: "Regenerate recovery codes" (opens password+code dialog → calls `/recovery-codes/regenerate` → shows new codes once), "Turn off two-factor" (opens password+code dialog → `DELETE /v1/users/me/2fa`).                                     |
+
+**Reading 2FA state:** `GET /v1/users/me` returns `twoFactorEnabled: boolean` on `GetCurrentUserResponse`. The Security panel reads this from the cached `useCurrentUser` query and re-renders on the standard `currentUserQueryKey` invalidation after setup / disable.
+
+### 2.5.3 Recovery codes UX
+
+- Codes are shown exactly **twice**: once after `confirm` (initial setup), once after `recovery-codes/regenerate`. Both flows must offer download + copy + a confirmation checkbox before letting the user navigate away.
+- Storage: never persist codes in React Query cache, never store in `localStorage`. They live in component state only.
+- A11y: render in a `<pre>` or list with monospace font and `aria-live="polite"` so screen readers announce them.
+
+### 2.5.4 Codegen + ProblemDetails
+
+- After `pnpm api:sync` + `pnpm api:generate`, the new types appear under `api/generated/` (`LoginTwoFactorRequest`, `ConfirmTotpRequest`, `SetupTotpResponse`, etc.) plus matching zod schemas — no hand-edits.
+- ProblemDetails mapper (`src/api/problems.ts`) needs no changes. The new endpoints return the same 400 (`HttpValidationProblemDetails`) and 401 (`ProblemDetails`) shapes as everything else. Specific message handling (e.g., "code is invalid", "recovery code already used") is just `detail` text shown via existing toast / field-error paths.
+
+### Phase 2.5 exit criteria
+
+- [ ] Email/password login with 2FA enabled → user lands on `/login/two-factor`, enters code, completes login.
+- [ ] Google login with 2FA enabled → same challenge flow.
+- [ ] Recovery code instead of TOTP code works for sign-in.
+- [ ] Expired or missing challenge token redirects cleanly to `/login`.
+- [ ] Settings → Security shows correct state (depends on resolved backend gap).
+- [ ] Setup wizard: QR code renders from `otpAuthUri`, fallback secret is copyable, confirm step accepts code.
+- [ ] Recovery codes display once after setup and after regenerate, with download/copy, gated by "I saved my codes" checkbox.
+- [ ] Disable flow requires current password + valid TOTP/recovery code.
+- [ ] React Query cache is invalidated for `currentUserQueryKey` after setup/disable so the panel reflects the new state.
+
+---
+
 ## Phase 3 — Profile + Account Management
 
 Self-service account features. Form-heavy — exercises the ProblemDetails mapper and two-phase flows.
@@ -726,6 +821,7 @@ Self-service account features. Form-heavy — exercises the ProblemDetails mappe
 - Profile (`/settings`)
 - Password (`/settings/password`)
 - Email (`/settings/email`)
+- Security (`/settings/security`) — two-factor authentication (Phase 2.5)
 - Connections (`/settings/connections`)
 - Notifications (`/settings/notifications`)
 - Your data (`/settings/data`)
@@ -743,7 +839,7 @@ Self-service account features. Form-heavy — exercises the ProblemDetails mappe
 - Role badge (read-only)
 - Save button for display name changes
 
-**Form:** TanStack Form, submit via `PUT /api/proxy/v1/users/me` (or equivalent profile update endpoint).
+**Form:** TanStack Form, submit `{ displayName }` via `PATCH /api/proxy/v1/users/me/profile`. Returns `{ userId, email, displayName }`. On success, invalidate `currentUserQueryKey` so the nav reflects the new name.
 
 ### 3.3 Change password page
 

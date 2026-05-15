@@ -814,6 +814,33 @@
     In <strong>InviteOnly</strong> mode, the Google OAuth confirm step must also supply the invitation token. The confirm page checks for <code>?token=…</code> in the URL and includes it in the POST body.
   </div>
 
+  <h3>Two-Factor Authentication <span class="badge badge-add">two-factor</span></h3>
+  <div class="callout">
+    Login responses now carry a discriminator. <code>{ status: "Authenticated", session }</code> means the cookie can be sealed immediately. <code>{ status: "TwoFactorRequired", challenge: { challengeToken, expiresAt } }</code> means the user must complete a second step at <code>POST /v1/users/login/2fa</code>. The BFF must <strong>not</strong> seal a cookie until the challenge is completed — the half-authenticated user has no session. The same shape applies to <code>/v1/users/auth/google/login</code>.
+  </div>
+  <div class="flow">
+    <div class="flow-step"><strong>1. Sign in</strong>POST /v1/users/login<br>(email + password)</div>
+    <div class="flow-step"><strong>2. Challenge</strong>Backend returns<br>status: TwoFactorRequired<br>+ challengeToken</div>
+    <div class="flow-step"><strong>3. Code page</strong>UI navigates to<br>/login/two-factor<br>(token in sessionStorage)</div>
+    <div class="flow-step"><strong>4. Verify</strong>POST /v1/users/login/2fa<br>{ challengeToken, code }<br>→ tokens</div>
+    <div class="flow-step"><strong>5. Cookie</strong>BFF seals session,<br>UI redirects to app<br>or /onboarding</div>
+  </div>
+  <div class="callout">
+    The same <code>code</code> field accepts either a 6-digit TOTP code or a one-time recovery code — the backend disambiguates by format. The UI offers a "Use a recovery code instead" link to set expectations for the user.
+  </div>
+
+  <h3>2FA Setup &amp; Management <span class="badge badge-add">two-factor</span></h3>
+  <div class="flow">
+    <div class="flow-step"><strong>Setup</strong>POST /me/2fa/totp/setup<br>→ secret + otpAuthUri</div>
+    <div class="flow-step"><strong>Scan</strong>UI renders QR from<br>otpAuthUri<br>(secret as fallback)</div>
+    <div class="flow-step"><strong>Confirm</strong>POST /me/2fa/totp/confirm<br>{ code } → recoveryCodes</div>
+    <div class="flow-step"><strong>Save codes</strong>Show once, gated<br>by "I saved my codes"<br>checkbox</div>
+    <div class="flow-step"><strong>Enabled</strong>Disable / regenerate<br>both require password<br>+ a current code</div>
+  </div>
+  <div class="callout">
+    The Security settings panel reads <code>twoFactorEnabled</code> directly from <code>GET /v1/users/me</code> (now part of <code>GetCurrentUserResponse</code>). After setup, disable, or regenerate, invalidate <code>currentUserQueryKey</code> so the panel re-renders with the new state.
+  </div>
+
   <h3>Password Reset</h3>
   <div class="flow">
     <div class="flow-step"><strong>Request</strong>User enters email<br>on /forgot-password</div>
@@ -1158,6 +1185,187 @@
             <div class="wf-input">••••••••••••</div>
             <div class="wf-hint">Minimum 10 characters</div>
             <div class="wf-btn primary" style="width: 100%; margin-top: 0.2rem;">Reset password</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <h3><span class="badge badge-phase">Phase 2.5</span> Two-Factor Authentication <span class="badge badge-add">two-factor</span></h3>
+  <div class="mockup-grid">
+
+    <!-- 2FA CHALLENGE -->
+    <div class="mockup">
+      <div class="mockup-label">2FA Challenge <span class="route">/login/two-factor</span></div>
+      <div class="mockup-body">
+        <div class="wf-center" style="gap: 0.6rem; padding: 0.5rem 1rem;">
+          <div style="font-size: 0.85rem; font-weight: 700;">Enter verification code</div>
+          <div class="wf-hint" style="text-align: center;">Open your authenticator app and enter the 6-digit code for Modulith.</div>
+          <div style="width: 100%; display: flex; flex-direction: column; gap: 0.4rem;">
+            <div class="wf-label">Code</div>
+            <div class="wf-input" style="letter-spacing: 0.3em; text-align: center;">1 2 3 &nbsp; 4 5 6</div>
+            <div class="wf-hint">Challenge expires in 4:32</div>
+            <div class="wf-btn primary" style="width: 100%; margin-top: 0.2rem;">Verify and sign in</div>
+            <div class="wf-link" style="text-align: center; margin-top: 0.3rem;">Use a recovery code instead</div>
+            <div class="wf-link" style="text-align: center;">Back to sign in</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2FA RECOVERY CODE -->
+    <div class="mockup">
+      <div class="mockup-label">2FA Recovery Code <span class="route">/login/two-factor</span></div>
+      <div class="mockup-body">
+        <div class="wf-center" style="gap: 0.6rem; padding: 0.5rem 1rem;">
+          <div style="font-size: 0.85rem; font-weight: 700;">Use a recovery code</div>
+          <div class="wf-hint" style="text-align: center;">Enter one of the codes you saved when you set up two-factor authentication.</div>
+          <div style="width: 100%; display: flex; flex-direction: column; gap: 0.4rem;">
+            <div class="wf-label">Recovery code</div>
+            <div class="wf-input" style="font-family: 'SF Mono', monospace;">a1b2-c3d4-e5</div>
+            <div class="wf-hint">Each code can only be used once.</div>
+            <div class="wf-btn primary" style="width: 100%; margin-top: 0.2rem;">Sign in</div>
+            <div class="wf-link" style="text-align: center; margin-top: 0.3rem;">Use an authenticator code instead</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECURITY: DISABLED -->
+    <div class="mockup">
+      <div class="mockup-label">Security — 2FA Off <span class="route">/settings/security</span></div>
+      <div class="mockup-body">
+        <div style="padding: 0.5rem 0.75rem; display: flex; flex-direction: column; gap: 0.5rem;">
+          <div style="font-size: 0.8rem; font-weight: 600;">Two-factor authentication</div>
+          <div class="wf-card">
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.3rem;">
+              <div class="wf-icon warn" style="width: 20px; height: 20px; font-size: 0.65rem;">!</div>
+              <div style="font-size: 0.7rem; font-weight: 600;">Two-factor authentication is off</div>
+            </div>
+            <div class="wf-hint">Add an authenticator app for an extra layer of security on sign-in.</div>
+            <div class="wf-btn primary" style="margin-top: 0.4rem;">Set up authenticator app</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2FA SETUP: QR -->
+    <div class="mockup">
+      <div class="mockup-label">2FA Setup — Scan <span class="route">/settings/security (step 1)</span></div>
+      <div class="mockup-body">
+        <div style="padding: 0.5rem 0.75rem; display: flex; flex-direction: column; gap: 0.45rem;">
+          <div class="wf-stepper">
+            <div class="wf-step-dot active">Scan</div>
+            <div class="wf-step-dot">Confirm</div>
+            <div class="wf-step-dot">Save codes</div>
+          </div>
+          <div style="font-size: 0.75rem; font-weight: 600;">Scan with your authenticator</div>
+          <div class="wf-hint">Use Google Authenticator, 1Password, Authy, or any TOTP app.</div>
+          <div class="wf-card" style="display: flex; align-items: center; gap: 0.6rem;">
+            <div style="width: 64px; height: 64px; background: repeating-conic-gradient(#111 0 25%, #fff 0 50%) 50%/8px 8px; border-radius: 4px; flex-shrink: 0;"></div>
+            <div style="display: flex; flex-direction: column; gap: 0.2rem; flex: 1;">
+              <div class="wf-hint">Can't scan? Enter this code manually:</div>
+              <div class="wf-input" style="font-family: 'SF Mono', monospace; font-size: 0.6rem; padding: 0.25rem 0.4rem;">JBSWY3DPEHPK3PXP</div>
+              <div class="wf-link" style="font-size: 0.6rem;">Copy</div>
+            </div>
+          </div>
+          <div class="wf-btn primary" style="margin-top: 0.2rem;">Continue</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2FA SETUP: CONFIRM -->
+    <div class="mockup">
+      <div class="mockup-label">2FA Setup — Confirm <span class="route">/settings/security (step 2)</span></div>
+      <div class="mockup-body">
+        <div style="padding: 0.5rem 0.75rem; display: flex; flex-direction: column; gap: 0.45rem;">
+          <div class="wf-stepper">
+            <div class="wf-step-dot">Scan</div>
+            <div class="wf-step-dot active">Confirm</div>
+            <div class="wf-step-dot">Save codes</div>
+          </div>
+          <div style="font-size: 0.75rem; font-weight: 600;">Confirm with a code</div>
+          <div class="wf-hint">Enter the 6-digit code shown in your authenticator app right now.</div>
+          <div class="wf-label">Code from app</div>
+          <div class="wf-input" style="letter-spacing: 0.3em; text-align: center;">9 1 4 &nbsp; 0 2 7</div>
+          <div class="wf-btn primary" style="margin-top: 0.2rem;">Enable two-factor</div>
+          <div class="wf-link" style="text-align: center; font-size: 0.65rem;">Back</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2FA SETUP: RECOVERY CODES -->
+    <div class="mockup">
+      <div class="mockup-label">2FA Recovery Codes <span class="route">/settings/security (step 3)</span></div>
+      <div class="mockup-body">
+        <div style="padding: 0.5rem 0.75rem; display: flex; flex-direction: column; gap: 0.4rem;">
+          <div class="wf-stepper">
+            <div class="wf-step-dot">Scan</div>
+            <div class="wf-step-dot">Confirm</div>
+            <div class="wf-step-dot active">Save codes</div>
+          </div>
+          <div style="font-size: 0.75rem; font-weight: 600;">Save your recovery codes</div>
+          <div class="wf-hint">Each code works once. Store them somewhere safe — they will not be shown again.</div>
+          <div class="wf-card" style="font-family: 'SF Mono', monospace; font-size: 0.6rem; line-height: 1.5;">
+            a1b2-c3d4-e5<br>f6g7-h8i9-j0<br>k1l2-m3n4-o5<br>p6q7-r8s9-t0<br>u1v2-w3x4-y5<br>z6a7-b8c9-d0<br>e1f2-g3h4-i5<br>j6k7-l8m9-n0
+          </div>
+          <div style="display: flex; gap: 0.4rem;">
+            <div class="wf-btn" style="flex: 1;">Copy all</div>
+            <div class="wf-btn" style="flex: 1;">Download .txt</div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.3rem; margin-top: 0.2rem;">
+            <div style="width: 12px; height: 12px; border: 1px solid var(--text); border-radius: 2px;"></div>
+            <div class="wf-hint" style="font-size: 0.6rem;">I have saved my recovery codes</div>
+          </div>
+          <div class="wf-btn primary" style="margin-top: 0.2rem;">Done</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECURITY: ENABLED -->
+    <div class="mockup">
+      <div class="mockup-label">Security — 2FA On <span class="route">/settings/security</span></div>
+      <div class="mockup-body">
+        <div style="padding: 0.5rem 0.75rem; display: flex; flex-direction: column; gap: 0.5rem;">
+          <div style="font-size: 0.8rem; font-weight: 600;">Two-factor authentication</div>
+          <div class="wf-card">
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.3rem;">
+              <div class="wf-icon shield" style="width: 20px; height: 20px; font-size: 0.65rem;">✓</div>
+              <div style="font-size: 0.7rem; font-weight: 600;">Two-factor authentication is on</div>
+            </div>
+            <div class="wf-hint">You'll be asked for a code from your authenticator app at every sign-in.</div>
+          </div>
+          <div class="wf-card">
+            <div style="font-size: 0.65rem; font-weight: 600; margin-bottom: 0.25rem;">Recovery codes</div>
+            <div class="wf-hint">Lost access to your codes? Generate a new set. Old codes stop working.</div>
+            <div class="wf-btn" style="margin-top: 0.3rem;">Regenerate recovery codes</div>
+          </div>
+          <div class="wf-card" style="border-color: #fecaca; background: #fef2f2;">
+            <div style="font-size: 0.65rem; font-weight: 600; margin-bottom: 0.25rem; color: #b91c1c;">Turn off two-factor</div>
+            <div class="wf-hint">Removes the second step from sign-in. You can always turn it back on later.</div>
+            <div class="wf-btn" style="margin-top: 0.3rem; color: #b91c1c; border-color: #fecaca;">Turn off two-factor</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DISABLE / REGENERATE DIALOG -->
+    <div class="mockup">
+      <div class="mockup-label">Disable 2FA — Confirm <span class="route">dialog</span></div>
+      <div class="mockup-body">
+        <div class="wf-center" style="gap: 0.5rem; padding: 0.75rem 1rem;">
+          <div style="font-size: 0.8rem; font-weight: 700;">Turn off two-factor authentication?</div>
+          <div class="wf-hint" style="text-align: center;">Enter your password and a current code to confirm.</div>
+          <div style="width: 100%; display: flex; flex-direction: column; gap: 0.4rem;">
+            <div class="wf-label">Current password</div>
+            <div class="wf-input">••••••••••</div>
+            <div class="wf-label">Code from app (or recovery code)</div>
+            <div class="wf-input" style="letter-spacing: 0.3em; text-align: center;">9 1 4 &nbsp; 0 2 7</div>
+            <div style="display: flex; gap: 0.4rem; margin-top: 0.3rem;">
+              <div class="wf-btn" style="flex: 1;">Cancel</div>
+              <div class="wf-btn primary" style="flex: 1;">Turn off</div>
+            </div>
           </div>
         </div>
       </div>
@@ -1956,12 +2164,21 @@
   <h3>Auth (BFF-handled, tokens managed server-side)</h3>
   <div class="endpoint-group">
     <div class="endpoint"><span class="method method-post">POST</span> /v1/users/register <span class="wf-hint" style="margin-left: 0.5rem;">Accepts optional <code>invitationToken</code> in body (required in InviteOnly mode).</span></div>
-    <div class="endpoint"><span class="method method-post">POST</span> /v1/users/login</div>
+    <div class="endpoint"><span class="method method-post">POST</span> /v1/users/login <span class="wf-hint" style="margin-left: 0.5rem;">Returns <code>{ status: "Authenticated", session }</code> or <code>{ status: "TwoFactorRequired", challenge }</code>.</span></div>
+    <div class="endpoint"><span class="method method-post">POST</span> /v1/users/login/2fa <span class="wf-hint" style="margin-left: 0.5rem;">Complete 2FA challenge with <code>{ challengeToken, code }</code> → tokens. <span class="badge badge-add">two-factor</span></span></div>
     <div class="endpoint"><span class="method method-post">POST</span> /v1/users/token/refresh</div>
     <div class="endpoint"><span class="method method-post">POST</span> /v1/users/logout</div>
     <div class="endpoint"><span class="method method-post">POST</span> /v1/users/logout/all</div>
-    <div class="endpoint"><span class="method method-post">POST</span> /v1/users/auth/google/login</div>
+    <div class="endpoint"><span class="method method-post">POST</span> /v1/users/auth/google/login <span class="wf-hint" style="margin-left: 0.5rem;">Same dual <code>status</code> shape as <code>/login</code> (200) or pending-confirmation (202).</span></div>
     <div class="endpoint"><span class="method method-post">POST</span> /v1/users/auth/google/confirm</div>
+  </div>
+
+  <h3>Two-Factor Authentication <span class="badge badge-add">two-factor</span></h3>
+  <div class="endpoint-group">
+    <div class="endpoint"><span class="method method-post">POST</span> /v1/users/me/2fa/totp/setup <span class="wf-hint" style="margin-left: 0.5rem;">Start authenticator-app enrollment → <code>{ secret, otpAuthUri }</code>.</span></div>
+    <div class="endpoint"><span class="method method-post">POST</span> /v1/users/me/2fa/totp/confirm <span class="wf-hint" style="margin-left: 0.5rem;">Confirm enrollment with <code>{ code }</code> → <code>{ recoveryCodes }</code> (shown once).</span></div>
+    <div class="endpoint"><span class="method method-delete">DEL</span> /v1/users/me/2fa <span class="wf-hint" style="margin-left: 0.5rem;">Disable 2FA. Body: <code>{ currentPassword, code }</code>.</span></div>
+    <div class="endpoint"><span class="method method-post">POST</span> /v1/users/me/2fa/recovery-codes/regenerate <span class="wf-hint" style="margin-left: 0.5rem;">Body: <code>{ currentPassword, code }</code> → fresh <code>{ recoveryCodes }</code>.</span></div>
   </div>
 
   <h3>Password Management</h3>
@@ -1980,7 +2197,8 @@
 
   <h3>Profile &amp; Onboarding</h3>
   <div class="endpoint-group">
-    <div class="endpoint"><span class="method method-get">GET</span> /v1/users/me</div>
+    <div class="endpoint"><span class="method method-get">GET</span> /v1/users/me <span class="wf-hint" style="margin-left: 0.5rem;">Returns profile, permissions, <code>hasPassword</code>, <code>twoFactorEnabled</code>, <code>hasCompletedOnboarding</code>, <code>linkedProviders</code>.</span></div>
+    <div class="endpoint"><span class="method method-put">PATCH</span> /v1/users/me/profile <span class="wf-hint" style="margin-left: 0.5rem;">Update profile. Body: <code>{ displayName }</code>.</span></div>
     <div class="endpoint"><span class="method method-post">POST</span> /v1/users/me/onboarding</div>
     <div class="endpoint"><span class="method method-post">POST</span> /v1/users/me/auth/google/link</div>
     <div class="endpoint"><span class="method method-delete">DEL</span> /v1/users/me/auth/google/unlink</div>
@@ -2064,6 +2282,22 @@
       <li>Google OAuth BFF routes</li>
     </ul>
     <p><strong>Exit criteria:</strong> New users complete onboarding before seeing the app. Google sign-in works end to end. Password reset via email works.</p>
+  </div>
+
+  <div class="phase phase-2">
+    <h3><span class="badge badge-phase">Phase 2.5</span> Two-Factor Authentication <span class="badge badge-add">two-factor</span></h3>
+    <p>Optional second factor (TOTP) + recovery codes. Lives between auth lifecycle and self-service settings because the login-challenge branch must work before any 2FA-enabled user can reach the management UI.</p>
+    <ul>
+      <li>Update <code>/api/auth/login</code> and <code>/api/auth/google/login</code> BFF routes to branch on the new <code>{ status, session?, challenge? }</code> response shape. Never seal a cookie for <code>TwoFactorRequired</code>.</li>
+      <li>New BFF route <code>/api/auth/login/two-factor</code> → forwards to <code>/v1/users/login/2fa</code>, seals cookie on success.</li>
+      <li>New page <code>/login/two-factor</code> — 6-digit code input with <code>autocomplete="one-time-code"</code>, "Use a recovery code instead" mode, countdown to challenge expiry.</li>
+      <li>Auth provider <code>login()</code> / <code>googleLogin()</code> return a discriminated union; <code>TwoFactorRequired</code> stores the challenge token in <code>sessionStorage</code> and navigates to the challenge page.</li>
+      <li>New settings page <code>/settings/security</code> — three-state panel (off / setup wizard / on) with QR code render from <code>otpAuthUri</code>, copyable fallback secret, recovery code display, regenerate + disable flows.</li>
+      <li>Recovery codes: shown exactly twice (after setup, after regenerate), with copy + download + "I saved my codes" confirmation gate. Never stored client-side beyond the displaying component.</li>
+      <li>Codegen pickup of new types (<code>LoginTwoFactorRequest/Response</code>, <code>SetupTotpResponse</code>, <code>ConfirmTotp*</code>, <code>DisableTwoFactor*</code>, <code>RegenerateRecoveryCodes*</code>) via <code>pnpm api:generate</code>.</li>
+    </ul>
+    <p>The Security panel reads <code>twoFactorEnabled</code> from <code>GET /v1/users/me</code> (cached in <code>useCurrentUser</code>); setup / disable / regenerate invalidate <code>currentUserQueryKey</code> to re-render.</p>
+    <p><strong>Exit criteria:</strong> Email/password and Google sign-in both complete through the challenge page when 2FA is enabled. Recovery codes work as an alternate sign-in input. Setup wizard, regenerate, and disable flows are all functional. Expired/missing challenge tokens fall back to <code>/login</code> cleanly.</p>
   </div>
 
   <div class="phase phase-3">
@@ -2163,6 +2397,7 @@
 │   │   ├── <span class="purple">api/</span>                    <span class="comment">← BFF routes</span>
 │   │   │   ├── auth/
 │   │   │   │   ├── login/route.ts
+│   │   │   │   ├── login/two-factor/route.ts   <span class="comment">← 2FA challenge → tokens (Phase 2.5)</span>
 │   │   │   │   ├── register/route.ts
 │   │   │   │   ├── logout/route.ts
 │   │   │   │   ├── session/route.ts
@@ -2174,6 +2409,7 @@
 │   │   │
 │   │   ├── <span class="green">(public)/</span>               <span class="comment">← no auth required (route group)</span>
 │   │   │   ├── login/page.tsx
+│   │   │   ├── login/two-factor/page.tsx <span class="comment">← 2FA challenge (Phase 2.5)</span>
 │   │   │   ├── register/page.tsx
 │   │   │   ├── forgot-password/page.tsx
 │   │   │   ├── reset-password/page.tsx
@@ -2189,6 +2425,7 @@
 │   │   │   │   ├── page.tsx        <span class="comment">← profile settings</span>
 │   │   │   │   ├── password/page.tsx
 │   │   │   │   ├── email/page.tsx
+│   │   │   │   ├── security/page.tsx  <span class="comment">← 2FA management (Phase 2.5)</span>
 │   │   │   │   ├── connections/page.tsx
 │   │   │   │   ├── notifications/page.tsx <span class="comment">← notification preferences</span>
 │   │   │   │   └── data/page.tsx   <span class="comment">← GDPR export + delete</span>

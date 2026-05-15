@@ -1,3 +1,4 @@
+import type { GoogleLoginResponse } from "@/api/generated";
 import {
   fetchBackend,
   getHasCompletedOnboarding,
@@ -5,25 +6,10 @@ import {
   publicUser,
   readJsonBody,
   sessionFromTokenResponse,
-  type TokenResponse,
 } from "@/lib/backend";
 import { getSession } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
-
-type GoogleLoginResponse = Partial<TokenResponse> & {
-  isPending?: boolean;
-  status?: string;
-  pendingToken?: string;
-  email?: string;
-  displayName?: string;
-};
-
-function hasTokenResponse(body: GoogleLoginResponse): body is TokenResponse {
-  return Boolean(
-    body.accessToken && body.refreshToken && body.accessTokenExpiresAt,
-  );
-}
 
 export async function POST(request: Request) {
   const body = await readJsonBody(request);
@@ -39,24 +25,32 @@ export async function POST(request: Request) {
     return problemResponse(response);
   }
 
-  const googleResponse = (await response.json()) as GoogleLoginResponse;
-
-  if (response.status === 202 || googleResponse.isPending) {
-    return Response.json(googleResponse, { status: 202 });
+  if (response.status === 202) {
+    const pending = await response.json();
+    return Response.json(pending, { status: 202 });
   }
 
-  if (!hasTokenResponse(googleResponse)) {
+  const payload = (await response.json()) as GoogleLoginResponse;
+
+  if (payload.status === "TwoFactorRequired" && payload.challenge) {
+    return Response.json({
+      status: "TwoFactorRequired",
+      challengeToken: payload.challenge.challengeToken,
+      expiresAt: payload.challenge.expiresAt,
+    });
+  }
+
+  if (payload.status !== "Authenticated" || !payload.session) {
     return Response.json(
       {
-        title: "Google sign-in pending",
-        status: 202,
-        detail: "Check your email to confirm this Google sign-in.",
+        title: "Unexpected Google sign-in response",
+        status: 502,
       },
-      { status: 202 },
+      { status: 502, headers: { "content-type": "application/problem+json" } },
     );
   }
 
-  const nextSession = sessionFromTokenResponse(googleResponse);
+  const nextSession = sessionFromTokenResponse(payload.session);
   const session = await getSession();
   Object.assign(session, nextSession, {
     hasCompletedOnboarding: await getHasCompletedOnboarding(
@@ -65,5 +59,8 @@ export async function POST(request: Request) {
   });
   await session.save();
 
-  return Response.json(publicUser(nextSession.user));
+  return Response.json({
+    status: "Authenticated",
+    user: publicUser(nextSession.user),
+  });
 }

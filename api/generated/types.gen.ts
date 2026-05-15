@@ -44,6 +44,14 @@ export type ConfirmEmailChangeResponse = {
   message?: string;
 };
 
+export type ConfirmTotpRequest = {
+  code: string;
+};
+
+export type ConfirmTotpResponse = {
+  recoveryCodes: Array<string>;
+};
+
 export type CreateInvitationRequest = {
   email: string;
 };
@@ -112,6 +120,15 @@ export type DeadLetterSummaryResultsDto = {
   envelopes: Array<DeadLetterSummaryDto>;
 };
 
+export type DisableTwoFactorRequest = {
+  currentPassword: string;
+  code: string;
+};
+
+export type DisableTwoFactorResponse = {
+  message?: string;
+};
+
 export type ExportPersonalDataResponse = {
   exports: Array<PersonalDataExport>;
 };
@@ -144,6 +161,7 @@ export type GetCurrentUserResponse = {
   permissionsVersion: string;
   hasPassword: boolean;
   hasCompletedOnboarding: boolean;
+  twoFactorEnabled: boolean;
   linkedProviders: Array<string>;
 };
 
@@ -175,6 +193,11 @@ export type GetUserByIdResponse = {
   linkedProviders: Array<string>;
 };
 
+export type GoogleLoginChallengeResponse = {
+  challengeToken: string;
+  expiresAt: string;
+};
+
 export type GoogleLoginConfirmRequest = {
   token: string;
   invitationToken?: null | string;
@@ -198,12 +221,17 @@ export type GoogleLoginRequest = {
 };
 
 export type GoogleLoginResponse = {
-  isPending: boolean;
-  userId?: null | string;
-  accessToken?: null | string;
-  accessTokenExpiresAt?: null | string;
-  refreshToken?: null | string;
-  refreshTokenExpiresAt?: null | string;
+  status: string;
+  session?: null | GoogleLoginSessionResponse;
+  challenge?: null | GoogleLoginChallengeResponse;
+};
+
+export type GoogleLoginSessionResponse = {
+  userId: string;
+  accessToken: string;
+  accessTokenExpiresAt: string;
+  refreshToken: string;
+  refreshTokenExpiresAt: string;
 };
 
 export type HttpValidationProblemDetails = {
@@ -262,12 +290,36 @@ export type ListUsersUserDto = {
   createdAt: string;
 };
 
+export type LoginChallengeResponse = {
+  challengeToken: string;
+  expiresAt: string;
+};
+
 export type LoginRequest = {
   email: string;
   password: string;
 };
 
 export type LoginResponse = {
+  status: string;
+  session?: null | LoginSessionResponse;
+  challenge?: null | LoginChallengeResponse;
+};
+
+export type LoginSessionResponse = {
+  userId: string;
+  accessToken: string;
+  accessTokenExpiresAt: string;
+  refreshToken: string;
+  refreshTokenExpiresAt: string;
+};
+
+export type LoginTwoFactorRequest = {
+  challengeToken: string;
+  code: string;
+};
+
+export type LoginTwoFactorResponse = {
   userId: string;
   accessToken: string;
   accessTokenExpiresAt: string;
@@ -355,6 +407,15 @@ export type RefreshTokenResponse = {
   refreshTokenExpiresAt: string;
 };
 
+export type RegenerateRecoveryCodesRequest = {
+  currentPassword: string;
+  code: string;
+};
+
+export type RegenerateRecoveryCodesResponse = {
+  recoveryCodes: Array<string>;
+};
+
 export type RegisterRequest = {
   email: string;
   password: string;
@@ -402,6 +463,11 @@ export type SetInitialPasswordRequest = {
   googleIdToken: string;
 };
 
+export type SetupTotpResponse = {
+  secret: string;
+  otpAuthUri: string;
+};
+
 export type TickerType = number;
 
 export type TimeRange = {
@@ -417,6 +483,16 @@ export type UpdateMyNotificationPreferenceRequest = {
 
 export type UpdateMyNotificationPreferencesRequest = {
   preferences: Array<UpdateMyNotificationPreferenceRequest>;
+};
+
+export type UpdateProfileRequest = {
+  displayName: string;
+};
+
+export type UpdateProfileResponse = {
+  userId: string;
+  email: string;
+  displayName: string;
 };
 
 export type GetAuthInfoData = {
@@ -1358,6 +1434,37 @@ export type LoginResponses = {
 
 export type LoginResponse2 = LoginResponses[keyof LoginResponses];
 
+export type LoginTwoFactorData = {
+  body: LoginTwoFactorRequest;
+  path?: never;
+  query?: never;
+  url: "/v1/users/login/2fa";
+};
+
+export type LoginTwoFactorErrors = {
+  /**
+   * Bad Request
+   */
+  400: HttpValidationProblemDetails;
+  /**
+   * Unauthorized
+   */
+  401: ProblemDetails;
+};
+
+export type LoginTwoFactorError =
+  LoginTwoFactorErrors[keyof LoginTwoFactorErrors];
+
+export type LoginTwoFactorResponses = {
+  /**
+   * OK
+   */
+  200: LoginTwoFactorResponse;
+};
+
+export type LoginTwoFactorResponse2 =
+  LoginTwoFactorResponses[keyof LoginTwoFactorResponses];
+
 export type DeleteAccountData = {
   body?: never;
   path?: never;
@@ -1414,6 +1521,40 @@ export type GetCurrentUserResponses = {
 
 export type GetCurrentUserResponse2 =
   GetCurrentUserResponses[keyof GetCurrentUserResponses];
+
+export type UpdateProfileData = {
+  body: UpdateProfileRequest;
+  path?: never;
+  query?: never;
+  url: "/v1/users/me/profile";
+};
+
+export type UpdateProfileErrors = {
+  /**
+   * Bad Request
+   */
+  400: HttpValidationProblemDetails;
+  /**
+   * Unauthorized
+   */
+  401: ProblemDetails;
+  /**
+   * Not Found
+   */
+  404: ProblemDetails;
+};
+
+export type UpdateProfileError = UpdateProfileErrors[keyof UpdateProfileErrors];
+
+export type UpdateProfileResponses = {
+  /**
+   * OK
+   */
+  200: UpdateProfileResponse;
+};
+
+export type UpdateProfileResponse2 =
+  UpdateProfileResponses[keyof UpdateProfileResponses];
 
 export type ExportPersonalDataData = {
   body?: never;
@@ -2059,6 +2200,123 @@ export type CompleteOnboardingResponses = {
 
 export type CompleteOnboardingResponse =
   CompleteOnboardingResponses[keyof CompleteOnboardingResponses];
+
+export type SetupTotpData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/v1/users/me/2fa/totp/setup";
+};
+
+export type SetupTotpErrors = {
+  /**
+   * Unauthorized
+   */
+  401: ProblemDetails;
+};
+
+export type SetupTotpError = SetupTotpErrors[keyof SetupTotpErrors];
+
+export type SetupTotpResponses = {
+  /**
+   * OK
+   */
+  200: SetupTotpResponse;
+};
+
+export type SetupTotpResponse2 = SetupTotpResponses[keyof SetupTotpResponses];
+
+export type ConfirmTotpData = {
+  body: ConfirmTotpRequest;
+  path?: never;
+  query?: never;
+  url: "/v1/users/me/2fa/totp/confirm";
+};
+
+export type ConfirmTotpErrors = {
+  /**
+   * Bad Request
+   */
+  400: HttpValidationProblemDetails;
+  /**
+   * Unauthorized
+   */
+  401: ProblemDetails;
+};
+
+export type ConfirmTotpError = ConfirmTotpErrors[keyof ConfirmTotpErrors];
+
+export type ConfirmTotpResponses = {
+  /**
+   * OK
+   */
+  200: ConfirmTotpResponse;
+};
+
+export type ConfirmTotpResponse2 =
+  ConfirmTotpResponses[keyof ConfirmTotpResponses];
+
+export type DisableTwoFactorData = {
+  body: DisableTwoFactorRequest;
+  path?: never;
+  query?: never;
+  url: "/v1/users/me/2fa";
+};
+
+export type DisableTwoFactorErrors = {
+  /**
+   * Bad Request
+   */
+  400: HttpValidationProblemDetails;
+  /**
+   * Unauthorized
+   */
+  401: ProblemDetails;
+};
+
+export type DisableTwoFactorError =
+  DisableTwoFactorErrors[keyof DisableTwoFactorErrors];
+
+export type DisableTwoFactorResponses = {
+  /**
+   * OK
+   */
+  200: DisableTwoFactorResponse;
+};
+
+export type DisableTwoFactorResponse2 =
+  DisableTwoFactorResponses[keyof DisableTwoFactorResponses];
+
+export type RegenerateRecoveryCodesData = {
+  body: RegenerateRecoveryCodesRequest;
+  path?: never;
+  query?: never;
+  url: "/v1/users/me/2fa/recovery-codes/regenerate";
+};
+
+export type RegenerateRecoveryCodesErrors = {
+  /**
+   * Bad Request
+   */
+  400: HttpValidationProblemDetails;
+  /**
+   * Unauthorized
+   */
+  401: ProblemDetails;
+};
+
+export type RegenerateRecoveryCodesError =
+  RegenerateRecoveryCodesErrors[keyof RegenerateRecoveryCodesErrors];
+
+export type RegenerateRecoveryCodesResponses = {
+  /**
+   * OK
+   */
+  200: RegenerateRecoveryCodesResponse;
+};
+
+export type RegenerateRecoveryCodesResponse2 =
+  RegenerateRecoveryCodesResponses[keyof RegenerateRecoveryCodesResponses];
 
 export type ListDeadLettersData = {
   body?: never;

@@ -14,6 +14,11 @@ import {
   sessionQueryKey,
 } from "@/lib/auth-query";
 import { safeNextPath } from "@/lib/safe-next-path";
+import {
+  clearTwoFactorChallenge,
+  readTwoFactorChallenge,
+  saveTwoFactorChallenge,
+} from "@/lib/two-factor-challenge";
 import { Toaster } from "@/components/ui/sonner";
 
 export type AuthUser = {
@@ -40,6 +45,7 @@ type AuthContextValue = {
     password: string,
     nextPath?: string | null,
   ): Promise<void>;
+  completeTwoFactorLogin(code: string, nextPath?: string | null): Promise<void>;
   register(data: RegisterInput): Promise<void>;
   googleLogin(idToken: string, nextPath?: string | null): Promise<void>;
   googleConfirm(data: {
@@ -113,11 +119,30 @@ function AuthProviderInner({ children }: { children: ReactNode }) {
       isAuthenticated: Boolean(sessionQuery.data),
       isLoading: sessionQuery.isLoading || currentUserQuery.isFetching,
       async login(email, password, nextPath) {
-        const user = await fetchJson<AuthUser>("/api/auth/login", {
+        type LoginResult =
+          | { status: "Authenticated"; user: AuthUser }
+          | {
+              status: "TwoFactorRequired";
+              challengeToken: string;
+              expiresAt: string;
+            };
+
+        const result = await fetchJson<LoginResult>("/api/auth/login", {
           method: "POST",
           body: JSON.stringify({ email, password }),
         });
-        queryClient.setQueryData(sessionQueryKey, user);
+
+        if (result.status === "TwoFactorRequired") {
+          saveTwoFactorChallenge({
+            challengeToken: result.challengeToken,
+            expiresAt: result.expiresAt,
+            nextPath: nextPath ?? null,
+          });
+          push("/login/two-factor");
+          return;
+        }
+
+        queryClient.setQueryData(sessionQueryKey, result.user);
         const profile = await queryClient.fetchQuery({
           queryKey: currentUserQueryKey,
           queryFn: fetchCurrentUserQuery,
@@ -126,6 +151,40 @@ function AuthProviderInner({ children }: { children: ReactNode }) {
           profile.hasCompletedOnboarding
             ? safeNextPath(nextPath)
             : "/onboarding",
+        );
+      },
+      async completeTwoFactorLogin(code, nextPath) {
+        const challenge = readTwoFactorChallenge();
+        if (!challenge) {
+          // The challenge was cleared (another tab, expiry, etc.). The page
+          // already redirects on mount when it's missing; this is just a
+          // belt-and-braces fallback. Resolve cleanly so the caller's catch
+          // doesn't paint a stale error before navigation completes.
+          push("/login");
+          return;
+        }
+
+        const result = await fetchJson<{
+          status: "Authenticated";
+          user: AuthUser;
+        }>("/api/auth/login/two-factor", {
+          method: "POST",
+          redirectOnUnauthorized: false,
+          body: JSON.stringify({
+            challengeToken: challenge.challengeToken,
+            code,
+          }),
+        });
+
+        clearTwoFactorChallenge();
+        queryClient.setQueryData(sessionQueryKey, result.user);
+        const profile = await queryClient.fetchQuery({
+          queryKey: currentUserQueryKey,
+          queryFn: fetchCurrentUserQuery,
+        });
+        const target = nextPath ?? challenge.nextPath;
+        push(
+          profile.hasCompletedOnboarding ? safeNextPath(target) : "/onboarding",
         );
       },
       async register(data) {
@@ -181,8 +240,27 @@ function AuthProviderInner({ children }: { children: ReactNode }) {
           throw problem;
         }
 
-        const user = (await response.json()) as AuthUser;
-        queryClient.setQueryData(sessionQueryKey, user);
+        type GoogleLoginResult =
+          | { status: "Authenticated"; user: AuthUser }
+          | {
+              status: "TwoFactorRequired";
+              challengeToken: string;
+              expiresAt: string;
+            };
+
+        const result = (await response.json()) as GoogleLoginResult;
+
+        if (result.status === "TwoFactorRequired") {
+          saveTwoFactorChallenge({
+            challengeToken: result.challengeToken,
+            expiresAt: result.expiresAt,
+            nextPath: nextPath ?? null,
+          });
+          push("/login/two-factor");
+          return;
+        }
+
+        queryClient.setQueryData(sessionQueryKey, result.user);
         const profile = await queryClient.fetchQuery({
           queryKey: currentUserQueryKey,
           queryFn: fetchCurrentUserQuery,
