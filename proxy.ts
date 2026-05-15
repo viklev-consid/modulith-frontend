@@ -6,6 +6,7 @@ import { hasUsableSession, unsealSessionCookie } from "@/lib/session";
 const publicRoutes = new Set([
   "/",
   "/login",
+  "/login/two-factor",
   "/register",
   "/forgot-password",
   "/reset-password",

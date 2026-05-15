@@ -165,6 +165,7 @@ function AuthProviderInner({ children }: { children: ReactNode }) {
 
         const user = await fetchJson<AuthUser>("/api/auth/login/two-factor", {
           method: "POST",
+          redirectOnUnauthorized: false,
           body: JSON.stringify({
             challengeToken: challenge.challengeToken,
             code,
