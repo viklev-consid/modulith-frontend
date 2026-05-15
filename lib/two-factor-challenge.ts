@@ -7,10 +7,25 @@ export type TwoFactorChallenge = {
 };
 
 // Cache so useSyncExternalStore receives a stable reference between snapshot
-// reads — without it React would re-render every microtask since JSON.parse
-// returns a fresh object each call.
+// reads — without it JSON.parse would return a fresh object each call and
+// React would re-render every microtask.
 let cachedRaw: string | null | undefined;
 let cachedParsed: TwoFactorChallenge | null = null;
+
+// Subscribers for useSyncExternalStore. Notified on cross-tab storage events
+// AND on same-tab save/clear so a mounted listener stays in sync.
+const subscribers = new Set<() => void>();
+
+function notifySubscribers() {
+  for (const cb of subscribers) {
+    cb();
+  }
+}
+
+function invalidateCache() {
+  cachedRaw = undefined;
+  cachedParsed = null;
+}
 
 function parseRaw(raw: string | null): TwoFactorChallenge | null {
   if (!raw) return null;
@@ -31,12 +46,6 @@ function readSnapshot(): TwoFactorChallenge | null {
   if (raw === cachedRaw) return cachedParsed;
   cachedRaw = raw;
   cachedParsed = parseRaw(raw);
-  if (raw && !cachedParsed) {
-    // Stored value was expired or malformed — purge it so we don't hand it
-    // back next call.
-    window.sessionStorage.removeItem(STORAGE_KEY);
-    cachedRaw = null;
-  }
   return cachedParsed;
 }
 
@@ -49,21 +58,30 @@ export function getTwoFactorChallengeServerSnapshot(): TwoFactorChallenge | null
 }
 
 export function subscribeTwoFactorChallenge(callback: () => void) {
-  if (typeof window === "undefined") return () => {};
+  subscribers.add(callback);
+  if (typeof window === "undefined") {
+    return () => {
+      subscribers.delete(callback);
+    };
+  }
   const onStorage = (event: StorageEvent) => {
     if (event.key === null || event.key === STORAGE_KEY) {
-      cachedRaw = undefined;
+      invalidateCache();
       callback();
     }
   };
   window.addEventListener("storage", onStorage);
-  return () => window.removeEventListener("storage", onStorage);
+  return () => {
+    subscribers.delete(callback);
+    window.removeEventListener("storage", onStorage);
+  };
 }
 
 export function saveTwoFactorChallenge(challenge: TwoFactorChallenge) {
   if (typeof window === "undefined") return;
   window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(challenge));
-  cachedRaw = undefined; // invalidate same-tab cache
+  invalidateCache();
+  notifySubscribers();
 }
 
 export function readTwoFactorChallenge(): TwoFactorChallenge | null {
@@ -73,6 +91,6 @@ export function readTwoFactorChallenge(): TwoFactorChallenge | null {
 export function clearTwoFactorChallenge() {
   if (typeof window === "undefined") return;
   window.sessionStorage.removeItem(STORAGE_KEY);
-  cachedRaw = undefined;
-  cachedParsed = null;
+  invalidateCache();
+  notifySubscribers();
 }

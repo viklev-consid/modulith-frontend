@@ -317,6 +317,7 @@ function SetupConfirmStep({
         "/api/proxy/v1/users/me/2fa/totp/confirm",
         {
           method: "POST",
+          redirectOnUnauthorized: false,
           body: JSON.stringify({ code: value }),
         },
       );
@@ -686,6 +687,7 @@ function RegenerateDialog({
               "/api/proxy/v1/users/me/2fa/recovery-codes/regenerate",
               {
                 method: "POST",
+                redirectOnUnauthorized: false,
                 body: JSON.stringify(data),
               },
             );
@@ -723,6 +725,7 @@ function DisableDialog({
           onSubmit={async (data) => {
             await fetchJson("/api/proxy/v1/users/me/2fa", {
               method: "DELETE",
+              redirectOnUnauthorized: false,
               body: JSON.stringify(data),
             });
             await onSuccess();

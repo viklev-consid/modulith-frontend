@@ -8,19 +8,25 @@ import {
 
 export async function fetchJson<T>(
   input: RequestInfo | URL,
-  init?: RequestInit,
+  init?: RequestInit & { redirectOnUnauthorized?: boolean },
 ) {
+  const { redirectOnUnauthorized = true, ...requestInit } = init ?? {};
   const response = await fetch(input, {
-    ...init,
+    ...requestInit,
     headers: {
       "content-type": "application/json",
-      ...init?.headers,
+      ...requestInit.headers,
     },
   });
 
   if (!response.ok) {
     const problem = await problemFromResponse(response);
-    handleProblem(problem);
+    // Auth-elevated actions (confirm/regenerate/disable 2FA, change password)
+    // return 401 when the *submitted credential* is wrong, not when the
+    // session is gone. Callers can opt out of the session-expired redirect.
+    if (redirectOnUnauthorized || problem.status !== 401) {
+      handleProblem(problem);
+    }
     throw problem;
   }
 
