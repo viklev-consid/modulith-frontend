@@ -14,17 +14,58 @@ import {
 } from "@/components/notifications-utils";
 import { useAuth } from "@/components/auth-provider";
 
+let notificationSource: EventSource | null = null;
+let notificationSourceSubscribers = 0;
+let notificationSourceCloseTimer: ReturnType<typeof setTimeout> | null = null;
+
+function acquireNotificationSource() {
+  notificationSourceSubscribers += 1;
+
+  if (notificationSourceCloseTimer) {
+    clearTimeout(notificationSourceCloseTimer);
+    notificationSourceCloseTimer = null;
+  }
+
+  if (!notificationSource) {
+    notificationSource = new EventSource(
+      "/api/proxy/v1/me/notifications/stream",
+    );
+  }
+
+  return notificationSource;
+}
+
+function releaseNotificationSource() {
+  notificationSourceSubscribers = Math.max(
+    0,
+    notificationSourceSubscribers - 1,
+  );
+
+  if (notificationSourceSubscribers > 0 || notificationSourceCloseTimer) {
+    return;
+  }
+
+  notificationSourceCloseTimer = setTimeout(() => {
+    if (notificationSourceSubscribers === 0) {
+      notificationSource?.close();
+      notificationSource = null;
+    }
+
+    notificationSourceCloseTimer = null;
+  }, 1000);
+}
+
 export function NotificationToast() {
   const { push } = useRouter();
   const queryClient = useQueryClient();
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
-    if (isLoading || !isAuthenticated) {
+    if (!isAuthenticated) {
       return;
     }
 
-    const source = new EventSource("/api/proxy/v1/me/notifications/stream");
+    const source = acquireNotificationSource();
 
     function handleNotificationCreated(event: MessageEvent<string>) {
       const notification = JSON.parse(
@@ -57,9 +98,9 @@ export function NotificationToast() {
         "notification.created",
         handleNotificationCreated,
       );
-      source.close();
+      releaseNotificationSource();
     };
-  }, [isAuthenticated, isLoading, push, queryClient]);
+  }, [isAuthenticated, push, queryClient]);
 
   return null;
 }

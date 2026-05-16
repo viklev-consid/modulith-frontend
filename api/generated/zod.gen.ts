@@ -425,7 +425,7 @@ export const zLoginSessionResponse = z.object({
 });
 
 export const zLoginResponse = z.object({
-  status: z.string(),
+  status: z.enum(["authenticated", "twoFactorRequired"]),
   session: zLoginSessionResponse.nullish(),
   challenge: zLoginChallengeResponse.nullish(),
 });

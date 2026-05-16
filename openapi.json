@@ -4127,6 +4127,7 @@
         "type": "object",
         "properties": {
           "status": {
+            "enum": ["authenticated", "twoFactorRequired"],
             "type": "string"
           },
           "session": {

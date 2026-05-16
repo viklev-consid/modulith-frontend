@@ -301,7 +301,7 @@ export type LoginRequest = {
 };
 
 export type LoginResponse = {
-  status: string;
+  status: "authenticated" | "twoFactorRequired";
   session?: null | LoginSessionResponse;
   challenge?: null | LoginChallengeResponse;
 };

@@ -27,7 +27,7 @@ export async function POST(request: Request) {
 
   const payload = (await response.json()) as LoginResponse;
 
-  if (payload.status === "TwoFactorRequired" && payload.challenge) {
+  if (payload.status === "twoFactorRequired" && payload.challenge) {
     return Response.json({
       status: "TwoFactorRequired",
       challengeToken: payload.challenge.challengeToken,
@@ -35,7 +35,7 @@ export async function POST(request: Request) {
     });
   }
 
-  if (payload.status !== "Authenticated" || !payload.session) {
+  if (payload.status !== "authenticated" || !payload.session) {
     return Response.json(
       {
         title: "Unexpected login response",
