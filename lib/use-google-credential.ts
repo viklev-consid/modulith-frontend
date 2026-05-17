@@ -24,7 +24,7 @@ declare global {
 
 export const GOOGLE_GSI_SRC = "https://accounts.google.com/gsi/client";
 
-export type GoogleButtonOptions = {
+type GoogleButtonOptions = {
   theme?: "outline" | "filled_blue" | "filled_black";
   size?: "large" | "medium" | "small";
   width?: number;
