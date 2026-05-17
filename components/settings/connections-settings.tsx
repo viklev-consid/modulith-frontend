@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useState } from "react";
 import Script from "next/script";
 import { useQueryClient } from "@tanstack/react-query";
 import { CircleIcon, LinkIcon } from "lucide-react";
@@ -8,6 +8,10 @@ import { toast } from "sonner";
 
 import { useAuth } from "@/components/auth-provider";
 import { fetchJson } from "@/components/settings/client-fetch";
+import {
+  GOOGLE_GSI_SRC,
+  useGoogleCredential,
+} from "@/lib/use-google-credential";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,76 +32,35 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-declare global {
-  interface Window {
-    google?: {
-      accounts?: {
-        id?: {
-          initialize: (options: {
-            client_id: string;
-            callback: (response: { credential?: string }) => void;
-          }) => void;
-          renderButton: (
-            element: HTMLElement,
-            options: Record<string, string | boolean | number>,
-          ) => void;
-          prompt?: () => void;
-        };
-      };
-    };
-  }
-}
-
 export function ConnectionsSettings() {
-  const id = useId().replace(/:/g, "");
   const { currentUser } = useAuth();
   const queryClient = useQueryClient();
-  const [isReady, setIsReady] = useState(false);
   const [isUnlinking, setIsUnlinking] = useState(false);
-  const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
   const isLinked = currentUser?.linkedProviders.includes("Google") ?? false;
 
-  function initializeGoogleButton() {
-    if (!clientId || !window.google?.accounts?.id || isLinked) {
-      return;
-    }
-
-    window.google.accounts.id.initialize({
-      client_id: clientId,
-      callback: ({ credential }) => {
-        if (!credential) {
-          return;
+  const {
+    containerId,
+    isReady,
+    isAvailable,
+    initialize: initializeGoogleButton,
+  } = useGoogleCredential({
+    disabled: isLinked,
+    onCredential: (credential) => {
+      void (async () => {
+        try {
+          await fetchJson("/api/proxy/v1/users/me/auth/google/link", {
+            method: "POST",
+            body: JSON.stringify({ idToken: credential }),
+          });
+          await queryClient.invalidateQueries({ queryKey: ["current-user"] });
+          toast.success("Google account linked");
+        } catch (error) {
+          console.error("Failed to link Google account", error);
+          toast.error("Failed to link Google account");
         }
-
-        void (async () => {
-          try {
-            await fetchJson("/api/proxy/v1/users/me/auth/google/link", {
-              method: "POST",
-              body: JSON.stringify({ idToken: credential }),
-            });
-            await queryClient.invalidateQueries({ queryKey: ["current-user"] });
-            toast.success("Google account linked");
-          } catch (error) {
-            console.error("Failed to link Google account", error);
-            toast.error("Failed to link Google account");
-          }
-        })();
-      },
-    });
-
-    const target = document.getElementById(id);
-    if (target) {
-      target.innerHTML = "";
-      window.google.accounts.id.renderButton(target, {
-        theme: "outline",
-        size: "large",
-        width: 260,
-        text: "continue_with",
-        shape: "rectangular",
-      });
-      setIsReady(true);
-    }
-  }
+      })();
+    },
+  });
 
   async function unlinkGoogle() {
     setIsUnlinking(true);
@@ -166,15 +129,15 @@ export function ConnectionsSettings() {
             </AlertDialog>
           ) : (
             <div className="min-w-64">
-              {clientId && (
+              {isAvailable && (
                 <Script
-                  src="https://accounts.google.com/gsi/client"
+                  src={GOOGLE_GSI_SRC}
                   strategy="afterInteractive"
                   onLoad={initializeGoogleButton}
                 />
               )}
-              <div id={id} className={isReady ? "" : "hidden"} />
-              {(!clientId || !isReady) && (
+              <div id={containerId} className={isReady ? "" : "hidden"} />
+              {(!isAvailable || !isReady) && (
                 <Button
                   className="w-full"
                   type="button"
