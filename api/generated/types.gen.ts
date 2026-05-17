@@ -1297,11 +1297,17 @@ export type ArchiveNotificationResponse =
 export type StreamMyNotificationsData = {
   body?: never;
   path?: never;
-  query?: never;
+  query?: {
+    clientId?: string;
+  };
   url: "/v1/me/notifications/stream";
 };
 
 export type StreamMyNotificationsErrors = {
+  /**
+   * Bad Request
+   */
+  400: HttpValidationProblemDetails;
   /**
    * Unauthorized
    */

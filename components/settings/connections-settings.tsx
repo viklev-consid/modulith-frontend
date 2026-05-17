@@ -69,15 +69,19 @@ export function ConnectionsSettings() {
           return;
         }
 
-        fetchJson("/api/proxy/v1/users/me/auth/google/link", {
-          method: "POST",
-          body: JSON.stringify({ idToken: credential }),
-        })
-          .then(async () => {
+        void (async () => {
+          try {
+            await fetchJson("/api/proxy/v1/users/me/auth/google/link", {
+              method: "POST",
+              body: JSON.stringify({ idToken: credential }),
+            });
             await queryClient.invalidateQueries({ queryKey: ["current-user"] });
             toast.success("Google account linked");
-          })
-          .catch(() => undefined);
+          } catch (error) {
+            console.error("Failed to link Google account", error);
+            toast.error("Failed to link Google account");
+          }
+        })();
       },
     });
 
@@ -103,6 +107,9 @@ export function ConnectionsSettings() {
       });
       await queryClient.invalidateQueries({ queryKey: ["current-user"] });
       toast.success("Google account unlinked");
+    } catch (error) {
+      console.error("Failed to unlink Google account", error);
+      toast.error("Failed to unlink Google account");
     } finally {
       setIsUnlinking(false);
     }

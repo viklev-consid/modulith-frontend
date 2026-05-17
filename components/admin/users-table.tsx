@@ -48,7 +48,7 @@ const columns = [
     header: "Name",
     cell: ({ row, getValue }) => (
       <Link
-        href={`/admin/users/${row.original.userId}`}
+        href={`/app/admin/users/${row.original.userId}`}
         className="font-medium underline-offset-4 hover:underline"
       >
         {getValue() || row.original.email}
@@ -171,7 +171,7 @@ export function UsersTable() {
                       if (target.closest("a, button")) {
                         return;
                       }
-                      push(`/admin/users/${row.original.userId}`);
+                      push(`/app/admin/users/${row.original.userId}`);
                     }}
                   >
                     {row.getVisibleCells().map((cell) => (

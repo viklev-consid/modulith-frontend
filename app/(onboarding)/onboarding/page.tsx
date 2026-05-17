@@ -1,8 +1,14 @@
 "use client";
 
-import { CheckIcon, KeyRoundIcon, ShieldCheckIcon } from "lucide-react";
+import {
+  CheckCircle2Icon,
+  CheckIcon,
+  KeyRoundIcon,
+  ShieldCheckIcon,
+} from "lucide-react";
+import Script from "next/script";
 import { useForm } from "@tanstack/react-form";
-import { useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
 
 import { mapProblemToFieldErrors, type ProblemDetails } from "@/api/problems";
 import {
@@ -31,6 +37,26 @@ import {
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
+declare global {
+  interface Window {
+    google?: {
+      accounts?: {
+        id?: {
+          initialize: (options: {
+            client_id: string;
+            callback: (response: { credential?: string }) => void;
+          }) => void;
+          renderButton: (
+            element: HTMLElement,
+            options: Record<string, string | boolean | number>,
+          ) => void;
+          prompt?: () => void;
+        };
+      };
+    };
+  }
+}
+
 type Step = "terms" | "password" | "complete";
 
 export default function OnboardingPage() {
@@ -39,6 +65,9 @@ export default function OnboardingPage() {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [marketingAccepted, setMarketingAccepted] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [googleButtonReady, setGoogleButtonReady] = useState(false);
+  const googleButtonId = useId().replace(/:/g, "");
+  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 
   const needsPasswordStep = currentUser ? !currentUser.hasPassword : false;
   const steps = useMemo(
@@ -116,6 +145,41 @@ export default function OnboardingPage() {
 
     setFieldErrors({});
     setStep(needsPasswordStep ? "password" : "complete");
+  }
+
+  function initializeGoogleButton() {
+    if (!googleClientId || !window.google?.accounts?.id) {
+      return;
+    }
+
+    window.google.accounts.id.initialize({
+      client_id: googleClientId,
+      callback: ({ credential }) => {
+        if (!credential) {
+          return;
+        }
+        passwordForm.setFieldValue("googleIdToken", credential);
+        setFieldErrors((current) => {
+          if (!current.googleIdToken) {
+            return current;
+          }
+          const { googleIdToken: _omit, ...rest } = current;
+          return rest;
+        });
+      },
+    });
+
+    const target = document.getElementById(googleButtonId);
+    if (target) {
+      target.innerHTML = "";
+      window.google.accounts.id.renderButton(target, {
+        theme: "outline",
+        size: "large",
+        text: "continue_with",
+        shape: "rectangular",
+      });
+      setGoogleButtonReady(true);
+    }
   }
 
   return (
@@ -260,22 +324,48 @@ export default function OnboardingPage() {
                 <passwordForm.Field name="googleIdToken">
                   {(field) => (
                     <Field>
-                      <FieldLabel htmlFor={field.name}>
-                        Google verification token
-                      </FieldLabel>
-                      <Input
-                        id={field.name}
-                        value={field.state.value}
-                        aria-invalid={Boolean(fieldErrors.googleIdToken)}
-                        onBlur={field.handleBlur}
-                        onChange={(event) =>
-                          field.handleChange(event.target.value)
-                        }
-                      />
+                      <FieldLabel>Confirm with Google</FieldLabel>
                       <FieldDescription>
-                        Required by the backend before setting a password on a
-                        Google-only account.
+                        Re-verify the Google account you signed up with to
+                        protect this account before adding a password.
                       </FieldDescription>
+                      {googleClientId ? (
+                        <>
+                          <Script
+                            src="https://accounts.google.com/gsi/client"
+                            strategy="afterInteractive"
+                            onLoad={initializeGoogleButton}
+                          />
+                          {field.state.value ? (
+                            <div className="flex items-center gap-2 border border-border p-3 text-sm">
+                              <CheckCircle2Icon className="size-4 text-foreground" />
+                              <span>Google account verified.</span>
+                            </div>
+                          ) : (
+                            <>
+                              <div
+                                id={googleButtonId}
+                                className={googleButtonReady ? "" : "hidden"}
+                              />
+                              {!googleButtonReady && (
+                                <Button
+                                  className="w-full"
+                                  type="button"
+                                  variant="outline"
+                                  disabled
+                                >
+                                  Loading Google verification…
+                                </Button>
+                              )}
+                            </>
+                          )}
+                        </>
+                      ) : (
+                        <div className="border border-border p-3 text-sm text-muted-foreground">
+                          Google sign-in is not configured. Contact your
+                          administrator to finish onboarding.
+                        </div>
+                      )}
                       <FieldError>{fieldErrors.googleIdToken}</FieldError>
                     </Field>
                   )}
@@ -290,7 +380,15 @@ export default function OnboardingPage() {
                 >
                   Skip for now
                 </Button>
-                <Button type="submit">Set password</Button>
+                <passwordForm.Subscribe
+                  selector={(state) => state.values.googleIdToken}
+                >
+                  {(googleIdToken) => (
+                    <Button type="submit" disabled={!googleIdToken}>
+                      Set password
+                    </Button>
+                  )}
+                </passwordForm.Subscribe>
               </div>
             </form>
           )}

@@ -5,7 +5,7 @@ export const sessionQueryKey = ["auth", "session"] as const;
 export const currentUserQueryKey = ["current-user"] as const;
 
 export async function fetchSessionQuery() {
-  const response = await fetch("/api/auth/session");
+  const response = await fetch("/api/auth/session", { cache: "no-store" });
 
   if (!response.ok) {
     throw new Error("Unable to load session");
@@ -15,7 +15,7 @@ export async function fetchSessionQuery() {
 }
 
 export async function fetchCurrentUserQuery() {
-  const response = await fetch("/api/proxy/v1/users/me");
+  const response = await fetch("/api/proxy/v1/users/me", { cache: "no-store" });
 
   if (!response.ok) {
     throw new Error("Unable to load current user");
