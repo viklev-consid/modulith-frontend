@@ -17,6 +17,42 @@ import { useAuth } from "@/components/auth-provider";
 let notificationSource: EventSource | null = null;
 let notificationSourceSubscribers = 0;
 let notificationSourceCloseTimer: ReturnType<typeof setTimeout> | null = null;
+let cachedClientId: string | null = null;
+
+const NOTIFICATION_CLIENT_ID_KEY = "modulith.notifications.clientId";
+
+function getOrCreateClientId(): string {
+  if (cachedClientId) {
+    return cachedClientId;
+  }
+
+  // Per-tab stable ID: sessionStorage is scoped to the tab so separate tabs
+  // get separate IDs, but reloads and reconnects within the tab reuse it.
+  try {
+    const existing = window.sessionStorage.getItem(NOTIFICATION_CLIENT_ID_KEY);
+    if (existing) {
+      cachedClientId = existing;
+      return existing;
+    }
+  } catch {
+    // sessionStorage unavailable (e.g. privacy mode); fall through to generate.
+  }
+
+  const generated =
+    typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+      ? crypto.randomUUID()
+      : `c_${Date.now().toString(36)}_${Math.random().toString(36).slice(2)}`;
+
+  try {
+    window.sessionStorage.setItem(NOTIFICATION_CLIENT_ID_KEY, generated);
+  } catch {
+    // Ignore storage write failures; the module-level cache still keeps it
+    // stable for the lifetime of this page.
+  }
+
+  cachedClientId = generated;
+  return generated;
+}
 
 function acquireNotificationSource() {
   notificationSourceSubscribers += 1;
@@ -27,8 +63,9 @@ function acquireNotificationSource() {
   }
 
   if (!notificationSource) {
+    const clientId = getOrCreateClientId();
     notificationSource = new EventSource(
-      "/api/proxy/v1/me/notifications/stream",
+      `/api/proxy/v1/me/notifications/stream?clientId=${encodeURIComponent(clientId)}`,
     );
   }
 

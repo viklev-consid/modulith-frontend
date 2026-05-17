@@ -96,12 +96,29 @@ export async function backendFetch(
           }
         }
 
+        const status = backendResponse.statusCode ?? 200;
+        const isNullBodyStatus =
+          status === 101 ||
+          status === 103 ||
+          status === 204 ||
+          status === 205 ||
+          status === 304;
+
+        if (isNullBodyStatus) {
+          backendResponse.resume();
+        }
+
         resolve(
-          new Response(Readable.toWeb(backendResponse) as ReadableStream, {
-            status: backendResponse.statusCode,
-            statusText: backendResponse.statusMessage,
-            headers,
-          }),
+          new Response(
+            isNullBodyStatus
+              ? null
+              : (Readable.toWeb(backendResponse) as ReadableStream),
+            {
+              status,
+              statusText: backendResponse.statusMessage,
+              headers,
+            },
+          ),
         );
       },
     );

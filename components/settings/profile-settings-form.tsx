@@ -39,8 +39,8 @@ export function ProfileSettingsForm() {
     onSubmit: async ({ value }) => {
       setFieldErrors({});
       try {
-        await fetchJson<unknown>("/api/proxy/v1/users/me", {
-          method: "PUT",
+        await fetchJson<unknown>("/api/proxy/v1/users/me/profile", {
+          method: "PATCH",
           body: JSON.stringify({ displayName: value.displayName }),
         });
         await queryClient.invalidateQueries({ queryKey: ["current-user"] });

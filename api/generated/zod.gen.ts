@@ -1043,6 +1043,10 @@ export const zArchiveNotificationPath = z.object({
  */
 export const zArchiveNotificationResponse = z.void();
 
+export const zStreamMyNotificationsQuery = z.object({
+  clientId: z.string().optional(),
+});
+
 /**
  * OK
  */

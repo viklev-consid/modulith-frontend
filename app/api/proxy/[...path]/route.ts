@@ -53,13 +53,16 @@ async function proxyRequest(request: Request, context: ProxyContext) {
   headers.delete("host");
   headers.delete("cookie");
 
+  const hasBody =
+    !["GET", "HEAD"].includes(request.method) && request.body !== null;
+
   const response = await backendFetch(target, {
     method: request.method,
     headers,
-    body: ["GET", "HEAD"].includes(request.method) ? undefined : request.body,
-    duplex: "half",
+    body: hasBody ? request.body : undefined,
+    duplex: hasBody ? "half" : undefined,
     cache: "no-store",
-  } as RequestInit & { duplex: "half" });
+  } as RequestInit & { duplex?: "half" });
 
   const responseHeaders = new Headers(response.headers);
   for (const header of hopByHopHeaders) {
