@@ -142,7 +142,7 @@ export function ConnectionsSettings() {
                 <Script
                   src={GOOGLE_GSI_SRC}
                   strategy="afterInteractive"
-                  onLoad={initializeGoogleButton}
+                  onReady={initializeGoogleButton}
                 />
               )}
               <div id={containerId} className={isReady ? "" : "hidden"} />

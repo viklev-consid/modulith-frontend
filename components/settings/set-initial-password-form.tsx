@@ -92,8 +92,9 @@ export function SetInitialPasswordForm() {
         if (!current.googleIdToken) {
           return current;
         }
-        const { googleIdToken: _omit, ...rest } = current;
-        return rest;
+        const next = { ...current };
+        delete next.googleIdToken;
+        return next;
       });
     },
   });
@@ -165,7 +166,7 @@ export function SetInitialPasswordForm() {
                   <Script
                     src={GOOGLE_GSI_SRC}
                     strategy="afterInteractive"
-                    onLoad={initializeGoogleButton}
+                    onReady={initializeGoogleButton}
                   />
                 )}
                 <div id={containerId} className={isReady ? "" : "hidden"} />
