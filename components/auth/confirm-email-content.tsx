@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { CheckCircle2Icon, LoaderCircleIcon, XCircleIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { useAuth } from "@/components/auth-provider";
 import { fetchJson } from "@/components/settings/client-fetch";
@@ -21,6 +22,8 @@ import { Input } from "@/components/ui/input";
 type Status = "idle" | "loading" | "success" | "error";
 
 export function ConfirmEmailContent() {
+  const t = useTranslations("authComponents.confirmEmail");
+  const tCommon = useTranslations("common.actions");
   const { resendEmailConfirmation } = useAuth();
   const searchParams = useSearchParams();
   const initialToken = searchParams.get("token") ?? "";
@@ -90,27 +93,27 @@ export function ConfirmEmailContent() {
         </div>
         <CardTitle>
           {isLoading
-            ? "Confirming your account"
+            ? t("loading.title")
             : isConfirmed
-              ? "Account confirmed"
+              ? t("success.title")
               : isError
-                ? "Invalid or expired link"
-                : "Confirm your account"}
+                ? t("error.title")
+                : t("idle.title")}
         </CardTitle>
         <CardDescription>
           {isLoading
-            ? "Please wait while we verify your confirmation link."
+            ? t("loading.description")
             : isConfirmed
-              ? "You can now sign in to your account."
+              ? t("success.description")
               : isError
-                ? "Request a new confirmation email and try again."
-                : "Paste the confirmation token from your email to activate your account."}
+                ? t("error.description")
+                : t("idle.description")}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {isConfirmed ? (
           <Link href="/login" className={`${buttonVariants()} w-full`}>
-            Continue to sign in
+            {t("continueToSignIn")}
           </Link>
         ) : (
           <>
@@ -126,13 +129,13 @@ export function ConfirmEmailContent() {
               >
                 <Field>
                   <FieldLabel htmlFor="confirm-token">
-                    Confirmation token
+                    {t("tokenLabel")}
                   </FieldLabel>
                   <Input
                     id="confirm-token"
                     value={token}
                     onChange={(event) => setToken(event.target.value)}
-                    placeholder="Paste the token from your email"
+                    placeholder={t("tokenPlaceholder")}
                   />
                 </Field>
                 <Button
@@ -140,7 +143,7 @@ export function ConfirmEmailContent() {
                   className="w-full"
                   disabled={!token.trim()}
                 >
-                  Confirm account
+                  {t("confirmButton")}
                 </Button>
               </form>
             )}
@@ -149,7 +152,7 @@ export function ConfirmEmailContent() {
                 <form className="space-y-3" onSubmit={onResendSubmit}>
                   <Field>
                     <FieldLabel htmlFor="resend-email">
-                      Email address
+                      {t("emailLabel")}
                     </FieldLabel>
                     <Input
                       id="resend-email"
@@ -157,7 +160,7 @@ export function ConfirmEmailContent() {
                       autoComplete="email"
                       value={resendEmail}
                       onChange={(event) => setResendEmail(event.target.value)}
-                      placeholder="you@example.com"
+                      placeholder={t("emailPlaceholder")}
                     />
                   </Field>
                   <div className="flex gap-2">
@@ -170,7 +173,7 @@ export function ConfirmEmailContent() {
                         setResendEmail("");
                       }}
                     >
-                      Cancel
+                      {tCommon("cancel")}
                     </Button>
                     <Button
                       type="submit"
@@ -178,7 +181,7 @@ export function ConfirmEmailContent() {
                       className="flex-1"
                       disabled={isResending || !resendEmail.trim()}
                     >
-                      {isResending ? "Resending…" : "Send"}
+                      {isResending ? t("resending") : tCommon("send")}
                     </Button>
                   </div>
                 </form>
@@ -189,7 +192,7 @@ export function ConfirmEmailContent() {
                   className="w-full"
                   onClick={() => setShowResend(true)}
                 >
-                  Resend confirmation email
+                  {t("resendButton")}
                 </Button>
               ))}
           </>
