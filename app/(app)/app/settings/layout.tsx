@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
+  ActivityIcon,
   BellIcon,
   DatabaseIcon,
   KeyRoundIcon,
@@ -21,6 +22,7 @@ const links = [
   { href: "/app/settings/password", label: "Password", icon: KeyRoundIcon },
   { href: "/app/settings/email", label: "Email", icon: MailIcon },
   { href: "/app/settings/security", label: "Security", icon: ShieldIcon },
+  { href: "/app/settings/activity", label: "Activity", icon: ActivityIcon },
   { href: "/app/settings/connections", label: "Connections", icon: LinkIcon },
   {
     href: "/app/settings/notifications",

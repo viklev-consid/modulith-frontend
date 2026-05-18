@@ -1,11 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import {
-  ActivityIcon,
-  LogOutIcon,
-  SettingsIcon,
-  ShieldIcon,
-} from "lucide-react";
+import { LogOutIcon, SettingsIcon, ShieldIcon } from "lucide-react";
 
 import { BellDropdown } from "@/components/bell-dropdown";
 import { Can } from "@/components/can";
@@ -43,13 +38,6 @@ export default function Page() {
               Admin
             </Link>
           </Can>
-          <Link
-            href="/app/activity"
-            className={cn(buttonVariants({ size: "sm", variant: "outline" }))}
-          >
-            <ActivityIcon />
-            Activity
-          </Link>
           <Link
             href="/app/settings"
             className={cn(buttonVariants({ size: "sm", variant: "outline" }))}
