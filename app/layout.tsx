@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, JetBrains_Mono } from "next/font/google";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 import "./globals.css";
@@ -18,33 +20,41 @@ const fontMono = JetBrains_Mono({
   variable: "--font-mono",
 });
 
-export const metadata: Metadata = {
-  title: "Modulith",
-  description: "Modulith frontend application",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("metadata.root");
+  return {
+    title: t("title"),
+    description: t("description"),
+  };
+}
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
     <html
-      lang="en"
+      lang={locale}
       suppressHydrationWarning
       className={`${fontSans.variable} ${fontMono.variable} font-mono antialiased`}
     >
       <body>
-        <ThemeProvider>
-          <NuqsAdapter>
-            <QueryProvider>
-              <AuthProvider>
-                {children}
-                <NotificationToast />
-              </AuthProvider>
-            </QueryProvider>
-          </NuqsAdapter>
-        </ThemeProvider>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <ThemeProvider>
+            <NuqsAdapter>
+              <QueryProvider>
+                <AuthProvider>
+                  {children}
+                  <NotificationToast />
+                </AuthProvider>
+              </QueryProvider>
+            </NuqsAdapter>
+          </ThemeProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );
