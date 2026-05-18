@@ -5,15 +5,15 @@ import "@/api/client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useQueryState } from "nuqs";
 import { BellIcon } from "lucide-react";
+import { useFormatter, useTranslations } from "next-intl";
 
 import {
   archiveNotificationMutation,
   listMyNotificationsOptions,
 } from "@/api/generated/@tanstack/react-query.gen";
 import {
-  notificationCategoryLabel,
+  notificationCategoryKey,
   notificationQueryKeyPrefix,
-  notificationTime,
 } from "@/components/notifications-utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -35,6 +35,9 @@ import { cn } from "@/lib/utils";
 const filters = ["all", "unread", "archived"] as const;
 
 export function NotificationsPageClient() {
+  const t = useTranslations("settingsForms.notificationsPage");
+  const tCategory = useTranslations("components.notifications.category");
+  const format = useFormatter();
   const queryClient = useQueryClient();
   const [filter, setFilter] = useQueryState("filter", {
     defaultValue: "all",
@@ -62,10 +65,8 @@ export function NotificationsPageClient() {
     <main className="mx-auto grid min-h-svh w-full max-w-4xl gap-5 px-4 py-6 md:px-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold">Notifications</h1>
-          <p className="text-sm text-muted-foreground">
-            Review recent account and workspace activity.
-          </p>
+          <h1 className="text-2xl font-semibold">{t("title")}</h1>
+          <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
         </div>
         <Select
           value={filter}
@@ -78,9 +79,9 @@ export function NotificationsPageClient() {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All</SelectItem>
-            <SelectItem value="unread">Unread</SelectItem>
-            <SelectItem value="archived">Archived</SelectItem>
+            <SelectItem value="all">{t("filter.all")}</SelectItem>
+            <SelectItem value="unread">{t("filter.unread")}</SelectItem>
+            <SelectItem value="archived">{t("filter.archived")}</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -109,8 +110,8 @@ export function NotificationsPageClient() {
                     {notification.body}
                   </p>
                   <p className="mt-2 text-xs text-muted-foreground">
-                    {notificationCategoryLabel(notification.category)} ·{" "}
-                    {notificationTime(notification.createdAt)}
+                    {tCategory(notificationCategoryKey(notification.category))}{" "}
+                    · {format.relativeTime(new Date(notification.createdAt))}
                   </p>
                 </div>
                 <Button
@@ -122,7 +123,7 @@ export function NotificationsPageClient() {
                     void archiveOne(notification.id);
                   }}
                 >
-                  Archive
+                  {t("archive")}
                 </Button>
               </div>
             ))
@@ -132,10 +133,8 @@ export function NotificationsPageClient() {
                 <div className="flex size-12 items-center justify-center rounded-full bg-muted">
                   <BellIcon className="size-6 text-muted-foreground" />
                 </div>
-                <CardTitle>All caught up</CardTitle>
-                <CardDescription>
-                  You have no unread notifications.
-                </CardDescription>
+                <CardTitle>{t("empty.title")}</CardTitle>
+                <CardDescription>{t("empty.description")}</CardDescription>
               </CardHeader>
             </Card>
           )}
@@ -150,7 +149,7 @@ export function NotificationsPageClient() {
             void setBefore(notificationsQuery.data.nextBefore);
           }}
         >
-          Load more
+          {t("loadMore")}
         </Button>
       )}
     </main>

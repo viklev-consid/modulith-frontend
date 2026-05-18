@@ -3,7 +3,7 @@
 import "@/api/client";
 
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { format, formatDistanceToNow, parseISO } from "date-fns";
+import { useFormatter, useTranslations } from "next-intl";
 
 import { getAuditTrailInfiniteOptions } from "@/api/generated/@tanstack/react-query.gen";
 import type { AuditEntryDto } from "@/api/generated";
@@ -19,23 +19,14 @@ function toNumber(value: number | string) {
   return typeof value === "string" ? Number.parseInt(value, 10) : value;
 }
 
-function relativeTime(iso: string) {
-  try {
-    return formatDistanceToNow(parseISO(iso), { addSuffix: true });
-  } catch {
-    return iso;
-  }
-}
-
-function fullTime(iso: string) {
-  try {
-    return format(parseISO(iso), "PPpp");
-  } catch {
-    return iso;
-  }
+function safeParse(iso: string): Date | null {
+  const date = new Date(iso);
+  return Number.isNaN(date.getTime()) ? null : date;
 }
 
 function TimelineEntry({ entry }: { entry: AuditEntryDto }) {
+  const format = useFormatter();
+  const occurredAt = safeParse(entry.occurredAt);
   return (
     <li className="flex items-start gap-3 border-b py-3 last:border-b-0">
       <span
@@ -45,9 +36,16 @@ function TimelineEntry({ entry }: { entry: AuditEntryDto }) {
         <span className="text-sm font-medium">{entry.eventType}</span>
         <span
           className="text-xs text-muted-foreground"
-          title={fullTime(entry.occurredAt)}
+          title={
+            occurredAt
+              ? format.dateTime(occurredAt, {
+                  dateStyle: "long",
+                  timeStyle: "medium",
+                })
+              : entry.occurredAt
+          }
         >
-          {relativeTime(entry.occurredAt)}
+          {occurredAt ? format.relativeTime(occurredAt) : entry.occurredAt}
         </span>
       </div>
     </li>
@@ -55,6 +53,7 @@ function TimelineEntry({ entry }: { entry: AuditEntryDto }) {
 }
 
 export function ActivityFeed() {
+  const t = useTranslations("components.activityFeed");
   const query = useInfiniteQuery({
     ...getAuditTrailInfiniteOptions({
       query: { pageSize: PAGE_SIZE },
@@ -89,8 +88,7 @@ export function ActivityFeed() {
     return (
       <Card>
         <CardContent className="py-6 text-sm text-muted-foreground">
-          No activity yet. Account events will appear here after you sign in,
-          change your password, or update your profile.
+          {t("empty")}
         </CardContent>
       </Card>
     );
@@ -113,10 +111,12 @@ export function ActivityFeed() {
               onClick={() => query.fetchNextPage()}
               disabled={query.isFetchingNextPage}
             >
-              Load more
+              {t("loadMore")}
             </Button>
           ) : (
-            <span className="text-xs text-muted-foreground">End of feed</span>
+            <span className="text-xs text-muted-foreground">
+              {t("endOfFeed")}
+            </span>
           )}
         </div>
       </CardContent>

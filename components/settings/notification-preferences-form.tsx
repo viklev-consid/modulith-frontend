@@ -5,6 +5,7 @@ import "@/api/client";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { LockIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import {
@@ -12,7 +13,7 @@ import {
   updateMyNotificationPreferencesMutation,
 } from "@/api/generated/@tanstack/react-query.gen";
 import type { MyNotificationPreferenceResponse } from "@/api/generated";
-import { notificationCategoryLabel } from "@/components/notifications-utils";
+import { notificationCategoryKey } from "@/components/notifications-utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -33,6 +34,8 @@ import {
 } from "@/components/ui/table";
 
 export function NotificationPreferencesForm() {
+  const t = useTranslations("settingsForms.notificationPreferences");
+  const tCategory = useTranslations("components.notifications.category");
   const queryClient = useQueryClient();
   const preferencesQuery = useQuery(getMyNotificationPreferencesOptions());
   const updatePreferences = useMutation(
@@ -81,26 +84,23 @@ export function NotificationPreferencesForm() {
       },
     });
     setOverrides({});
-    toast.success("Notification preferences saved");
+    toast.success(t("saved"));
   }
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Notifications</CardTitle>
-        <CardDescription>
-          Account and Security notifications are always sent by email and cannot
-          be changed.
-        </CardDescription>
+        <CardTitle>{t("title")}</CardTitle>
+        <CardDescription>{t("description")}</CardDescription>
       </CardHeader>
       <CardContent className="grid gap-5">
         <div className="overflow-hidden rounded-md border">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Category</TableHead>
-                <TableHead>Bell</TableHead>
-                <TableHead>Email</TableHead>
+                <TableHead>{t("table.category")}</TableHead>
+                <TableHead>{t("table.bell")}</TableHead>
+                <TableHead>{t("table.email")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -108,11 +108,11 @@ export function NotificationPreferencesForm() {
                 <TableRow key={preference.category}>
                   <TableCell className="font-medium">
                     <span className="flex items-center gap-2">
-                      {notificationCategoryLabel(preference.category)}
+                      {tCategory(notificationCategoryKey(preference.category))}
                       {preference.isLocked && (
                         <Badge variant="outline">
                           <LockIcon className="size-3" />
-                          Locked
+                          {t("locked")}
                         </Badge>
                       )}
                     </span>
@@ -156,7 +156,7 @@ export function NotificationPreferencesForm() {
             void savePreferences();
           }}
         >
-          {updatePreferences.isPending ? "Saving..." : "Save preferences"}
+          {updatePreferences.isPending ? t("saving") : t("save")}
         </Button>
       </CardContent>
     </Card>

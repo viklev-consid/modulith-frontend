@@ -1,1 +1,30 @@
-{}
+{
+  "notificationPreferences": {
+    "title": "Notifications",
+    "description": "Account and Security notifications are always sent by email and cannot be changed.",
+    "table": {
+      "category": "Category",
+      "bell": "Bell",
+      "email": "Email"
+    },
+    "locked": "Locked",
+    "save": "Save preferences",
+    "saving": "Saving...",
+    "saved": "Notification preferences saved"
+  },
+  "notificationsPage": {
+    "title": "Notifications",
+    "subtitle": "Review recent account and workspace activity.",
+    "filter": {
+      "all": "All",
+      "unread": "Unread",
+      "archived": "Archived"
+    },
+    "empty": {
+      "title": "All caught up",
+      "description": "You have no unread notifications."
+    },
+    "archive": "Archive",
+    "loadMore": "Load more"
+  }
+}

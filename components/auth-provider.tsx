@@ -3,6 +3,7 @@
 import { createContext, useMemo, use, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { handleProblem, problemFromResponse } from "@/api/problems";
@@ -96,6 +97,7 @@ async function fetchJson<T>(
 }
 
 function AuthProviderInner({ children }: { children: ReactNode }) {
+  const t = useTranslations("components.auth.toast");
   const { push } = useRouter();
   const queryClient = useQueryClient();
 
@@ -203,9 +205,8 @@ function AuthProviderInner({ children }: { children: ReactNode }) {
             body: JSON.stringify({ email }),
           },
         );
-        toast.success("Confirmation email sent", {
-          description:
-            "If an account exists and needs confirmation, a new email is on its way.",
+        toast.success(t("confirmationSent.title"), {
+          description: t("confirmationSent.description"),
         });
       },
       async googleLogin(idToken, nextPath) {
@@ -238,10 +239,8 @@ function AuthProviderInner({ children }: { children: ReactNode }) {
             return;
           }
 
-          toast.success("Check your email", {
-            description:
-              pending.detail ??
-              "Use the confirmation link to finish Google sign-in.",
+          toast.success(t("checkEmail.title"), {
+            description: pending.detail ?? t("checkEmail.description"),
           });
           return;
         }
@@ -320,6 +319,7 @@ function AuthProviderInner({ children }: { children: ReactNode }) {
       queryClient,
       sessionQuery.data,
       sessionQuery.isLoading,
+      t,
     ],
   );
 

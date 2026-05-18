@@ -1,1 +1,41 @@
-{}
+{
+  "notifications": {
+    "bell": {
+      "aria": "Notifications",
+      "title": "Notifications",
+      "markAllRead": "Mark all read",
+      "empty": "All caught up",
+      "viewAll": "View all notifications"
+    },
+    "toast": {
+      "newNotification": "New notification",
+      "open": "Open",
+      "justNow": "just now"
+    },
+    "category": {
+      "product": "Product",
+      "collaboration": "Collaboration",
+      "system": "System",
+      "account": "Account",
+      "security": "Security",
+      "unknown": "Notification"
+    }
+  },
+  "auth": {
+    "toast": {
+      "confirmationSent": {
+        "title": "Confirmation email sent",
+        "description": "If an account exists and needs confirmation, a new email is on its way."
+      },
+      "checkEmail": {
+        "title": "Check your email",
+        "description": "Use the confirmation link to finish Google sign-in."
+      }
+    }
+  },
+  "activityFeed": {
+    "empty": "No activity yet. Account events will appear here after you sign in, change your password, or update your profile.",
+    "loadMore": "Load more",
+    "endOfFeed": "End of feed"
+  }
+}
