@@ -147,6 +147,12 @@
       "confirmDialog": {
         "title": "Unlink Google account?",
         "description": "You will need to use your email and password the next time you sign in."
+      },
+      "overrideDialog": {
+        "title": "Use your Google profile picture?",
+        "description": "Replace your current profile picture with the one from your Google account.",
+        "keepCurrent": "Keep current",
+        "useGoogle": "Use Google picture"
       }
     },
     "needsPassword": {
