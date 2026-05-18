@@ -86,6 +86,11 @@ export type CreateProductResponse = {
   currency: string;
 };
 
+export type CurrentUserAvatarResponse = {
+  url: string;
+  updatedAt: string;
+};
+
 export type DeadLetterEnvelopeQuery = {
   pageNumber?: number | string;
   pageSize?: number | string;
@@ -170,6 +175,7 @@ export type GetCurrentUserResponse = {
   hasPassword: boolean;
   hasCompletedOnboarding: boolean;
   twoFactorEnabled: boolean;
+  avatar: null | CurrentUserAvatarResponse;
   linkedAccounts: Array<LinkedAccountResponse>;
 };
 
@@ -209,6 +215,7 @@ export type GoogleLoginChallengeResponse = {
 export type GoogleLoginConfirmRequest = {
   token: string;
   invitationToken?: null | string;
+  useGoogleAvatar?: boolean;
 };
 
 export type GoogleLoginConfirmResponse = {
@@ -253,6 +260,8 @@ export type HttpValidationProblemDetails = {
   };
 };
 
+export type IFormFile = Blob | File;
+
 export type LinkedAccountResponse = {
   provider: string;
   providerEmail: string;
@@ -260,6 +269,7 @@ export type LinkedAccountResponse = {
 
 export type LinkGoogleLoginRequest = {
   idToken: string;
+  overrideAvatarWithGoogleAvatar?: boolean;
 };
 
 export type ListInvitationsInvitationDto = {
@@ -491,6 +501,11 @@ export type TickerType = number;
 export type TimeRange = {
   from: null | string;
   to: null | string;
+};
+
+export type UpdateAvatarResponse = {
+  url: string;
+  updatedAt: string;
 };
 
 export type UpdateMyNotificationPreferenceRequest = {
@@ -1579,6 +1594,103 @@ export type UpdateProfileResponses = {
 
 export type UpdateProfileResponse2 =
   UpdateProfileResponses[keyof UpdateProfileResponses];
+
+export type DeleteAvatarData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/v1/users/me/avatar";
+};
+
+export type DeleteAvatarErrors = {
+  /**
+   * Unauthorized
+   */
+  401: ProblemDetails;
+  /**
+   * Not Found
+   */
+  404: ProblemDetails;
+};
+
+export type DeleteAvatarError = DeleteAvatarErrors[keyof DeleteAvatarErrors];
+
+export type DeleteAvatarResponses = {
+  /**
+   * No Content
+   */
+  204: void;
+};
+
+export type DeleteAvatarResponse =
+  DeleteAvatarResponses[keyof DeleteAvatarResponses];
+
+export type UpdateAvatarData = {
+  body: IFormFile;
+  path?: never;
+  query?: never;
+  url: "/v1/users/me/avatar";
+};
+
+export type UpdateAvatarErrors = {
+  /**
+   * Bad Request
+   */
+  400: HttpValidationProblemDetails;
+  /**
+   * Unauthorized
+   */
+  401: ProblemDetails;
+  /**
+   * Not Found
+   */
+  404: ProblemDetails;
+};
+
+export type UpdateAvatarError = UpdateAvatarErrors[keyof UpdateAvatarErrors];
+
+export type UpdateAvatarResponses = {
+  /**
+   * OK
+   */
+  200: UpdateAvatarResponse;
+};
+
+export type UpdateAvatarResponse2 =
+  UpdateAvatarResponses[keyof UpdateAvatarResponses];
+
+export type GetUserAvatarData = {
+  body?: never;
+  path: {
+    userId: string;
+  };
+  query?: never;
+  url: "/v1/users/{userId}/avatar";
+};
+
+export type GetUserAvatarErrors = {
+  /**
+   * Unauthorized
+   */
+  401: ProblemDetails;
+  /**
+   * Forbidden
+   */
+  403: ProblemDetails;
+  /**
+   * Not Found
+   */
+  404: ProblemDetails;
+};
+
+export type GetUserAvatarError = GetUserAvatarErrors[keyof GetUserAvatarErrors];
+
+export type GetUserAvatarResponses = {
+  /**
+   * OK
+   */
+  200: unknown;
+};
 
 export type ExportPersonalDataData = {
   body?: never;

@@ -93,6 +93,11 @@ export const zCreateProductResponse = z.object({
   currency: z.string(),
 });
 
+export const zCurrentUserAvatarResponse = z.object({
+  url: z.string(),
+  updatedAt: z.iso.datetime(),
+});
+
 /**
  * Redacted projection of a Wolverine DeadLetterEnvelope.
  * The message body (`Envelope` and `Message` on the source type) is intentionally
@@ -253,6 +258,7 @@ export const zGoogleLoginChallengeResponse = z.object({
 export const zGoogleLoginConfirmRequest = z.object({
   token: z.string(),
   invitationToken: z.string().nullish(),
+  useGoogleAvatar: z.boolean().optional().default(false),
 });
 
 export const zGoogleLoginConfirmResponse = z.object({
@@ -307,6 +313,8 @@ export const zHttpValidationProblemDetails = z.object({
   errors: z.record(z.string(), z.array(z.string())).optional(),
 });
 
+export const zIFormFile = z.string();
+
 export const zLinkedAccountResponse = z.object({
   provider: z.string(),
   providerEmail: z.string(),
@@ -323,11 +331,13 @@ export const zGetCurrentUserResponse = z.object({
   hasPassword: z.boolean(),
   hasCompletedOnboarding: z.boolean(),
   twoFactorEnabled: z.boolean(),
+  avatar: zCurrentUserAvatarResponse.nullable(),
   linkedAccounts: z.array(zLinkedAccountResponse),
 });
 
 export const zLinkGoogleLoginRequest = z.object({
   idToken: z.string(),
+  overrideAvatarWithGoogleAvatar: z.boolean().optional().default(false),
 });
 
 export const zListInvitationsInvitationDto = z.object({
@@ -697,6 +707,11 @@ export const zDeadLetterEnvelopeQuery = z.object({
   range: zTimeRange.optional(),
   messageIds: z.array(z.uuid()).optional(),
   queryId: z.uuid().optional(),
+});
+
+export const zUpdateAvatarResponse = z.object({
+  url: z.string(),
+  updatedAt: z.iso.datetime(),
 });
 
 export const zUpdateMyNotificationPreferenceRequest = z.object({
@@ -1129,6 +1144,22 @@ export const zUpdateProfileBody = zUpdateProfileRequest;
  * OK
  */
 export const zUpdateProfileResponse2 = zUpdateProfileResponse;
+
+/**
+ * No Content
+ */
+export const zDeleteAvatarResponse = z.void();
+
+export const zUpdateAvatarBody = zIFormFile;
+
+/**
+ * OK
+ */
+export const zUpdateAvatarResponse2 = zUpdateAvatarResponse;
+
+export const zGetUserAvatarPath = z.object({
+  userId: z.uuid(),
+});
 
 /**
  * OK

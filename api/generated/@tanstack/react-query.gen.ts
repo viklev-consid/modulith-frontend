@@ -23,6 +23,7 @@ import {
   createInvitation,
   createProduct,
   deleteAccount,
+  deleteAvatar,
   deleteCronTicker,
   deleteCronTickerOccurrence,
   deleteTimeTicker,
@@ -58,6 +59,7 @@ import {
   getTimeTickersGraphDataRange,
   getTimeTickersPaginated,
   getUnreadNotificationCount,
+  getUserAvatar,
   getUserById,
   googleLogin,
   googleLoginConfirm,
@@ -90,6 +92,7 @@ import {
   stopTickerHost,
   streamMyNotifications,
   unlinkGoogleLogin,
+  updateAvatar,
   updateCronTicker,
   updateMyNotificationPreferences,
   updateProfile,
@@ -130,6 +133,9 @@ import type {
   DeleteAccountData,
   DeleteAccountError,
   DeleteAccountResponse,
+  DeleteAvatarData,
+  DeleteAvatarError,
+  DeleteAvatarResponse,
   DeleteCronTickerData,
   DeleteCronTickerOccurrenceData,
   DeleteTimeTickerData,
@@ -184,6 +190,8 @@ import type {
   GetUnreadNotificationCountData,
   GetUnreadNotificationCountError,
   GetUnreadNotificationCountResponse2,
+  GetUserAvatarData,
+  GetUserAvatarError,
   GetUserByIdData,
   GetUserByIdError,
   GetUserByIdResponse2,
@@ -265,6 +273,9 @@ import type {
   UnlinkGoogleLoginData,
   UnlinkGoogleLoginError,
   UnlinkGoogleLoginResponse,
+  UpdateAvatarData,
+  UpdateAvatarError,
+  UpdateAvatarResponse2,
   UpdateCronTickerData,
   UpdateMyNotificationPreferencesData,
   UpdateMyNotificationPreferencesError,
@@ -1833,6 +1844,85 @@ export const updateProfileMutation = (
   };
   return mutationOptions;
 };
+
+/**
+ * Remove the authenticated user's avatar.
+ */
+export const deleteAvatarMutation = (
+  options?: Partial<Options<DeleteAvatarData>>,
+): UseMutationOptions<
+  DeleteAvatarResponse,
+  DeleteAvatarError,
+  Options<DeleteAvatarData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    DeleteAvatarResponse,
+    DeleteAvatarError,
+    Options<DeleteAvatarData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await deleteAvatar({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * Upload or replace the authenticated user's avatar.
+ */
+export const updateAvatarMutation = (
+  options?: Partial<Options<UpdateAvatarData>>,
+): UseMutationOptions<
+  UpdateAvatarResponse2,
+  UpdateAvatarError,
+  Options<UpdateAvatarData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    UpdateAvatarResponse2,
+    UpdateAvatarError,
+    Options<UpdateAvatarData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await updateAvatar({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const getUserAvatarQueryKey = (options: Options<GetUserAvatarData>) =>
+  createQueryKey("getUserAvatar", options);
+
+/**
+ * Get a user's avatar when the authenticated caller is allowed to view it.
+ */
+export const getUserAvatarOptions = (options: Options<GetUserAvatarData>) =>
+  queryOptions<
+    unknown,
+    GetUserAvatarError,
+    unknown,
+    ReturnType<typeof getUserAvatarQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getUserAvatar({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getUserAvatarQueryKey(options),
+  });
 
 export const exportPersonalDataQueryKey = (
   options?: Options<ExportPersonalDataData>,
