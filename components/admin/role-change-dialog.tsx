@@ -4,6 +4,7 @@ import "@/api/client";
 
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { handleProblem, type ProblemDetails } from "@/api/problems";
@@ -29,10 +30,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const ROLE_OPTIONS = [
-  { value: "Admin", label: "Admin" },
-  { value: "User", label: "User" },
-] as const;
+const ROLE_OPTIONS = [{ value: "Admin" }, { value: "User" }] as const;
+
+type RoleKey = (typeof ROLE_OPTIONS)[number]["value"];
 
 export function RoleChangeDialog({
   open,
@@ -75,14 +75,26 @@ function RoleChangeForm({
   currentRole: string;
   onClose: () => void;
 }) {
+  const t = useTranslations("adminComponents.roleChange");
+  const tCommon = useTranslations("common.actions");
   const queryClient = useQueryClient();
   const [role, setRole] = useState(currentRole);
+
+  const roleLabel = (value: string) =>
+    (ROLE_OPTIONS as readonly { value: string }[]).some(
+      (option) => option.value === value,
+    )
+      ? t(`roles.${value as RoleKey}`)
+      : value;
 
   const mutation = useMutation({
     ...changeUserRoleMutation(),
     onSuccess: async () => {
-      toast.success("Role updated", {
-        description: `${userName} is now a ${role}.`,
+      toast.success(t("toast.title"), {
+        description: t("toast.description", {
+          name: userName,
+          role: roleLabel(role),
+        }),
       });
       await queryClient.invalidateQueries({
         queryKey: getUserByIdQueryKey({ path: { userId } }),
@@ -100,9 +112,12 @@ function RoleChangeForm({
   return (
     <>
       <DialogHeader>
-        <DialogTitle>Change user role</DialogTitle>
+        <DialogTitle>{t("title")}</DialogTitle>
         <DialogDescription>
-          Changing the role for <strong>{userName}</strong>.
+          {t.rich("description", {
+            name: userName,
+            strong: (chunks) => <strong>{chunks}</strong>,
+          })}
         </DialogDescription>
       </DialogHeader>
       <div className="grid gap-3 py-2">
@@ -115,20 +130,17 @@ function RoleChangeForm({
           }}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Select a role" />
+            <SelectValue placeholder={t("placeholder")} />
           </SelectTrigger>
           <SelectContent>
             {ROLE_OPTIONS.map((option) => (
               <SelectItem key={option.value} value={option.value}>
-                {option.label}
+                {t(`roles.${option.value}`)}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
-        <p className="text-xs text-muted-foreground">
-          Admins can manage users, invitations, and audit logs. Regular users
-          only see their own account.
-        </p>
+        <p className="text-xs text-muted-foreground">{t("hint")}</p>
       </div>
       <DialogFooter>
         <Button
@@ -136,7 +148,7 @@ function RoleChangeForm({
           onClick={onClose}
           disabled={mutation.isPending}
         >
-          Cancel
+          {tCommon("cancel")}
         </Button>
         <Button
           onClick={() =>
@@ -147,7 +159,7 @@ function RoleChangeForm({
           }
           disabled={!isDirty || mutation.isPending}
         >
-          {mutation.isPending ? "Updating…" : "Confirm"}
+          {mutation.isPending ? t("submitting") : t("submit")}
         </Button>
       </DialogFooter>
     </>

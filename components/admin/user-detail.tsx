@@ -5,7 +5,7 @@ import "@/api/client";
 import Link from "next/link";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { format, formatDistanceToNow, parseISO } from "date-fns";
+import { useFormatter, useTranslations } from "next-intl";
 import { ArrowLeftIcon } from "lucide-react";
 
 import {
@@ -26,30 +26,21 @@ import {
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
-function formatRelative(iso: string) {
-  try {
-    return formatDistanceToNow(parseISO(iso), { addSuffix: true });
-  } catch {
-    return iso;
-  }
-}
-
-function formatDate(iso: string) {
-  try {
-    return format(parseISO(iso), "PP");
-  } catch {
-    return iso;
-  }
+function safeParse(iso: string): Date | null {
+  const date = new Date(iso);
+  return Number.isNaN(date.getTime()) ? null : date;
 }
 
 function ActivityRow({ entry }: { entry: AuditEntryDto }) {
+  const format = useFormatter();
+  const occurredAt = safeParse(entry.occurredAt);
   return (
     <li className="flex items-start gap-3 border-b py-2 last:border-b-0">
       <span className="mt-1 size-2 shrink-0 rounded-full bg-primary/60" />
       <div className="grid gap-0.5">
         <span className="text-sm font-medium">{entry.eventType}</span>
         <span className="text-xs text-muted-foreground">
-          {formatRelative(entry.occurredAt)}
+          {occurredAt ? format.relativeTime(occurredAt) : entry.occurredAt}
         </span>
       </div>
     </li>
@@ -57,6 +48,8 @@ function ActivityRow({ entry }: { entry: AuditEntryDto }) {
 }
 
 export function UserDetail({ userId }: { userId: string }) {
+  const t = useTranslations("adminComponents.userDetail");
+  const format = useFormatter();
   const [roleDialogOpen, setRoleDialogOpen] = useState(false);
 
   const userQuery = useQuery(getUserByIdOptions({ path: { userId } }));
@@ -81,7 +74,7 @@ export function UserDetail({ userId }: { userId: string }) {
         <BackLink />
         <Card>
           <CardContent className="py-6 text-sm text-muted-foreground">
-            We couldn&apos;t load this user. They may have been removed.
+            {t("loadError")}
           </CardContent>
         </Card>
       </div>
@@ -91,6 +84,7 @@ export function UserDetail({ userId }: { userId: string }) {
   const user = userQuery.data;
   const hasGoogle = user.linkedProviders.includes("Google");
   const activity = activityQuery.data?.entries ?? [];
+  const joinedAt = safeParse(user.createdAt);
 
   return (
     <div className="grid gap-4">
@@ -105,40 +99,54 @@ export function UserDetail({ userId }: { userId: string }) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Account info</CardTitle>
-          <CardDescription>
-            Read-only profile details from the user&apos;s record.
-          </CardDescription>
+          <CardTitle>{t("info.title")}</CardTitle>
+          <CardDescription>{t("info.description")}</CardDescription>
         </CardHeader>
         <CardContent>
           <dl className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
             <div>
-              <dt className="text-xs text-muted-foreground">Email</dt>
+              <dt className="text-xs text-muted-foreground">
+                {t("info.email")}
+              </dt>
               <dd>{user.email}</dd>
             </div>
             <div>
-              <dt className="text-xs text-muted-foreground">Joined</dt>
-              <dd>{formatDate(user.createdAt)}</dd>
+              <dt className="text-xs text-muted-foreground">
+                {t("info.joined")}
+              </dt>
+              <dd>
+                {joinedAt
+                  ? format.dateTime(joinedAt, { dateStyle: "long" })
+                  : user.createdAt}
+              </dd>
             </div>
             <div>
-              <dt className="text-xs text-muted-foreground">Login method</dt>
+              <dt className="text-xs text-muted-foreground">
+                {t("info.loginMethod")}
+              </dt>
               <dd className="flex items-center gap-2">
                 {user.hasPassword ? (
-                  <Badge variant="outline">Password</Badge>
+                  <Badge variant="outline">{t("info.password")}</Badge>
                 ) : null}
-                {hasGoogle ? <Badge variant="outline">Google</Badge> : null}
+                {hasGoogle ? (
+                  <Badge variant="outline">{t("info.google")}</Badge>
+                ) : null}
                 {!user.hasPassword && !hasGoogle ? (
-                  <span className="text-muted-foreground">None</span>
+                  <span className="text-muted-foreground">
+                    {t("info.loginMethodNone")}
+                  </span>
                 ) : null}
               </dd>
             </div>
             <div>
-              <dt className="text-xs text-muted-foreground">Onboarding</dt>
+              <dt className="text-xs text-muted-foreground">
+                {t("info.onboarding")}
+              </dt>
               <dd>
                 {user.hasCompletedOnboarding ? (
-                  <Badge variant="secondary">Completed</Badge>
+                  <Badge variant="secondary">{t("info.completed")}</Badge>
                 ) : (
-                  <Badge variant="destructive">Pending</Badge>
+                  <Badge variant="destructive">{t("info.pending")}</Badge>
                 )}
               </dd>
             </div>
@@ -148,22 +156,20 @@ export function UserDetail({ userId }: { userId: string }) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Actions</CardTitle>
-          <CardDescription>
-            Admin-only changes to this user&apos;s account.
-          </CardDescription>
+          <CardTitle>{t("actions.title")}</CardTitle>
+          <CardDescription>{t("actions.description")}</CardDescription>
         </CardHeader>
         <CardContent>
-          <Button onClick={() => setRoleDialogOpen(true)}>Change role</Button>
+          <Button onClick={() => setRoleDialogOpen(true)}>
+            {t("actions.changeRole")}
+          </Button>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle>Recent activity</CardTitle>
-          <CardDescription>
-            Latest audit entries with this user as the actor.
-          </CardDescription>
+          <CardTitle>{t("activity.title")}</CardTitle>
+          <CardDescription>{t("activity.description")}</CardDescription>
         </CardHeader>
         <CardContent>
           {activityQuery.isLoading ? (
@@ -173,7 +179,7 @@ export function UserDetail({ userId }: { userId: string }) {
             </div>
           ) : activity.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              No recent activity recorded.
+              {t("activity.empty")}
             </p>
           ) : (
             <ul className="grid">
@@ -197,13 +203,14 @@ export function UserDetail({ userId }: { userId: string }) {
 }
 
 function BackLink() {
+  const t = useTranslations("adminComponents.userDetail");
   return (
     <Link
       href="/app/admin/users"
       className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
     >
       <ArrowLeftIcon className="size-4" />
-      Back to users
+      {t("backToUsers")}
     </Link>
   );
 }

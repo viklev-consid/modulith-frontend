@@ -1,0 +1,11 @@
+{
+  "dashboard": {
+    "brand": "Modulith",
+    "tagline": "Auth foundation is ready for the next feature slice.",
+    "admin": "Admin",
+    "settings": "Settings",
+    "signOut": "Sign out",
+    "title": "Dashboard",
+    "body": "The application shell will grow here once profile, notifications, and admin workflows are wired."
+  }
+}

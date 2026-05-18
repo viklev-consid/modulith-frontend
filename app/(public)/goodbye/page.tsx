@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CheckCircle2Icon } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -11,11 +12,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-export const metadata: Metadata = {
-  title: "Account deleted | Modulith",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("metadata.auth.goodbye");
+  return { title: t("title") };
+}
 
-export default function GoodbyePage() {
+export default async function GoodbyePage() {
+  const t = await getTranslations("auth.goodbye");
   return (
     <main className="flex min-h-svh items-center justify-center px-4 py-10">
       <Card className="w-full max-w-md">
@@ -23,14 +26,12 @@ export default function GoodbyePage() {
           <div className="mx-auto mb-2 flex size-12 items-center justify-center rounded-full bg-muted">
             <CheckCircle2Icon className="size-6 text-emerald-600" />
           </div>
-          <CardTitle>Account deleted</CardTitle>
-          <CardDescription>
-            Your account and all associated data have been permanently removed.
-          </CardDescription>
+          <CardTitle>{t("title")}</CardTitle>
+          <CardDescription>{t("description")}</CardDescription>
         </CardHeader>
         <CardContent className="flex justify-center">
           <Link href="/login" className={buttonVariants()}>
-            Return to home
+            {t("cta")}
           </Link>
         </CardContent>
       </Card>

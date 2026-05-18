@@ -10,42 +10,56 @@ import {
   ShieldIcon,
   UserIcon,
 } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
 import { cn } from "@/lib/utils";
 
-export const metadata: Metadata = {
-  title: "Settings | Modulith",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("metadata.settings");
+  return { title: t("shell") };
+}
 
-const links = [
-  { href: "/app/settings", label: "Profile", icon: UserIcon },
-  { href: "/app/settings/password", label: "Password", icon: KeyRoundIcon },
-  { href: "/app/settings/email", label: "Email", icon: MailIcon },
-  { href: "/app/settings/security", label: "Security", icon: ShieldIcon },
-  { href: "/app/settings/activity", label: "Activity", icon: ActivityIcon },
-  { href: "/app/settings/connections", label: "Connections", icon: LinkIcon },
+type SettingsLinkKey =
+  | "profile"
+  | "password"
+  | "email"
+  | "security"
+  | "activity"
+  | "connections"
+  | "notifications"
+  | "data";
+
+const links: { href: string; key: SettingsLinkKey; icon: typeof UserIcon }[] = [
+  { href: "/app/settings", key: "profile", icon: UserIcon },
+  { href: "/app/settings/password", key: "password", icon: KeyRoundIcon },
+  { href: "/app/settings/email", key: "email", icon: MailIcon },
+  { href: "/app/settings/security", key: "security", icon: ShieldIcon },
+  { href: "/app/settings/activity", key: "activity", icon: ActivityIcon },
+  { href: "/app/settings/connections", key: "connections", icon: LinkIcon },
   {
     href: "/app/settings/notifications",
-    label: "Notifications",
+    key: "notifications",
     icon: BellIcon,
   },
-  { href: "/app/settings/data", label: "Your data", icon: DatabaseIcon },
+  { href: "/app/settings/data", key: "data", icon: DatabaseIcon },
 ];
 
-export default function SettingsLayout({
+export default async function SettingsLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const [t, tNav] = await Promise.all([
+    getTranslations("settings.shell"),
+    getTranslations("settings.nav"),
+  ]);
   return (
     <main className="min-h-svh bg-background">
       <div className="mx-auto grid w-full max-w-6xl gap-6 px-4 py-6 md:grid-cols-[220px_1fr] md:px-6">
         <aside className="md:border-r md:pr-4">
           <div className="mb-4">
-            <h1 className="text-lg font-semibold">Settings</h1>
-            <p className="text-sm text-muted-foreground">
-              Manage your account preferences.
-            </p>
+            <h1 className="text-lg font-semibold">{t("title")}</h1>
+            <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
           </div>
           <nav className="grid gap-1">
             {links.map((item) => (
@@ -57,7 +71,7 @@ export default function SettingsLayout({
                 )}
               >
                 <item.icon className="size-4" />
-                {item.label}
+                {tNav(item.key)}
               </Link>
             ))}
           </nav>

@@ -9,6 +9,7 @@ import {
 import Script from "next/script";
 import { useForm } from "@tanstack/react-form";
 import { useId, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { mapProblemToFieldErrors, type ProblemDetails } from "@/api/problems";
 import {
@@ -60,6 +61,7 @@ declare global {
 type Step = "terms" | "password" | "complete";
 
 export default function OnboardingPage() {
+  const t = useTranslations("onboarding.page");
   const { currentUser, completeOnboarding, setInitialPassword } = useAuth();
   const [step, setStep] = useState<Step>("terms");
   const [termsAccepted, setTermsAccepted] = useState(false);
@@ -88,7 +90,7 @@ export default function OnboardingPage() {
       setFieldErrors({});
 
       if (value.password !== value.confirmPassword) {
-        setFieldErrors({ confirmPassword: "Passwords must match." });
+        setFieldErrors({ confirmPassword: t("password.mismatch") });
         return;
       }
 
@@ -125,7 +127,7 @@ export default function OnboardingPage() {
     });
 
     if (!parsed.success) {
-      setFieldErrors({ acceptTerms: "Accept the terms to continue." });
+      setFieldErrors({ acceptTerms: t("terms.errorAcceptTerms") });
       setStep("terms");
       return;
     }
@@ -139,7 +141,7 @@ export default function OnboardingPage() {
 
   function continueFromTerms() {
     if (!termsAccepted) {
-      setFieldErrors({ acceptTerms: "Accept the terms to continue." });
+      setFieldErrors({ acceptTerms: t("terms.errorAcceptTerms") });
       return;
     }
 
@@ -186,10 +188,8 @@ export default function OnboardingPage() {
     <main className="flex min-h-svh items-center justify-center px-4 py-10">
       <Card className="w-full max-w-xl">
         <CardHeader>
-          <CardTitle>Finish account setup</CardTitle>
-          <CardDescription>
-            Complete these steps before entering your workspace.
-          </CardDescription>
+          <CardTitle>{t("title")}</CardTitle>
+          <CardDescription>{t("description")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <Stepper activeStep={step} steps={steps} />
@@ -199,18 +199,13 @@ export default function OnboardingPage() {
               <div className="grid gap-3 border border-border p-3 text-xs leading-relaxed text-muted-foreground">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="border border-border px-2 py-0.5 text-foreground">
-                    Terms v1.0
+                    {t("terms.versionTerms")}
                   </span>
                   <span className="border border-border px-2 py-0.5 text-foreground">
-                    Privacy v1.0
+                    {t("terms.versionPrivacy")}
                   </span>
                 </div>
-                <p>
-                  By continuing, you agree to use Modulith according to the
-                  workspace terms and acknowledge how account data is processed
-                  for authentication, notifications, audit history, and account
-                  administration.
-                </p>
+                <p>{t("terms.summary")}</p>
               </div>
 
               <FieldGroup>
@@ -226,7 +221,7 @@ export default function OnboardingPage() {
                   />
                   <FieldContent>
                     <FieldLabel htmlFor="acceptTerms">
-                      I accept the terms and privacy policy
+                      {t("terms.acceptTerms")}
                     </FieldLabel>
                     <FieldError>{fieldErrors.acceptTerms}</FieldError>
                   </FieldContent>
@@ -241,9 +236,11 @@ export default function OnboardingPage() {
                   />
                   <FieldContent>
                     <FieldLabel htmlFor="acceptMarketingEmails">
-                      Send me product updates by email
+                      {t("terms.acceptMarketing")}
                     </FieldLabel>
-                    <FieldDescription>Optional.</FieldDescription>
+                    <FieldDescription>
+                      {t("terms.marketingHint")}
+                    </FieldDescription>
                   </FieldContent>
                 </Field>
               </FieldGroup>
@@ -254,7 +251,7 @@ export default function OnboardingPage() {
                 disabled={!termsAccepted}
                 onClick={continueFromTerms}
               >
-                Continue
+                {t("terms.submit")}
               </Button>
             </section>
           )}
@@ -270,9 +267,9 @@ export default function OnboardingPage() {
               <div className="flex items-start gap-2 border border-border p-3">
                 <KeyRoundIcon className="mt-0.5 size-4 text-muted-foreground" />
                 <div className="space-y-1 text-xs">
-                  <FieldTitle>Set an initial password</FieldTitle>
+                  <FieldTitle>{t("password.title")}</FieldTitle>
                   <FieldDescription>
-                    Add a password if you want to sign in without Google later.
+                    {t("password.description")}
                   </FieldDescription>
                 </div>
               </div>
@@ -281,7 +278,9 @@ export default function OnboardingPage() {
                 <passwordForm.Field name="password">
                   {(field) => (
                     <Field>
-                      <FieldLabel htmlFor={field.name}>New password</FieldLabel>
+                      <FieldLabel htmlFor={field.name}>
+                        {t("password.newLabel")}
+                      </FieldLabel>
                       <Input
                         id={field.name}
                         type="password"
@@ -294,7 +293,7 @@ export default function OnboardingPage() {
                         }
                       />
                       <FieldDescription>
-                        Minimum 10 characters.
+                        {t("password.newHint")}
                       </FieldDescription>
                       <FieldError>{fieldErrors.password}</FieldError>
                     </Field>
@@ -304,7 +303,7 @@ export default function OnboardingPage() {
                   {(field) => (
                     <Field>
                       <FieldLabel htmlFor={field.name}>
-                        Confirm password
+                        {t("password.confirmLabel")}
                       </FieldLabel>
                       <Input
                         id={field.name}
@@ -324,10 +323,9 @@ export default function OnboardingPage() {
                 <passwordForm.Field name="googleIdToken">
                   {(field) => (
                     <Field>
-                      <FieldLabel>Confirm with Google</FieldLabel>
+                      <FieldLabel>{t("password.verifyLabel")}</FieldLabel>
                       <FieldDescription>
-                        Re-verify the Google account you signed up with to
-                        protect this account before adding a password.
+                        {t("password.verifyDescription")}
                       </FieldDescription>
                       {googleClientId ? (
                         <>
@@ -339,7 +337,7 @@ export default function OnboardingPage() {
                           {field.state.value ? (
                             <div className="flex items-center gap-2 border border-border p-3 text-sm">
                               <CheckCircle2Icon className="size-4 text-foreground" />
-                              <span>Google account verified.</span>
+                              <span>{t("password.verifyConfirmed")}</span>
                             </div>
                           ) : (
                             <>
@@ -354,7 +352,7 @@ export default function OnboardingPage() {
                                   variant="outline"
                                   disabled
                                 >
-                                  Loading Google verification…
+                                  {t("password.verifyLoading")}
                                 </Button>
                               )}
                             </>
@@ -362,8 +360,7 @@ export default function OnboardingPage() {
                         </>
                       ) : (
                         <div className="border border-border p-3 text-sm text-muted-foreground">
-                          Google sign-in is not configured. Contact your
-                          administrator to finish onboarding.
+                          {t("password.googleUnavailable")}
                         </div>
                       )}
                       <FieldError>{fieldErrors.googleIdToken}</FieldError>
@@ -378,14 +375,14 @@ export default function OnboardingPage() {
                   variant="outline"
                   onClick={() => setStep("complete")}
                 >
-                  Skip for now
+                  {t("password.skip")}
                 </Button>
                 <passwordForm.Subscribe
                   selector={(state) => state.values.googleIdToken}
                 >
                   {(googleIdToken) => (
                     <Button type="submit" disabled={!googleIdToken}>
-                      Set password
+                      {t("password.submit")}
                     </Button>
                   )}
                 </passwordForm.Subscribe>
@@ -398,9 +395,9 @@ export default function OnboardingPage() {
               <div className="flex items-start gap-2 border border-border p-3">
                 <ShieldCheckIcon className="mt-0.5 size-4 text-muted-foreground" />
                 <div className="space-y-1 text-xs">
-                  <FieldTitle>Ready to enter Modulith</FieldTitle>
+                  <FieldTitle>{t("complete.title")}</FieldTitle>
                   <FieldDescription>
-                    We&apos;ll save your onboarding choices and open the app.
+                    {t("complete.description")}
                   </FieldDescription>
                 </div>
               </div>
@@ -409,7 +406,7 @@ export default function OnboardingPage() {
                 type="button"
                 onClick={() => void finishOnboarding()}
               >
-                Complete setup
+                {t("complete.submit")}
               </Button>
             </section>
           )}
@@ -420,6 +417,7 @@ export default function OnboardingPage() {
 }
 
 function Stepper({ activeStep, steps }: { activeStep: Step; steps: Step[] }) {
+  const t = useTranslations("onboarding.page.steps");
   const activeIndex = steps.indexOf(activeStep);
 
   return (
@@ -435,7 +433,7 @@ function Stepper({ activeStep, steps }: { activeStep: Step; steps: Step[] }) {
           <span className="flex size-4 items-center justify-center border border-current">
             {index < activeIndex ? <CheckIcon className="size-3" /> : index + 1}
           </span>
-          <span className="capitalize">{step}</span>
+          <span>{t(step)}</span>
         </li>
       ))}
     </ol>

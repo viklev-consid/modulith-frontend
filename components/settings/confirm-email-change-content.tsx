@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { CheckCircle2Icon, LoaderCircleIcon, XCircleIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { fetchJson } from "@/components/settings/client-fetch";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -20,6 +21,7 @@ import { Input } from "@/components/ui/input";
 type Status = "idle" | "loading" | "success" | "error";
 
 export function ConfirmEmailChangeContent() {
+  const t = useTranslations("settingsForms.confirmEmailChange");
   const searchParams = useSearchParams();
   const initialToken = searchParams.get("token") ?? "";
   const [token, setToken] = useState(initialToken);
@@ -69,21 +71,21 @@ export function ConfirmEmailChangeContent() {
         </div>
         <CardTitle>
           {isLoading
-            ? "Confirming email change"
+            ? t("loading.title")
             : isConfirmed
-              ? "Email updated"
+              ? t("success.title")
               : isError
-                ? "Invalid or expired link"
-                : "Confirm email change"}
+                ? t("error.title")
+                : t("idle.title")}
         </CardTitle>
         <CardDescription>
           {isLoading
-            ? "Please wait while we verify the confirmation link."
+            ? t("loading.description")
             : isConfirmed
-              ? "Your new email address is ready to use."
+              ? t("success.description")
               : isError
-                ? "Request a fresh confirmation link from Email settings."
-                : "Paste the confirmation token from your email to finish the change."}
+                ? t("error.description")
+                : t("idle.description")}
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
@@ -92,7 +94,7 @@ export function ConfirmEmailChangeContent() {
             href={isConfirmed ? "/app" : "/app/settings/email"}
             className={buttonVariants()}
           >
-            {isConfirmed ? "Go to app" : "Back to Email settings"}
+            {isConfirmed ? t("success.cta") : t("error.cta")}
           </Link>
         ) : (
           !isLoading && (
@@ -107,17 +109,17 @@ export function ConfirmEmailChangeContent() {
             >
               <Field>
                 <FieldLabel htmlFor="change-token">
-                  Confirmation token
+                  {t("tokenLabel")}
                 </FieldLabel>
                 <Input
                   id="change-token"
                   value={token}
                   onChange={(event) => setToken(event.target.value)}
-                  placeholder="Paste the token from your email"
+                  placeholder={t("tokenPlaceholder")}
                 />
               </Field>
               <Button type="submit" className="w-full" disabled={!token.trim()}>
-                Confirm email change
+                {t("submit")}
               </Button>
             </form>
           )

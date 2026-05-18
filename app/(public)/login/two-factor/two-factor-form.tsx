@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { useTranslations } from "next-intl";
 
 import { mapProblemToFieldErrors, type ProblemDetails } from "@/api/problems";
 import { useAuth } from "@/components/auth-provider";
@@ -56,17 +57,16 @@ function useHasMounted() {
 }
 
 function NoChallengeShell() {
+  const t = useTranslations("auth.twoFactor");
   return (
     <main className="flex min-h-svh items-center justify-center px-4 py-10">
       <div className="w-full max-w-sm space-y-4 text-center">
-        <p className="text-sm text-muted-foreground">
-          No active verification challenge.
-        </p>
+        <p className="text-sm text-muted-foreground">{t("noChallenge")}</p>
         <Link
           href="/login"
           className="text-sm underline underline-offset-4 hover:text-foreground"
         >
-          Back to sign in
+          {t("backToSignIn")}
         </Link>
       </div>
     </main>
@@ -74,6 +74,7 @@ function NoChallengeShell() {
 }
 
 function ExpiryCountdown({ expiresAt }: { expiresAt: string }) {
+  const t = useTranslations("auth.twoFactor");
   const target = useMemo(() => new Date(expiresAt).getTime(), [expiresAt]);
   const [remaining, setRemaining] = useState(() => target - Date.now());
 
@@ -87,9 +88,9 @@ function ExpiryCountdown({ expiresAt }: { expiresAt: string }) {
   if (remaining <= 0) {
     return (
       <p className="text-xs text-destructive">
-        This challenge has expired.{" "}
+        {t("expired")}{" "}
         <Link href="/login" className="underline-offset-4 hover:underline">
-          Start over
+          {t("startOver")}
         </Link>
         .
       </p>
@@ -102,12 +103,13 @@ function ExpiryCountdown({ expiresAt }: { expiresAt: string }) {
 
   return (
     <p className="text-xs text-muted-foreground">
-      Challenge expires in {minutes}:{seconds}
+      {t("expiresIn", { minutes, seconds })}
     </p>
   );
 }
 
 export function TwoFactorForm() {
+  const t = useTranslations("auth.twoFactor");
   const { completeTwoFactorLogin } = useAuth();
   const challenge = useChallenge();
   const mounted = useHasMounted();
@@ -147,14 +149,12 @@ export function TwoFactorForm() {
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle>
-            {mode === "totp"
-              ? "Enter verification code"
-              : "Use a recovery code"}
+            {mode === "totp" ? t("totp.title") : t("recovery.title")}
           </CardTitle>
           <CardDescription>
             {mode === "totp"
-              ? "Open your authenticator app and enter the 6-digit code."
-              : "Enter one of the codes you saved when you set up two-factor authentication."}
+              ? t("totp.description")
+              : t("recovery.description")}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -169,7 +169,9 @@ export function TwoFactorForm() {
             <FieldGroup>
               <Field>
                 <FieldLabel htmlFor="code">
-                  {mode === "totp" ? "Code" : "Recovery code"}
+                  {mode === "totp"
+                    ? t("totp.codeLabel")
+                    : t("recovery.codeLabel")}
                 </FieldLabel>
                 {mode === "totp" ? (
                   <InputOTP
@@ -199,7 +201,7 @@ export function TwoFactorForm() {
                     value={code}
                     aria-invalid={Boolean(fieldErrors.code)}
                     onChange={(event) => setCode(event.target.value.trim())}
-                    placeholder="abcd-efgh-ij"
+                    placeholder={t("recovery.placeholder")}
                   />
                 )}
                 <FieldError>{fieldErrors.code}</FieldError>
@@ -208,7 +210,7 @@ export function TwoFactorForm() {
               {challenge ? (
                 <ExpiryCountdown expiresAt={challenge.expiresAt} />
               ) : (
-                <p className="text-xs text-muted-foreground">Loading…</p>
+                <p className="text-xs text-muted-foreground">{t("loading")}</p>
               )}
             </FieldGroup>
 
@@ -217,7 +219,7 @@ export function TwoFactorForm() {
               className="w-full"
               disabled={!code || submitting}
             >
-              {submitting ? "Verifying…" : "Verify and sign in"}
+              {submitting ? t("submitting") : t("submit")}
             </Button>
 
             <div className="space-y-2 text-center">
@@ -230,15 +232,15 @@ export function TwoFactorForm() {
                 }}
               >
                 {mode === "totp"
-                  ? "Use a recovery code instead"
-                  : "Use an authenticator code instead"}
+                  ? t("totp.switchToRecovery")
+                  : t("recovery.switchToTotp")}
               </button>
               <div>
                 <Link
                   href="/login"
                   className="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
                 >
-                  Back to sign in
+                  {t("backToSignIn")}
                 </Link>
               </div>
             </div>

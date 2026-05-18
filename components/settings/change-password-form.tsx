@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useForm } from "@tanstack/react-form";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { zChangePasswordRequest } from "@/api/generated/zod.gen";
 import { mapProblemToFieldErrors, type ProblemDetails } from "@/api/problems";
@@ -24,6 +25,7 @@ import {
 import { Input } from "@/components/ui/input";
 
 export function ChangePasswordForm() {
+  const t = useTranslations("settingsForms.password");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const form = useForm({
@@ -35,7 +37,7 @@ export function ChangePasswordForm() {
     onSubmit: async ({ value, formApi }) => {
       setFieldErrors({});
       if (value.newPassword !== value.confirmPassword) {
-        setFieldErrors({ confirmPassword: "Passwords must match." });
+        setFieldErrors({ confirmPassword: t("mismatch") });
         return;
       }
 
@@ -48,7 +50,7 @@ export function ChangePasswordForm() {
         setFieldErrors(
           Object.fromEntries(
             Object.entries(parsed.error.flatten().fieldErrors).map(
-              ([field, messages]) => [field, messages[0] ?? "Invalid value"],
+              ([field, messages]) => [field, messages[0] ?? t("invalidValue")],
             ),
           ),
         );
@@ -61,7 +63,7 @@ export function ChangePasswordForm() {
           body: JSON.stringify(parsed.data),
         });
         formApi.reset();
-        toast.success("Password updated");
+        toast.success(t("saved"));
       } catch (error) {
         const problem = error as ProblemDetails;
         const nextErrors = mapProblemToFieldErrors(problem);
@@ -69,7 +71,7 @@ export function ChangePasswordForm() {
           ...nextErrors,
           currentPassword:
             nextErrors.currentPassword ??
-            fieldMessage(problem, "currentPassword", "Check your password."),
+            fieldMessage(problem, "currentPassword", t("checkPassword")),
         });
       }
     },
@@ -78,10 +80,8 @@ export function ChangePasswordForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Password</CardTitle>
-        <CardDescription>
-          Use a strong password that you do not use elsewhere.
-        </CardDescription>
+        <CardTitle>{t("title")}</CardTitle>
+        <CardDescription>{t("description")}</CardDescription>
       </CardHeader>
       <CardContent>
         <form
@@ -95,7 +95,9 @@ export function ChangePasswordForm() {
             <form.Field name="currentPassword">
               {(field) => (
                 <Field data-invalid={Boolean(fieldErrors.currentPassword)}>
-                  <FieldLabel htmlFor={field.name}>Current password</FieldLabel>
+                  <FieldLabel htmlFor={field.name}>
+                    {t("currentLabel")}
+                  </FieldLabel>
                   <FieldContent>
                     <Input
                       id={field.name}
@@ -115,7 +117,7 @@ export function ChangePasswordForm() {
             <form.Field name="newPassword">
               {(field) => (
                 <Field data-invalid={Boolean(fieldErrors.newPassword)}>
-                  <FieldLabel htmlFor={field.name}>New password</FieldLabel>
+                  <FieldLabel htmlFor={field.name}>{t("newLabel")}</FieldLabel>
                   <FieldContent>
                     <Input
                       id={field.name}
@@ -136,7 +138,7 @@ export function ChangePasswordForm() {
               {(field) => (
                 <Field data-invalid={Boolean(fieldErrors.confirmPassword)}>
                   <FieldLabel htmlFor={field.name}>
-                    Confirm new password
+                    {t("confirmLabel")}
                   </FieldLabel>
                   <FieldContent>
                     <Input
@@ -158,7 +160,7 @@ export function ChangePasswordForm() {
           <form.Subscribe selector={(state) => state.isSubmitting}>
             {(isSubmitting) => (
               <Button className="w-fit" type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Updating..." : "Update password"}
+                {isSubmitting ? t("submitting") : t("submit")}
               </Button>
             )}
           </form.Subscribe>

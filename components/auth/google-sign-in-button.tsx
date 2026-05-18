@@ -3,6 +3,7 @@
 import Script from "next/script";
 import { CircleIcon } from "lucide-react";
 import { useId, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/components/auth-provider";
@@ -32,6 +33,7 @@ export function GoogleSignInButton({
 }: {
   nextPath?: string | null;
 } = {}) {
+  const t = useTranslations("authComponents.googleSignIn");
   const id = useId().replace(/:/g, "");
   const { googleLogin } = useAuth();
   const [isReady, setIsReady] = useState(false);
@@ -69,7 +71,7 @@ export function GoogleSignInButton({
     return (
       <Button className="w-full" type="button" variant="outline" disabled>
         <CircleIcon />
-        Continue with Google
+        {t("continue")}
       </Button>
     );
   }

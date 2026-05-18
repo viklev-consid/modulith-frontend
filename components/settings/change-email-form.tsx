@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useForm } from "@tanstack/react-form";
 import { MailCheckIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { zRequestEmailChangeRequest } from "@/api/generated/zod.gen";
@@ -29,6 +30,8 @@ import {
 import { Input } from "@/components/ui/input";
 
 export function ChangeEmailForm() {
+  const t = useTranslations("settingsForms.email");
+  const tPassword = useTranslations("settingsForms.password");
   const { currentUser } = useAuth();
   const [pendingEmail, setPendingEmail] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -45,7 +48,10 @@ export function ChangeEmailForm() {
         setFieldErrors(
           Object.fromEntries(
             Object.entries(parsed.error.flatten().fieldErrors).map(
-              ([field, messages]) => [field, messages[0] ?? "Invalid value"],
+              ([field, messages]) => [
+                field,
+                messages[0] ?? tPassword("invalidValue"),
+              ],
             ),
           ),
         );
@@ -59,7 +65,7 @@ export function ChangeEmailForm() {
         });
         setPendingEmail(parsed.data.newEmail);
         formApi.reset();
-        toast.success("Confirmation link sent");
+        toast.success(t("sentToast"));
       } catch (error) {
         setFieldErrors(mapProblemToFieldErrors(error as ProblemDetails));
       }
@@ -69,31 +75,31 @@ export function ChangeEmailForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Email</CardTitle>
-        <CardDescription>
-          Change the address used for sign-in and account alerts.
-        </CardDescription>
+        <CardTitle>{t("title")}</CardTitle>
+        <CardDescription>{t("description")}</CardDescription>
       </CardHeader>
       <CardContent className="grid max-w-xl gap-5">
         {pendingEmail && (
           <Alert>
             <MailCheckIcon />
-            <AlertTitle>Confirmation pending</AlertTitle>
+            <AlertTitle>{t("pending.title")}</AlertTitle>
             <AlertDescription>
-              We sent a link to <strong>{pendingEmail}</strong>. Check your
-              email to complete the change.
+              {t.rich("pending.body", {
+                email: pendingEmail,
+                strong: (chunks) => <strong>{chunks}</strong>,
+              })}
             </AlertDescription>
           </Alert>
         )}
         <Field>
-          <FieldLabel htmlFor="current-email">Current email</FieldLabel>
+          <FieldLabel htmlFor="current-email">{t("currentLabel")}</FieldLabel>
           <FieldContent>
             <Input
               id="current-email"
               value={currentUser?.email ?? ""}
               readOnly
             />
-            <FieldDescription>This address remains active.</FieldDescription>
+            <FieldDescription>{t("currentHint")}</FieldDescription>
           </FieldContent>
         </Field>
         <form
@@ -107,9 +113,7 @@ export function ChangeEmailForm() {
             <form.Field name="newEmail">
               {(field) => (
                 <Field data-invalid={Boolean(fieldErrors.newEmail)}>
-                  <FieldLabel htmlFor={field.name}>
-                    New email address
-                  </FieldLabel>
+                  <FieldLabel htmlFor={field.name}>{t("newLabel")}</FieldLabel>
                   <FieldContent>
                     <Input
                       id={field.name}
@@ -121,9 +125,7 @@ export function ChangeEmailForm() {
                       }
                       aria-invalid={Boolean(fieldErrors.newEmail)}
                     />
-                    <FieldDescription>
-                      We&apos;ll send a confirmation link to the new address.
-                    </FieldDescription>
+                    <FieldDescription>{t("newHint")}</FieldDescription>
                     <FieldError>{fieldErrors.newEmail}</FieldError>
                   </FieldContent>
                 </Field>
@@ -132,7 +134,9 @@ export function ChangeEmailForm() {
             <form.Field name="currentPassword">
               {(field) => (
                 <Field data-invalid={Boolean(fieldErrors.currentPassword)}>
-                  <FieldLabel htmlFor={field.name}>Current password</FieldLabel>
+                  <FieldLabel htmlFor={field.name}>
+                    {t("passwordLabel")}
+                  </FieldLabel>
                   <FieldContent>
                     <Input
                       id={field.name}
@@ -153,7 +157,7 @@ export function ChangeEmailForm() {
           <form.Subscribe selector={(state) => state.isSubmitting}>
             {(isSubmitting) => (
               <Button className="w-fit" type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Requesting..." : "Request change"}
+                {isSubmitting ? t("submitting") : t("submit")}
               </Button>
             )}
           </form.Subscribe>

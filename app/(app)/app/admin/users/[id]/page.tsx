@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
+import { getTranslations } from "next-intl/server";
 
 import { serverClient } from "@/api/server-client";
 import {
@@ -9,9 +10,10 @@ import {
 import { UserDetail } from "@/components/admin/user-detail";
 import { createQueryClient } from "@/lib/query-client";
 
-export const metadata: Metadata = {
-  title: "User detail | Admin | Modulith",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("metadata.admin");
+  return { title: t("userDetail") };
+}
 
 export default async function AdminUserDetailPage({
   params,

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { CheckIcon } from "lucide-react";
 import { useForm } from "@tanstack/react-form";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { problemFromResponse, handleProblem } from "@/api/problems";
 import { zForgotPasswordRequest } from "@/api/generated/zod.gen";
@@ -24,6 +25,7 @@ import {
 import { Input } from "@/components/ui/input";
 
 export function ForgotPasswordForm() {
+  const t = useTranslations("auth.forgotPassword");
   const [sentEmail, setSentEmail] = useState<string | null>(null);
   const [emailError, setEmailError] = useState("");
 
@@ -62,10 +64,12 @@ export function ForgotPasswordForm() {
         <Card className="w-full max-w-sm">
           <CardHeader>
             <CheckIcon className="mb-2 size-5 text-muted-foreground" />
-            <CardTitle>Check your email</CardTitle>
+            <CardTitle>{t("sent.title")}</CardTitle>
             <CardDescription>
-              We sent a password reset link to <strong>{sentEmail}</strong>. The
-              link expires in 30 minutes.
+              {t.rich("sent.body", {
+                email: sentEmail,
+                strong: (chunks) => <strong>{chunks}</strong>,
+              })}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -75,7 +79,7 @@ export function ForgotPasswordForm() {
               variant="outline"
               onClick={() => void form.handleSubmit()}
             >
-              Resend
+              {t("sent.resend")}
             </Button>
             <BackToSignIn />
           </CardContent>
@@ -88,10 +92,8 @@ export function ForgotPasswordForm() {
     <AuthShell>
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle>Reset password</CardTitle>
-          <CardDescription>
-            Enter your email and we&apos;ll send a reset link.
-          </CardDescription>
+          <CardTitle>{t("title")}</CardTitle>
+          <CardDescription>{t("description")}</CardDescription>
         </CardHeader>
         <CardContent>
           <form
@@ -105,7 +107,9 @@ export function ForgotPasswordForm() {
               <form.Field name="email">
                 {(field) => (
                   <Field>
-                    <FieldLabel htmlFor={field.name}>Email</FieldLabel>
+                    <FieldLabel htmlFor={field.name}>
+                      {t("emailLabel")}
+                    </FieldLabel>
                     <Input
                       id={field.name}
                       type="email"
@@ -124,7 +128,7 @@ export function ForgotPasswordForm() {
             </FieldGroup>
 
             <Button className="w-full" type="submit">
-              Send reset link
+              {t("submit")}
             </Button>
             <BackToSignIn />
           </form>
@@ -143,12 +147,13 @@ function AuthShell({ children }: { children: React.ReactNode }) {
 }
 
 function BackToSignIn() {
+  const t = useTranslations("auth.forgotPassword");
   return (
     <Link
       href="/login"
       className="block text-center text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
     >
-      Back to sign in
+      {t("back")}
     </Link>
   );
 }

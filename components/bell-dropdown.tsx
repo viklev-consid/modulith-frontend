@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { BellIcon } from "lucide-react";
+import { useFormatter, useTranslations } from "next-intl";
 
 import {
   getUnreadNotificationCountOptions,
@@ -15,10 +16,9 @@ import {
 } from "@/api/generated/@tanstack/react-query.gen";
 import type { MyNotificationResponse } from "@/api/generated";
 import {
-  notificationCategoryLabel,
+  notificationCategoryKey,
   notificationQueryKeyPrefix,
   safeNotificationHref,
-  notificationTime,
   unreadCountQueryKeyPrefix,
 } from "@/components/notifications-utils";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -37,6 +37,8 @@ function NotificationRow({
   notification: MyNotificationResponse;
   onSelect: (notification: MyNotificationResponse) => void;
 }) {
+  const t = useTranslations("components.notifications");
+  const format = useFormatter();
   return (
     <button
       type="button"
@@ -55,14 +57,15 @@ function NotificationRow({
         </span>
       </span>
       <span className="text-xs text-muted-foreground">
-        {notificationCategoryLabel(notification.category)} ·{" "}
-        {notificationTime(notification.createdAt)}
+        {t(`category.${notificationCategoryKey(notification.category)}`)} ·{" "}
+        {format.relativeTime(new Date(notification.createdAt))}
       </span>
     </button>
   );
 }
 
 export function BellDropdown() {
+  const t = useTranslations("components.notifications.bell");
   const { push } = useRouter();
   const queryClient = useQueryClient();
   const notificationsQuery = useQuery(
@@ -106,7 +109,7 @@ export function BellDropdown() {
     <Popover>
       <PopoverTrigger
         render={
-          <Button size="icon" variant="ghost" aria-label="Notifications">
+          <Button size="icon" variant="ghost" aria-label={t("aria")}>
             <BellIcon />
             {unreadCount > 0 && (
               <span className="absolute -mt-5 ml-5 min-w-4 rounded-full bg-sky-600 px-1 text-[10px] leading-4 text-white">
@@ -118,7 +121,7 @@ export function BellDropdown() {
       />
       <PopoverContent className="w-96 p-0" align="end">
         <div className="flex items-center justify-between px-4 py-3">
-          <h2 className="text-sm font-medium">Notifications</h2>
+          <h2 className="text-sm font-medium">{t("title")}</h2>
           <Button
             type="button"
             variant="link"
@@ -129,7 +132,7 @@ export function BellDropdown() {
             }}
             disabled={markAllRead.isPending || unreadCount === 0}
           >
-            Mark all read
+            {t("markAllRead")}
           </Button>
         </div>
         <Separator />
@@ -146,7 +149,7 @@ export function BellDropdown() {
             ))
           ) : (
             <p className="px-3 py-6 text-center text-sm text-muted-foreground">
-              All caught up
+              {t("empty")}
             </p>
           )}
         </div>
@@ -159,7 +162,7 @@ export function BellDropdown() {
               className: "w-full justify-center",
             })}
           >
-            View all notifications
+            {t("viewAll")}
           </Link>
         </div>
       </PopoverContent>

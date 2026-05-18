@@ -1,15 +1,17 @@
 import type { Metadata } from "next";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { Suspense } from "react";
+import { getTranslations } from "next-intl/server";
 
 import { serverClient } from "@/api/server-client";
 import { listUsersOptions } from "@/api/generated/@tanstack/react-query.gen";
 import { UsersTable } from "@/components/admin/users-table";
 import { createQueryClient } from "@/lib/query-client";
 
-export const metadata: Metadata = {
-  title: "Users | Admin | Modulith",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("metadata.admin");
+  return { title: t("users") };
+}
 
 const DEFAULT_PAGE_SIZE = 20;
 

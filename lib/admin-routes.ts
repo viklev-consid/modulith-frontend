@@ -5,9 +5,11 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
+export type AdminRouteLabelKey = "users" | "invitations" | "auditTrail";
+
 export type AdminRoute = {
   href: string;
-  label: string;
+  labelKey: AdminRouteLabelKey;
   icon: LucideIcon;
   permission: string;
 };
@@ -15,19 +17,19 @@ export type AdminRoute = {
 export const adminRoutes = [
   {
     href: "/app/admin/users",
-    label: "Users",
+    labelKey: "users",
     icon: UsersIcon,
     permission: "users.users.read",
   },
   {
     href: "/app/admin/invitations",
-    label: "Invitations",
+    labelKey: "invitations",
     icon: MailIcon,
     permission: "users.invitations.write",
   },
   {
     href: "/app/admin/audit",
-    label: "Audit trail",
+    labelKey: "auditTrail",
     icon: ClipboardListIcon,
     permission: "audit.trail.read",
   },

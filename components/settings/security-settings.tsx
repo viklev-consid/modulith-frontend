@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { CheckIcon, CopyIcon, DownloadIcon, ShieldIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import type {
@@ -72,6 +73,7 @@ function downloadCodes(codes: string[]) {
 }
 
 function RecoveryCodeList({ codes }: { codes: string[] }) {
+  const t = useTranslations("settingsForms.security.codes");
   const joined = codes.join("\n");
   return (
     <div className="space-y-3">
@@ -90,10 +92,10 @@ function RecoveryCodeList({ codes }: { codes: string[] }) {
           size="sm"
           onClick={() => {
             copyToClipboard(joined);
-            toast.success("Recovery codes copied");
+            toast.success(t("copied"));
           }}
         >
-          <CopyIcon className="size-4" /> Copy all
+          <CopyIcon className="size-4" /> {t("copyAll")}
         </Button>
         <Button
           type="button"
@@ -101,7 +103,7 @@ function RecoveryCodeList({ codes }: { codes: string[] }) {
           size="sm"
           onClick={() => downloadCodes(codes)}
         >
-          <DownloadIcon className="size-4" /> Download .txt
+          <DownloadIcon className="size-4" /> {t("downloadTxt")}
         </Button>
       </div>
     </div>
@@ -109,11 +111,12 @@ function RecoveryCodeList({ codes }: { codes: string[] }) {
 }
 
 function SecuritySettingsSkeleton() {
+  const t = useTranslations("settingsForms.security");
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Two-factor authentication</CardTitle>
-        <CardDescription>Loading your security settings…</CardDescription>
+        <CardTitle>{t("loadingTitle")}</CardTitle>
+        <CardDescription>{t("loadingDescription")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
         <Skeleton className="h-5 w-2/3" />
@@ -142,6 +145,7 @@ function DisabledPanel({
 }: {
   currentUser: GetCurrentUserResponse;
 }) {
+  const t = useTranslations("settingsForms.security.disabled");
   const queryClient = useQueryClient();
   const [step, setStep] = useState<SetupStep | null>(null);
   const [setup, setSetup] = useState<SetupTotpResponse | null>(null);
@@ -150,9 +154,8 @@ function DisabledPanel({
 
   async function startSetup() {
     if (!currentUser.hasPassword) {
-      toast.error("Set a password first", {
-        description:
-          "You need an account password before enabling two-factor authentication.",
+      toast.error(t("needsPasswordToast.title"), {
+        description: t("needsPasswordToast.description"),
       });
       return;
     }
@@ -218,22 +221,17 @@ function DisabledPanel({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Two-factor authentication</CardTitle>
-        <CardDescription>
-          Add a second step to your sign-in for an extra layer of security.
-        </CardDescription>
+        <CardTitle>{t("title")}</CardTitle>
+        <CardDescription>{t("description")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="flex items-center gap-2 text-sm font-medium">
           <ShieldIcon className="size-4 text-muted-foreground" />
-          Two-factor authentication is off
+          {t("status")}
         </div>
-        <p className="text-sm text-muted-foreground">
-          We&apos;ll ask for a code from your authenticator app the next time
-          you sign in.
-        </p>
+        <p className="text-sm text-muted-foreground">{t("explainer")}</p>
         <Button type="button" onClick={startSetup} disabled={starting}>
-          {starting ? "Starting…" : "Set up authenticator app"}
+          {starting ? t("starting") : t("start")}
         </Button>
       </CardContent>
     </Card>
@@ -249,13 +247,12 @@ function SetupScanStep({
   onContinue: () => void;
   onCancel: () => void;
 }) {
+  const t = useTranslations("settingsForms.security.scan");
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Scan with your authenticator</CardTitle>
-        <CardDescription>
-          Use Google Authenticator, 1Password, Authy, or any TOTP app.
-        </CardDescription>
+        <CardTitle>{t("title")}</CardTitle>
+        <CardDescription>{t("description")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-5">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
@@ -263,9 +260,7 @@ function SetupScanStep({
             <QRCodeCanvas className="rounded-md border bg-white p-2" />
           </QRCode>
           <div className="space-y-2">
-            <p className="text-sm text-muted-foreground">
-              Can&apos;t scan? Enter this code manually:
-            </p>
+            <p className="text-sm text-muted-foreground">{t("manualPrompt")}</p>
             <div className="flex items-center gap-2">
               <code className="rounded bg-muted px-2 py-1 font-mono text-xs">
                 {setup.secret}
@@ -276,21 +271,21 @@ function SetupScanStep({
                 size="sm"
                 onClick={() => {
                   copyToClipboard(setup.secret);
-                  toast.success("Secret copied");
+                  toast.success(t("secretCopied"));
                 }}
               >
                 <CopyIcon className="size-4" />
-                <span className="sr-only">Copy secret</span>
+                <span className="sr-only">{t("copySecret")}</span>
               </Button>
             </div>
           </div>
         </div>
         <div className="flex gap-2">
           <Button type="button" variant="outline" onClick={onCancel}>
-            Cancel
+            {t("back")}
           </Button>
           <Button type="button" onClick={onContinue}>
-            I&apos;ve added it, continue
+            {t("continue")}
           </Button>
         </div>
       </CardContent>
@@ -305,6 +300,7 @@ function SetupConfirmStep({
   onBack: () => void;
   onConfirmed: (codes: string[]) => void;
 }) {
+  const t = useTranslations("settingsForms.security.confirm");
   const [code, setCode] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -326,9 +322,7 @@ function SetupConfirmStep({
       const problem = error as ProblemDetails;
       const mapped = mapProblemToFieldErrors(problem);
       setFieldErrors({
-        code:
-          mapped.code ??
-          fieldMessage(problem, "code", "That code did not match."),
+        code: mapped.code ?? fieldMessage(problem, "code", t("wrongCode")),
       });
     } finally {
       setSubmitting(false);
@@ -338,10 +332,8 @@ function SetupConfirmStep({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Confirm with a code</CardTitle>
-        <CardDescription>
-          Enter the 6-digit code shown in your authenticator app right now.
-        </CardDescription>
+        <CardTitle>{t("title")}</CardTitle>
+        <CardDescription>{t("description")}</CardDescription>
       </CardHeader>
       <CardContent>
         <form
@@ -354,7 +346,7 @@ function SetupConfirmStep({
           }}
         >
           <Field>
-            <FieldLabel htmlFor="totp-confirm">Code from app</FieldLabel>
+            <FieldLabel htmlFor="totp-confirm">{t("codeLabel")}</FieldLabel>
             <InputOTP
               id="totp-confirm"
               maxLength={TOTP_LENGTH}
@@ -378,13 +370,13 @@ function SetupConfirmStep({
           </Field>
           <div className="flex gap-2">
             <Button type="button" variant="outline" onClick={onBack}>
-              Back
+              {t("back")}
             </Button>
             <Button
               type="submit"
               disabled={code.length !== TOTP_LENGTH || submitting}
             >
-              {submitting ? "Confirming…" : "Enable two-factor"}
+              {submitting ? t("submitting") : t("submit")}
             </Button>
           </div>
         </form>
@@ -400,16 +392,14 @@ function SetupCodesStep({
   codes: string[];
   onDone: () => void;
 }) {
+  const t = useTranslations("settingsForms.security.codes");
   const [acknowledged, setAcknowledged] = useState(false);
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Save your recovery codes</CardTitle>
-        <CardDescription>
-          Each code works once. Store them somewhere safe, they will not be
-          shown again.
-        </CardDescription>
+        <CardTitle>{t("title")}</CardTitle>
+        <CardDescription>{t("description")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <RecoveryCodeList codes={codes} />
@@ -422,10 +412,10 @@ function SetupCodesStep({
             checked={acknowledged}
             onCheckedChange={(checked) => setAcknowledged(checked === true)}
           />
-          I have saved my recovery codes
+          {t("acknowledge")}
         </label>
         <Button type="button" disabled={!acknowledged} onClick={onDone}>
-          <CheckIcon className="size-4" /> Finish setup
+          <CheckIcon className="size-4" /> {t("finish")}
         </Button>
       </CardContent>
     </Card>
@@ -433,6 +423,9 @@ function SetupCodesStep({
 }
 
 function EnabledPanel() {
+  const tEnabled = useTranslations("settingsForms.security.enabled");
+  const tRegen = useTranslations("settingsForms.security.regenerate");
+  const tDisable = useTranslations("settingsForms.security.disableCard");
   const queryClient = useQueryClient();
   const [regenerateOpen, setRegenerateOpen] = useState(false);
   const [disableOpen, setDisableOpen] = useState(false);
@@ -444,11 +437,8 @@ function EnabledPanel() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>New recovery codes</CardTitle>
-          <CardDescription>
-            Your old recovery codes have been invalidated. Save these new codes,
-            they will not be shown again.
-          </CardDescription>
+          <CardTitle>{tRegen("result.title")}</CardTitle>
+          <CardDescription>{tRegen("result.description")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <RecoveryCodeList codes={newRecoveryCodes} />
@@ -462,26 +452,21 @@ function EnabledPanel() {
     <div className="space-y-4">
       <Card>
         <CardHeader>
-          <CardTitle>Two-factor authentication</CardTitle>
-          <CardDescription>
-            You&apos;ll be asked for a code at every sign-in.
-          </CardDescription>
+          <CardTitle>{tEnabled("title")}</CardTitle>
+          <CardDescription>{tEnabled("description")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-2 text-sm font-medium">
             <ShieldIcon className="size-4 text-emerald-600" />
-            Two-factor authentication is on
+            {tEnabled("status")}
           </div>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle>Recovery codes</CardTitle>
-          <CardDescription>
-            Lost access to your codes? Generate a new set. Old codes stop
-            working.
-          </CardDescription>
+          <CardTitle>{tRegen("title")}</CardTitle>
+          <CardDescription>{tRegen("description")}</CardDescription>
         </CardHeader>
         <CardContent>
           <Button
@@ -489,7 +474,7 @@ function EnabledPanel() {
             variant="outline"
             onClick={() => setRegenerateOpen(true)}
           >
-            Regenerate recovery codes
+            {tRegen("open")}
           </Button>
         </CardContent>
       </Card>
@@ -497,11 +482,9 @@ function EnabledPanel() {
       <Card>
         <CardHeader>
           <CardTitle className="text-destructive">
-            Turn off two-factor
+            {tDisable("title")}
           </CardTitle>
-          <CardDescription>
-            Removes the second step from sign-in. You can turn it back on later.
-          </CardDescription>
+          <CardDescription>{tDisable("description")}</CardDescription>
         </CardHeader>
         <CardContent>
           <Button
@@ -509,7 +492,7 @@ function EnabledPanel() {
             variant="destructive"
             onClick={() => setDisableOpen(true)}
           >
-            Turn off two-factor
+            {tDisable("open")}
           </Button>
         </CardContent>
       </Card>
@@ -528,7 +511,7 @@ function EnabledPanel() {
         onOpenChange={setDisableOpen}
         onSuccess={async () => {
           setDisableOpen(false);
-          toast.success("Two-factor authentication is off");
+          toast.success(tEnabled("disabledToast"));
           await queryClient.invalidateQueries({
             queryKey: currentUserQueryKey,
           });
@@ -539,6 +522,7 @@ function EnabledPanel() {
 }
 
 function SaveAcknowledgeButton({ onDone }: { onDone: () => void }) {
+  const t = useTranslations("settingsForms.security.regenerate.result");
   const [ack, setAck] = useState(false);
   return (
     <div className="space-y-3">
@@ -551,10 +535,10 @@ function SaveAcknowledgeButton({ onDone }: { onDone: () => void }) {
           checked={ack}
           onCheckedChange={(checked) => setAck(checked === true)}
         />
-        I have saved my new recovery codes
+        {t("acknowledge")}
       </label>
       <Button type="button" disabled={!ack} onClick={onDone}>
-        Finish saving codes
+        {t("finish")}
       </Button>
     </div>
   );
@@ -576,6 +560,7 @@ function ConfirmFieldsForm({
   destructive?: boolean;
   onSubmit: (data: ConfirmFields) => Promise<void>;
 }) {
+  const t = useTranslations("settingsForms.security.credentials");
   const [password, setPassword] = useState("");
   const [code, setCode] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -616,7 +601,7 @@ function ConfirmFieldsForm({
       <FieldGroup>
         <Field data-invalid={Boolean(fieldErrors.currentPassword)}>
           <FieldLabel htmlFor="security-current-password">
-            Current password
+            {t("passwordLabel")}
           </FieldLabel>
           <FieldContent>
             <Input
@@ -631,15 +616,13 @@ function ConfirmFieldsForm({
           </FieldContent>
         </Field>
         <Field data-invalid={Boolean(fieldErrors.code)}>
-          <FieldLabel htmlFor="security-code">
-            Code from app (or recovery code)
-          </FieldLabel>
+          <FieldLabel htmlFor="security-code">{t("codeLabel")}</FieldLabel>
           <FieldContent>
             <Input
               id="security-code"
               autoComplete="one-time-code"
               value={code}
-              placeholder="123456 or abcd-efgh-ij"
+              placeholder={t("codePlaceholder")}
               onChange={(event) => setCode(event.target.value.trim())}
               aria-invalid={Boolean(fieldErrors.code)}
             />
@@ -669,19 +652,17 @@ function RegenerateDialog({
   onOpenChange: (open: boolean) => void;
   onSuccess: (codes: string[]) => void;
 }) {
+  const t = useTranslations("settingsForms.security.regenerate");
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Regenerate recovery codes?</DialogTitle>
-          <DialogDescription>
-            Your existing recovery codes will stop working immediately. Enter
-            your password and a current code to confirm.
-          </DialogDescription>
+          <DialogTitle>{t("dialog.title")}</DialogTitle>
+          <DialogDescription>{t("dialog.description")}</DialogDescription>
         </DialogHeader>
         <ConfirmFieldsForm
-          submitLabel="Regenerate codes"
-          pendingLabel="Regenerating…"
+          submitLabel={t("submit")}
+          pendingLabel={t("submitting")}
           onSubmit={async (data) => {
             const response = await fetchJson<RegenerateRecoveryCodesResponse>(
               "/api/proxy/v1/users/me/2fa/recovery-codes/regenerate",
@@ -708,19 +689,17 @@ function DisableDialog({
   onOpenChange: (open: boolean) => void;
   onSuccess: () => Promise<void> | void;
 }) {
+  const t = useTranslations("settingsForms.security.disableCard");
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Turn off two-factor authentication?</DialogTitle>
-          <DialogDescription>
-            Sign-in will no longer require a second step. You can re-enable it
-            later. Enter your password and a current code to confirm.
-          </DialogDescription>
+          <DialogTitle>{t("dialog.title")}</DialogTitle>
+          <DialogDescription>{t("dialog.description")}</DialogDescription>
         </DialogHeader>
         <ConfirmFieldsForm
-          submitLabel="Turn off"
-          pendingLabel="Turning off…"
+          submitLabel={t("submit")}
+          pendingLabel={t("submitting")}
           destructive
           onSubmit={async (data) => {
             await fetchJson("/api/proxy/v1/users/me/2fa", {

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { CheckCircle2Icon, ShieldAlertIcon } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { mapProblemToFieldErrors, type ProblemDetails } from "@/api/problems";
 import { zGoogleLoginConfirmRequest } from "@/api/generated/zod.gen";
@@ -26,6 +27,7 @@ export default function GoogleConfirmPage() {
 }
 
 function GoogleConfirmContent() {
+  const t = useTranslations("auth.googleConfirm");
   const searchParams = useSearchParams();
   const { googleConfirm } = useAuth();
   const [error, setError] = useState("");
@@ -42,7 +44,7 @@ function GoogleConfirmContent() {
     });
 
     if (!parsed.success) {
-      setError("This confirmation link is missing required information.");
+      setError(t("missingDetails"));
       return;
     }
 
@@ -54,7 +56,7 @@ function GoogleConfirmContent() {
         fieldErrors.token ??
           (problem as ProblemDetails).detail ??
           (problem as ProblemDetails).title ??
-          "This Google confirmation link is invalid or expired.",
+          t("invalidLink"),
       );
     }
   }
@@ -62,8 +64,8 @@ function GoogleConfirmContent() {
   if (!token) {
     return (
       <ConfirmMessage
-        title="Confirmation link missing"
-        description="Use the Google confirmation link from your email, or start sign-in again."
+        title={t("missing.title")}
+        description={t("missing.description")}
       />
     );
   }
@@ -73,10 +75,8 @@ function GoogleConfirmContent() {
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CheckCircle2Icon className="mb-2 size-5 text-muted-foreground" />
-          <CardTitle>Create account & continue</CardTitle>
-          <CardDescription>
-            Confirm this Google sign-in and finish account setup.
-          </CardDescription>
+          <CardTitle>{t("title")}</CardTitle>
+          <CardDescription>{t("description")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {(email || displayName) && (
@@ -91,13 +91,13 @@ function GoogleConfirmContent() {
             type="button"
             onClick={() => void confirm()}
           >
-            Create account & continue
+            {t("submit")}
           </Button>
           <Link
             href="/login"
             className="block text-center text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
           >
-            Back to sign in
+            {t("back")}
           </Link>
         </CardContent>
       </Card>
@@ -106,12 +106,13 @@ function GoogleConfirmContent() {
 }
 
 function ConfirmShell() {
+  const t = useTranslations("auth.googleConfirm");
   return (
     <main className="flex min-h-svh items-center justify-center px-4 py-10">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle>Confirm Google sign-in</CardTitle>
-          <CardDescription>Loading confirmation details.</CardDescription>
+          <CardTitle>{t("shellTitle")}</CardTitle>
+          <CardDescription>{t("shellDescription")}</CardDescription>
         </CardHeader>
       </Card>
     </main>
@@ -125,6 +126,7 @@ function ConfirmMessage({
   title: string;
   description: string;
 }) {
+  const t = useTranslations("auth.googleConfirm");
   return (
     <main className="flex min-h-svh items-center justify-center px-4 py-10">
       <Card className="w-full max-w-sm">
@@ -138,7 +140,7 @@ function ConfirmMessage({
             href="/login"
             className="inline-flex h-8 w-full items-center justify-center border border-border px-2.5 text-xs font-medium hover:bg-muted"
           >
-            Back to sign in
+            {t("back")}
           </Link>
         </CardContent>
       </Card>

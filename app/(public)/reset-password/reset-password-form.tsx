@@ -5,6 +5,7 @@ import { AlertTriangleIcon } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useForm } from "@tanstack/react-form";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import {
@@ -31,6 +32,7 @@ import {
 import { Input } from "@/components/ui/input";
 
 export function ResetPasswordContent() {
+  const t = useTranslations("auth.resetPassword");
   const searchParams = useSearchParams();
   const token = searchParams.get("token") ?? "";
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -46,7 +48,7 @@ export function ResetPasswordContent() {
       setPageError("");
 
       if (value.newPassword !== value.confirmPassword) {
-        setFieldErrors({ confirmPassword: "Passwords must match." });
+        setFieldErrors({ confirmPassword: t("mismatch") });
         return;
       }
 
@@ -75,16 +77,12 @@ export function ResetPasswordContent() {
       if (!response.ok) {
         const problem = await problemFromResponse(response);
         setFieldErrors(mapProblemToFieldErrors(problem as ProblemDetails));
-        setPageError(
-          problem.detail ??
-            problem.title ??
-            "This reset link is invalid or has expired.",
-        );
+        setPageError(problem.detail ?? problem.title ?? t("linkError"));
         return;
       }
 
-      toast.success("Password reset", {
-        description: "You can now sign in with your new password.",
+      toast.success(t("toast.title"), {
+        description: t("toast.description"),
       });
       window.location.assign("/login");
     },
@@ -93,8 +91,8 @@ export function ResetPasswordContent() {
   if (!token) {
     return (
       <ResetMessage
-        title="Reset link missing"
-        description="Use the password reset link from your email, or request a new one."
+        title={t("missing.title")}
+        description={t("missing.description")}
       />
     );
   }
@@ -103,10 +101,8 @@ export function ResetPasswordContent() {
     <main className="flex min-h-svh items-center justify-center px-4 py-10">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle>Set new password</CardTitle>
-          <CardDescription>
-            Choose a new password for your account.
-          </CardDescription>
+          <CardTitle>{t("title")}</CardTitle>
+          <CardDescription>{t("description")}</CardDescription>
         </CardHeader>
         <CardContent>
           <form
@@ -120,7 +116,7 @@ export function ResetPasswordContent() {
               <p className="text-xs text-destructive">
                 {pageError}{" "}
                 <Link href="/forgot-password" className="underline">
-                  Request a new link.
+                  {t("requestNew")}
                 </Link>
               </p>
             )}
@@ -129,7 +125,9 @@ export function ResetPasswordContent() {
               <form.Field name="newPassword">
                 {(field) => (
                   <Field>
-                    <FieldLabel htmlFor={field.name}>New password</FieldLabel>
+                    <FieldLabel htmlFor={field.name}>
+                      {t("newLabel")}
+                    </FieldLabel>
                     <Input
                       id={field.name}
                       type="password"
@@ -141,7 +139,7 @@ export function ResetPasswordContent() {
                         field.handleChange(event.target.value)
                       }
                     />
-                    <FieldDescription>Minimum 10 characters.</FieldDescription>
+                    <FieldDescription>{t("newHint")}</FieldDescription>
                     <FieldError>{fieldErrors.newPassword}</FieldError>
                   </Field>
                 )}
@@ -150,7 +148,7 @@ export function ResetPasswordContent() {
                 {(field) => (
                   <Field>
                     <FieldLabel htmlFor={field.name}>
-                      Confirm password
+                      {t("confirmLabel")}
                     </FieldLabel>
                     <Input
                       id={field.name}
@@ -170,7 +168,7 @@ export function ResetPasswordContent() {
             </FieldGroup>
 
             <Button className="w-full" type="submit">
-              Reset password
+              {t("submit")}
             </Button>
           </form>
         </CardContent>
@@ -180,12 +178,13 @@ export function ResetPasswordContent() {
 }
 
 export function ResetShell() {
+  const t = useTranslations("auth.resetPassword");
   return (
     <main className="flex min-h-svh items-center justify-center px-4 py-10">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle>Set new password</CardTitle>
-          <CardDescription>Loading reset link.</CardDescription>
+          <CardTitle>{t("title")}</CardTitle>
+          <CardDescription>{t("shellLoading")}</CardDescription>
         </CardHeader>
       </Card>
     </main>
@@ -199,6 +198,7 @@ function ResetMessage({
   title: string;
   description: string;
 }) {
+  const t = useTranslations("auth.resetPassword.missing");
   return (
     <main className="flex min-h-svh items-center justify-center px-4 py-10">
       <Card className="w-full max-w-sm">
@@ -212,7 +212,7 @@ function ResetMessage({
             href="/forgot-password"
             className="inline-flex h-8 w-full items-center justify-center border border-border px-2.5 text-xs font-medium hover:bg-muted"
           >
-            Request reset link
+            {t("cta")}
           </Link>
         </CardContent>
       </Card>

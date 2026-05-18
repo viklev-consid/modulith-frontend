@@ -5,6 +5,7 @@ import { LockIcon, MailCheckIcon } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useForm } from "@tanstack/react-form";
 import { useState, type ReactNode } from "react";
+import { useTranslations } from "next-intl";
 
 import { mapProblemToFieldErrors, type ProblemDetails } from "@/api/problems";
 import { zRegisterRequest } from "@/api/generated/zod.gen";
@@ -33,6 +34,7 @@ const registrationMode = (process.env.NEXT_PUBLIC_REGISTRATION_MODE ??
   "Open") as RegisterMode;
 
 export function RegisterContent() {
+  const t = useTranslations("auth.register");
   const { register, resendEmailConfirmation } = useAuth();
   const searchParams = useSearchParams();
   const invitationToken = searchParams.get("token");
@@ -50,7 +52,7 @@ export function RegisterContent() {
       setFieldErrors({});
 
       if (value.password !== value.confirmPassword) {
-        setFieldErrors({ confirmPassword: "Passwords must match." });
+        setFieldErrors({ confirmPassword: t("mismatch") });
         return;
       }
 
@@ -82,14 +84,14 @@ export function RegisterContent() {
   });
 
   if (registrationMode === "Disabled") {
-    return <RegisterMessage title="Registration closed" />;
+    return <RegisterMessage title={t("closed.title")} />;
   }
 
   if (registrationMode === "InviteOnly" && !invitationToken) {
     return (
       <RegisterMessage
-        title="Invitation required"
-        description="Registration is currently by invitation only."
+        title={t("inviteOnly.title")}
+        description={t("inviteOnly.description")}
       />
     );
   }
@@ -114,11 +116,9 @@ export function RegisterContent() {
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle>
-            {invitationToken ? "You're invited" : "Create account"}
+            {invitationToken ? t("titleInvited") : t("title")}
           </CardTitle>
-          <CardDescription>
-            Set up your Modulith workspace access.
-          </CardDescription>
+          <CardDescription>{t("description")}</CardDescription>
         </CardHeader>
         <CardContent>
           <form
@@ -132,14 +132,14 @@ export function RegisterContent() {
               <FormInput
                 form={form}
                 name="displayName"
-                label="Display name"
+                label={t("displayName")}
                 error={fieldErrors.displayName}
                 autoComplete="name"
               />
               <FormInput
                 form={form}
                 name="email"
-                label="Email"
+                label={t("email")}
                 error={fieldErrors.email}
                 type="email"
                 autoComplete="email"
@@ -147,7 +147,7 @@ export function RegisterContent() {
               <FormInput
                 form={form}
                 name="password"
-                label="Password"
+                label={t("password")}
                 error={fieldErrors.password}
                 type="password"
                 autoComplete="new-password"
@@ -155,7 +155,7 @@ export function RegisterContent() {
               <FormInput
                 form={form}
                 name="confirmPassword"
-                label="Confirm password"
+                label={t("confirmPassword")}
                 error={fieldErrors.confirmPassword}
                 type="password"
                 autoComplete="new-password"
@@ -163,20 +163,20 @@ export function RegisterContent() {
             </FieldGroup>
 
             <Button className="w-full" type="submit">
-              Create account
+              {t("submit")}
             </Button>
 
-            <FieldSeparator>or</FieldSeparator>
+            <FieldSeparator>{t("or")}</FieldSeparator>
 
             <GoogleSignInButton />
 
             <p className="text-center text-xs text-muted-foreground">
-              Already have an account?{" "}
+              {t("haveAccount")}{" "}
               <Link
                 href="/login"
                 className="text-foreground underline-offset-4 hover:underline"
               >
-                Sign in
+                {t("signIn")}
               </Link>
             </p>
           </form>
@@ -187,12 +187,13 @@ export function RegisterContent() {
 }
 
 export function RegisterShell() {
+  const t = useTranslations("auth.register");
   return (
     <main className="flex min-h-svh items-center justify-center px-4 py-10">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle>Create account</CardTitle>
-          <CardDescription>Loading registration options.</CardDescription>
+          <CardTitle>{t("title")}</CardTitle>
+          <CardDescription>{t("shellLoading")}</CardDescription>
         </CardHeader>
       </Card>
     </main>
@@ -206,6 +207,7 @@ function CheckEmailMessage({
   email: string;
   onResend: () => Promise<void>;
 }) {
+  const t = useTranslations("auth.register.checkEmail");
   const [isResending, setIsResending] = useState(false);
 
   return (
@@ -213,10 +215,12 @@ function CheckEmailMessage({
       <Card className="w-full max-w-sm">
         <CardHeader>
           <MailCheckIcon className="mb-2 size-5 text-muted-foreground" />
-          <CardTitle>Check your email</CardTitle>
+          <CardTitle>{t("title")}</CardTitle>
           <CardDescription>
-            We sent a confirmation link to <strong>{email}</strong>. Click the
-            link in that email to activate your account.
+            {t.rich("body", {
+              email,
+              strong: (chunks) => <strong>{chunks}</strong>,
+            })}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -233,15 +237,15 @@ function CheckEmailMessage({
               }
             }}
           >
-            {isResending ? "Resending…" : "Resend confirmation email"}
+            {isResending ? t("resending") : t("resend")}
           </Button>
           <p className="text-center text-xs text-muted-foreground">
-            Already confirmed?{" "}
+            {t("alreadyConfirmed")}{" "}
             <Link
               href="/login"
               className="text-foreground underline-offset-4 hover:underline"
             >
-              Sign in
+              {t("signIn")}
             </Link>
           </p>
         </CardContent>
@@ -252,25 +256,26 @@ function CheckEmailMessage({
 
 function RegisterMessage({
   title,
-  description = "New account registration is not available at this time.",
+  description,
 }: {
   title: string;
   description?: string;
 }) {
+  const t = useTranslations("auth.register.closed");
   return (
     <main className="flex min-h-svh items-center justify-center px-4 py-10">
       <Card className="w-full max-w-sm">
         <CardHeader>
           <LockIcon className="mb-2 size-5 text-muted-foreground" />
           <CardTitle>{title}</CardTitle>
-          <CardDescription>{description}</CardDescription>
+          <CardDescription>{description ?? t("description")}</CardDescription>
         </CardHeader>
         <CardContent>
           <Link
             href="/login"
             className="inline-flex h-8 w-full items-center justify-center border border-border px-2.5 text-xs font-medium hover:bg-muted"
           >
-            Already have an account? Sign in
+            {t("back")}
           </Link>
         </CardContent>
       </Card>

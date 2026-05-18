@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useForm } from "@tanstack/react-form";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { mapProblemToFieldErrors, type ProblemDetails } from "@/api/problems";
@@ -28,6 +29,8 @@ import {
 import { Input } from "@/components/ui/input";
 
 export function ProfileSettingsForm() {
+  const t = useTranslations("settingsForms.profile");
+  const tCommon = useTranslations("common.actions");
   const { currentUser } = useAuth();
   const queryClient = useQueryClient();
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -44,7 +47,7 @@ export function ProfileSettingsForm() {
           body: JSON.stringify({ displayName: value.displayName }),
         });
         await queryClient.invalidateQueries({ queryKey: ["current-user"] });
-        toast.success("Profile updated");
+        toast.success(t("saved"));
       } catch (error) {
         setFieldErrors(mapProblemToFieldErrors(error as ProblemDetails));
       }
@@ -64,10 +67,8 @@ export function ProfileSettingsForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Profile</CardTitle>
-        <CardDescription>
-          Update the name shown across your workspace.
-        </CardDescription>
+        <CardTitle>{t("title")}</CardTitle>
+        <CardDescription>{t("description")}</CardDescription>
       </CardHeader>
       <CardContent>
         <form
@@ -81,7 +82,9 @@ export function ProfileSettingsForm() {
             <form.Field name="displayName">
               {(field) => (
                 <Field data-invalid={Boolean(fieldErrors.displayName)}>
-                  <FieldLabel htmlFor={field.name}>Display name</FieldLabel>
+                  <FieldLabel htmlFor={field.name}>
+                    {t("displayName")}
+                  </FieldLabel>
                   <FieldContent>
                     <Input
                       id={field.name}
@@ -98,19 +101,17 @@ export function ProfileSettingsForm() {
               )}
             </form.Field>
             <Field>
-              <FieldLabel htmlFor="email">Email</FieldLabel>
+              <FieldLabel htmlFor="email">{t("email")}</FieldLabel>
               <FieldContent>
                 <Input id="email" value={currentUser?.email ?? ""} readOnly />
-                <FieldDescription>
-                  Change it in Email settings.
-                </FieldDescription>
+                <FieldDescription>{t("emailHint")}</FieldDescription>
               </FieldContent>
             </Field>
             <Field>
-              <FieldLabel>Role</FieldLabel>
+              <FieldLabel>{t("role")}</FieldLabel>
               <FieldContent>
                 <Badge variant="secondary" className="w-fit">
-                  {currentUser?.role ?? "User"}
+                  {currentUser?.role ?? t("roleFallback")}
                 </Badge>
               </FieldContent>
             </Field>
@@ -118,7 +119,7 @@ export function ProfileSettingsForm() {
           <form.Subscribe selector={(state) => state.isSubmitting}>
             {(isSubmitting) => (
               <Button className="w-fit" type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Saving..." : "Save changes"}
+                {isSubmitting ? tCommon("saving") : tCommon("save")}
               </Button>
             )}
           </form.Subscribe>

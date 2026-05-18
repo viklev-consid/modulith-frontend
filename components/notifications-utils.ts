@@ -1,19 +1,25 @@
-import { formatDistanceToNowStrict } from "date-fns";
+export type NotificationCategoryKey =
+  | "product"
+  | "collaboration"
+  | "system"
+  | "account"
+  | "security"
+  | "unknown";
 
-export function notificationCategoryLabel(category: number) {
+export function notificationCategoryKey(
+  category: number,
+): NotificationCategoryKey {
   return (
-    {
-      0: "Product",
-      1: "Collaboration",
-      2: "System",
-      3: "Account",
-      4: "Security",
-    }[category] ?? "Notification"
+    (
+      {
+        0: "product",
+        1: "collaboration",
+        2: "system",
+        3: "account",
+        4: "security",
+      } as const
+    )[category] ?? "unknown"
   );
-}
-
-export function notificationTime(value: string) {
-  return `${formatDistanceToNowStrict(new Date(value))} ago`;
 }
 
 export function safeNotificationHref(href: string | null | undefined) {

@@ -3,11 +3,12 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import type { MyNotificationResponse } from "@/api/generated";
 import {
-  notificationCategoryLabel,
+  notificationCategoryKey,
   notificationQueryKeyPrefix,
   safeNotificationHref,
   unreadCountQueryKeyPrefix,
@@ -93,6 +94,7 @@ function releaseNotificationSource() {
 }
 
 export function NotificationToast() {
+  const t = useTranslations("components.notifications");
   const { push } = useRouter();
   const queryClient = useQueryClient();
   const { isAuthenticated } = useAuth();
@@ -113,15 +115,16 @@ export function NotificationToast() {
       void queryClient.invalidateQueries(unreadCountQueryKeyPrefix());
 
       const href = safeNotificationHref(notification.link?.href);
+      const categoryKey = notificationCategoryKey(
+        Number(notification.category ?? 0),
+      );
 
-      toast(notification.title ?? "New notification", {
-        description: `${notificationCategoryLabel(
-          Number(notification.category ?? 0),
-        )} · just now`,
+      toast(notification.title ?? t("toast.newNotification"), {
+        description: `${t(`category.${categoryKey}`)} · ${t("toast.justNow")}`,
         duration: 5000,
         action: href
           ? {
-              label: "Open",
+              label: t("toast.open"),
               onClick: () => push(href),
             }
           : undefined,
@@ -137,7 +140,7 @@ export function NotificationToast() {
       );
       releaseNotificationSource();
     };
-  }, [isAuthenticated, push, queryClient]);
+  }, [isAuthenticated, push, queryClient, t]);
 
   return null;
 }

@@ -5,6 +5,7 @@ import Script from "next/script";
 import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "@tanstack/react-form";
 import { CircleIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { zSetInitialPasswordRequest } from "@/api/generated/zod.gen";
@@ -34,6 +35,7 @@ import {
 import { Input } from "@/components/ui/input";
 
 export function SetInitialPasswordForm() {
+  const t = useTranslations("settingsForms.setPassword");
   const queryClient = useQueryClient();
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
@@ -46,7 +48,7 @@ export function SetInitialPasswordForm() {
     onSubmit: async ({ value, formApi }) => {
       setFieldErrors({});
       if (value.password !== value.confirmPassword) {
-        setFieldErrors({ confirmPassword: "Passwords must match." });
+        setFieldErrors({ confirmPassword: t("mismatch") });
         return;
       }
 
@@ -59,7 +61,7 @@ export function SetInitialPasswordForm() {
         setFieldErrors(
           Object.fromEntries(
             Object.entries(parsed.error.flatten().fieldErrors).map(
-              ([field, messages]) => [field, messages[0] ?? "Invalid value"],
+              ([field, messages]) => [field, messages[0] ?? t("invalidValue")],
             ),
           ),
         );
@@ -73,7 +75,7 @@ export function SetInitialPasswordForm() {
         });
         await queryClient.invalidateQueries({ queryKey: ["current-user"] });
         formApi.reset();
-        toast.success("Password set");
+        toast.success(t("saved"));
       } catch (error) {
         setFieldErrors(mapProblemToFieldErrors(error as ProblemDetails));
       }
@@ -102,11 +104,8 @@ export function SetInitialPasswordForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Set a password</CardTitle>
-        <CardDescription>
-          Add a password to your account so you can sign in without Google, and
-          to unlock email changes and unlinking Google later.
-        </CardDescription>
+        <CardTitle>{t("title")}</CardTitle>
+        <CardDescription>{t("description")}</CardDescription>
       </CardHeader>
       <CardContent>
         <form
@@ -120,7 +119,7 @@ export function SetInitialPasswordForm() {
             <form.Field name="password">
               {(field) => (
                 <Field data-invalid={Boolean(fieldErrors.password)}>
-                  <FieldLabel htmlFor={field.name}>New password</FieldLabel>
+                  <FieldLabel htmlFor={field.name}>{t("newLabel")}</FieldLabel>
                   <FieldContent>
                     <Input
                       id={field.name}
@@ -141,7 +140,7 @@ export function SetInitialPasswordForm() {
               {(field) => (
                 <Field data-invalid={Boolean(fieldErrors.confirmPassword)}>
                   <FieldLabel htmlFor={field.name}>
-                    Confirm new password
+                    {t("confirmLabel")}
                   </FieldLabel>
                   <FieldContent>
                     <Input
@@ -160,7 +159,7 @@ export function SetInitialPasswordForm() {
               )}
             </form.Field>
             <Field>
-              <FieldLabel htmlFor={containerId}>Verify with Google</FieldLabel>
+              <FieldLabel htmlFor={containerId}>{t("verifyLabel")}</FieldLabel>
               <FieldContent>
                 {isAvailable && (
                   <Script
@@ -178,12 +177,10 @@ export function SetInitialPasswordForm() {
                     disabled
                   >
                     <CircleIcon />
-                    Continue with Google
+                    {t("continueWithGoogle")}
                   </Button>
                 )}
-                <FieldDescription>
-                  Confirm your Google identity before setting a password.
-                </FieldDescription>
+                <FieldDescription>{t("verifyHint")}</FieldDescription>
                 <FieldError>{fieldErrors.googleIdToken}</FieldError>
               </FieldContent>
             </Field>
@@ -198,10 +195,9 @@ export function SetInitialPasswordForm() {
               <>
                 {!hasCredential && (
                   <Alert>
-                    <AlertTitle>Verify with Google to continue</AlertTitle>
+                    <AlertTitle>{t("needsVerification.title")}</AlertTitle>
                     <AlertDescription>
-                      Click the Google button above to confirm your identity,
-                      then submit.
+                      {t("needsVerification.description")}
                     </AlertDescription>
                   </Alert>
                 )}
@@ -210,7 +206,7 @@ export function SetInitialPasswordForm() {
                   type="submit"
                   disabled={isSubmitting || !hasCredential}
                 >
-                  {isSubmitting ? "Setting password..." : "Set password"}
+                  {isSubmitting ? t("submitting") : t("submit")}
                 </Button>
               </>
             )}

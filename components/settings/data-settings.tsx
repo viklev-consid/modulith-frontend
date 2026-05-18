@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { DownloadIcon, Trash2Icon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { useAuth } from "@/components/auth-provider";
@@ -34,6 +35,8 @@ import {
 import { Input } from "@/components/ui/input";
 
 export function DataSettings() {
+  const t = useTranslations("settingsForms.data");
+  const tCommon = useTranslations("common.actions");
   const { currentUser } = useAuth();
   const { replace } = useRouter();
   const [confirmEmail, setConfirmEmail] = useState("");
@@ -77,10 +80,8 @@ export function DataSettings() {
     <div className="grid gap-5">
       <Card>
         <CardHeader>
-          <CardTitle>Export personal data</CardTitle>
-          <CardDescription>
-            Download a JSON file with all data we hold about you.
-          </CardDescription>
+          <CardTitle>{t("export.title")}</CardTitle>
+          <CardDescription>{t("export.description")}</CardDescription>
         </CardHeader>
         <CardContent>
           <Button
@@ -92,17 +93,16 @@ export function DataSettings() {
             disabled={isExporting}
           >
             <DownloadIcon />
-            {isExporting ? "Preparing..." : "Download my data"}
+            {isExporting ? t("export.submitting") : t("export.submit")}
           </Button>
         </CardContent>
       </Card>
       <Card className="border-destructive/40">
         <CardHeader>
-          <CardTitle className="text-destructive">Delete account</CardTitle>
-          <CardDescription>
-            Permanently delete your account and all associated data. This cannot
-            be undone.
-          </CardDescription>
+          <CardTitle className="text-destructive">
+            {t("delete.title")}
+          </CardTitle>
+          <CardDescription>{t("delete.description")}</CardDescription>
         </CardHeader>
         <CardContent>
           <AlertDialog>
@@ -110,22 +110,22 @@ export function DataSettings() {
               render={
                 <Button type="button" variant="destructive">
                   <Trash2Icon />
-                  Delete my account
+                  {t("delete.trigger")}
                 </Button>
               }
             />
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle className="text-destructive">
-                  Delete your account?
+                  {t("delete.confirmTitle")}
                 </AlertDialogTitle>
                 <AlertDialogDescription>
-                  This permanently removes your account and all associated data.
+                  {t("delete.confirmDescription")}
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <Field>
                 <FieldLabel htmlFor="delete-confirm-email">
-                  Type your email to confirm
+                  {t("delete.confirmLabel")}
                 </FieldLabel>
                 <FieldContent>
                   <Input
@@ -142,7 +142,7 @@ export function DataSettings() {
                     setConfirmEmail("");
                   }}
                 >
-                  Cancel
+                  {tCommon("cancel")}
                 </AlertDialogCancel>
                 <Button
                   type="button"
@@ -150,13 +150,13 @@ export function DataSettings() {
                   disabled={!canDelete || isDeleting}
                   onClick={() => {
                     if (!canDelete) {
-                      toast.error("Email does not match");
+                      toast.error(t("delete.emailMismatch"));
                       return;
                     }
                     void deleteAccount();
                   }}
                 >
-                  {isDeleting ? "Deleting..." : "Delete forever"}
+                  {isDeleting ? t("delete.submitting") : t("delete.submit")}
                 </Button>
               </AlertDialogFooter>
             </AlertDialogContent>

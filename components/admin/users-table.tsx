@@ -13,6 +13,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
+import { useTranslations } from "next-intl";
 import { ChevronLeftIcon, ChevronRightIcon, SearchIcon } from "lucide-react";
 
 import { listUsersOptions } from "@/api/generated/@tanstack/react-query.gen";
@@ -43,36 +44,41 @@ const DEFAULT_PAGE_SIZE = 20;
 
 const columnHelper = createColumnHelper<ListUsersUserDto>();
 
-const columns = [
-  columnHelper.accessor("displayName", {
-    header: "Name",
-    cell: ({ row, getValue }) => (
-      <Link
-        href={`/app/admin/users/${row.original.userId}`}
-        className="font-medium underline-offset-4 hover:underline"
-      >
-        {getValue() || row.original.email}
-      </Link>
-    ),
-  }),
-  columnHelper.accessor("email", {
-    header: "Email",
-    cell: ({ getValue }) => (
-      <span className="text-muted-foreground">{getValue()}</span>
-    ),
-  }),
-  columnHelper.accessor("role", {
-    header: "Role",
-    cell: ({ getValue }) => <RoleBadge role={getValue()} />,
-  }),
-];
-
 function toNumber(value: number | string) {
   return typeof value === "string" ? Number.parseInt(value, 10) : value;
 }
 
 export function UsersTable() {
+  const t = useTranslations("adminComponents.usersTable");
+  const tPagination = useTranslations("adminComponents.pagination");
   const { push } = useRouter();
+
+  const columns = useMemo(
+    () => [
+      columnHelper.accessor("displayName", {
+        header: t("columns.name"),
+        cell: ({ row, getValue }) => (
+          <Link
+            href={`/app/admin/users/${row.original.userId}`}
+            className="font-medium underline-offset-4 hover:underline"
+          >
+            {getValue() || row.original.email}
+          </Link>
+        ),
+      }),
+      columnHelper.accessor("email", {
+        header: t("columns.email"),
+        cell: ({ getValue }) => (
+          <span className="text-muted-foreground">{getValue()}</span>
+        ),
+      }),
+      columnHelper.accessor("role", {
+        header: t("columns.role"),
+        cell: ({ getValue }) => <RoleBadge role={getValue()} />,
+      }),
+    ],
+    [t],
+  );
   const [page, setPage] = useQueryState(
     "page",
     parseAsInteger.withDefault(1).withOptions({ clearOnDefault: true }),
@@ -108,16 +114,16 @@ export function UsersTable() {
     <div className="grid gap-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold">Users</h2>
+          <h2 className="text-lg font-semibold">{t("title")}</h2>
           <p className="text-xs text-muted-foreground">
-            {totalCount} total · page {page} of {totalPages}
+            {t("summary", { total: totalCount, page, totalPages })}
           </p>
         </div>
         <div className="relative w-full max-w-xs">
           <SearchIcon className="absolute left-2 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            aria-label="Search users"
-            placeholder="Search by name or email"
+            aria-label={t("search.aria")}
+            placeholder={t("search.placeholder")}
             className="pl-8"
             value={search}
             onChange={(event) => {
@@ -139,10 +145,8 @@ export function UsersTable() {
           ) : data.length === 0 ? (
             <Empty>
               <EmptyHeader>
-                <EmptyTitle>No users match this search</EmptyTitle>
-                <EmptyDescription>
-                  Try a different name or email.
-                </EmptyDescription>
+                <EmptyTitle>{t("empty.title")}</EmptyTitle>
+                <EmptyDescription>{t("empty.description")}</EmptyDescription>
               </EmptyHeader>
             </Empty>
           ) : (
@@ -199,7 +203,7 @@ export function UsersTable() {
           disabled={page <= 1 || query.isFetching}
         >
           <ChevronLeftIcon />
-          Prev
+          {tPagination("prev")}
         </Button>
         <span className="text-xs text-muted-foreground">
           {page} / {totalPages}
@@ -210,7 +214,7 @@ export function UsersTable() {
           onClick={() => setPage(Math.min(totalPages, page + 1))}
           disabled={page >= totalPages || query.isFetching}
         >
-          Next
+          {tPagination("next")}
           <ChevronRightIcon />
         </Button>
       </div>
