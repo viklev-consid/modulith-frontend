@@ -35,7 +35,26 @@
     "emailHint": "Change it in Email settings.",
     "role": "Role",
     "roleFallback": "User",
-    "saved": "Profile updated"
+    "saved": "Profile updated",
+    "avatar": {
+      "label": "Profile picture",
+      "change": "Change",
+      "remove": "Remove",
+      "dropzoneHint": "JPEG, PNG, or WebP up to 25 MB.",
+      "cropTitle": "Crop your photo",
+      "cropDescription": "Drag to reposition, pinch or scroll to zoom.",
+      "save": "Save photo",
+      "uploaded": "Profile picture updated",
+      "removed": "Profile picture removed",
+      "errors": {
+        "tooLarge": "That image is too large. Try a smaller file.",
+        "unsupportedFormat": "Use a JPEG, PNG, or WebP image.",
+        "uploadFailed": "Could not upload the image.",
+        "removeFailed": "Could not remove the profile picture."
+      },
+      "removeConfirmTitle": "Remove profile picture?",
+      "removeConfirmDescription": "Your avatar will go back to your initials."
+    }
   },
   "email": {
     "title": "Email",
