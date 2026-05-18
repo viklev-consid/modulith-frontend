@@ -1886,6 +1886,45 @@
         ]
       }
     },
+    "/v1/users/email/confirm": {
+      "post": {
+        "tags": ["Modulith.Api"],
+        "summary": "Confirm a newly registered account using the token from the confirmation email.",
+        "operationId": "ConfirmEmail",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfirmEmailRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfirmEmailResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/users/me/email/request": {
       "post": {
         "tags": ["Modulith.Api"],
@@ -1982,6 +2021,35 @@
             "Bearer": []
           }
         ]
+      }
+    },
+    "/v1/users/email/confirmation/resend": {
+      "post": {
+        "tags": ["Modulith.Api"],
+        "summary": "Request another email confirmation link.",
+        "operationId": "ResendEmailConfirmation",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResendEmailConfirmationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResendEmailConfirmationResponse"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/v1/users/token/refresh": {
@@ -3357,6 +3425,24 @@
           }
         }
       },
+      "ConfirmEmailRequest": {
+        "required": ["token"],
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          }
+        }
+      },
+      "ConfirmEmailResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "default": "Email address confirmed successfully."
+          }
+        }
+      },
       "ConfirmTotpRequest": {
         "required": ["code"],
         "type": "object",
@@ -4518,32 +4604,16 @@
         }
       },
       "RegisterResponse": {
-        "required": [
-          "userId",
-          "accessToken",
-          "accessTokenExpiresAt",
-          "refreshToken",
-          "refreshTokenExpiresAt"
-        ],
+        "required": ["userId"],
         "type": "object",
         "properties": {
           "userId": {
             "type": "string",
             "format": "uuid"
           },
-          "accessToken": {
-            "type": "string"
-          },
-          "accessTokenExpiresAt": {
+          "message": {
             "type": "string",
-            "format": "date-time"
-          },
-          "refreshToken": {
-            "type": "string"
-          },
-          "refreshTokenExpiresAt": {
-            "type": "string",
-            "format": "date-time"
+            "default": "Registration successful. Check your email to confirm your account before signing in."
           }
         }
       },
@@ -4568,6 +4638,24 @@
           }
         },
         "description": "Always returned — even when the email is taken — to prevent enumeration."
+      },
+      "ResendEmailConfirmationRequest": {
+        "required": ["email"],
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          }
+        }
+      },
+      "ResendEmailConfirmationResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "default": "If an account exists and needs confirmation, a confirmation email has been sent."
+          }
+        }
       },
       "ResetPasswordRequest": {
         "required": ["token", "newPassword"],

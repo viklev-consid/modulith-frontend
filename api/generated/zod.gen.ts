@@ -42,6 +42,17 @@ export const zConfirmEmailChangeResponse = z.object({
   message: z.string().optional().default("Email address changed successfully."),
 });
 
+export const zConfirmEmailRequest = z.object({
+  token: z.string(),
+});
+
+export const zConfirmEmailResponse = z.object({
+  message: z
+    .string()
+    .optional()
+    .default("Email address confirmed successfully."),
+});
+
 export const zConfirmTotpRequest = z.object({
   code: z.string(),
 });
@@ -579,10 +590,12 @@ export const zRegisterRequest = z.object({
 
 export const zRegisterResponse = z.object({
   userId: z.uuid(),
-  accessToken: z.string(),
-  accessTokenExpiresAt: z.iso.datetime(),
-  refreshToken: z.string(),
-  refreshTokenExpiresAt: z.iso.datetime(),
+  message: z
+    .string()
+    .optional()
+    .default(
+      "Registration successful. Check your email to confirm your account before signing in.",
+    ),
 });
 
 export const zRequestEmailChangeRequest = z.object({
@@ -599,6 +612,19 @@ export const zRequestEmailChangeResponse = z.object({
     .optional()
     .default(
       "If that email address is available, a confirmation link has been sent to it.",
+    ),
+});
+
+export const zResendEmailConfirmationRequest = z.object({
+  email: z.string(),
+});
+
+export const zResendEmailConfirmationResponse = z.object({
+  message: z
+    .string()
+    .optional()
+    .default(
+      "If an account exists and needs confirmation, a confirmation email has been sent.",
     ),
 });
 
@@ -1130,6 +1156,13 @@ export const zChangePasswordBody = zChangePasswordRequest;
  */
 export const zChangePasswordResponse2 = zChangePasswordResponse;
 
+export const zConfirmEmailBody = zConfirmEmailRequest;
+
+/**
+ * OK
+ */
+export const zConfirmEmailResponse2 = zConfirmEmailResponse;
+
 export const zRequestEmailChangeBody = zRequestEmailChangeRequest;
 
 /**
@@ -1143,6 +1176,14 @@ export const zConfirmEmailChangeBody = zConfirmEmailChangeRequest;
  * OK
  */
 export const zConfirmEmailChangeResponse2 = zConfirmEmailChangeResponse;
+
+export const zResendEmailConfirmationBody = zResendEmailConfirmationRequest;
+
+/**
+ * OK
+ */
+export const zResendEmailConfirmationResponse2 =
+  zResendEmailConfirmationResponse;
 
 export const zRefreshTokenBody = zRefreshTokenRequest;
 

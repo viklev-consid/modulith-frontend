@@ -5,10 +5,15 @@ import { useForm } from "@tanstack/react-form";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
-import { mapProblemToFieldErrors, type ProblemDetails } from "@/api/problems";
+import {
+  mapProblemToFieldErrors,
+  problemHasErrorCode,
+  type ProblemDetails,
+} from "@/api/problems";
 import { zLoginRequest } from "@/api/generated/zod.gen";
 import { useAuth } from "@/components/auth-provider";
 import { GoogleSignInButton } from "@/components/auth/google-sign-in-button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -41,10 +46,12 @@ export function LoginShell({ children }: { children?: React.ReactNode }) {
 }
 
 export function LoginForm() {
-  const { login } = useAuth();
+  const { login, resendEmailConfirmation } = useAuth();
   const searchParams = useSearchParams();
   const nextPath = searchParams.get("next");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [unconfirmedEmail, setUnconfirmedEmail] = useState<string | null>(null);
+  const [isResending, setIsResending] = useState(false);
 
   const form = useForm({
     defaultValues: {
@@ -53,6 +60,7 @@ export function LoginForm() {
     },
     onSubmit: async ({ value }) => {
       setFieldErrors({});
+      setUnconfirmedEmail(null);
       const parsed = zLoginRequest.safeParse(value);
 
       if (!parsed.success) {
@@ -66,13 +74,51 @@ export function LoginForm() {
       try {
         await login(parsed.data.email, parsed.data.password, nextPath);
       } catch (error) {
-        setFieldErrors(mapProblemToFieldErrors(error as ProblemDetails));
+        const problem = error as ProblemDetails;
+        if (problemHasErrorCode(problem, "Users.Email.NotConfirmed")) {
+          setUnconfirmedEmail(parsed.data.email);
+          return;
+        }
+        setFieldErrors(mapProblemToFieldErrors(problem));
       }
     },
   });
 
+  async function onResend(email: string) {
+    setIsResending(true);
+    try {
+      await resendEmailConfirmation(email);
+    } catch {
+      // handleProblem already surfaced a toast.
+    } finally {
+      setIsResending(false);
+    }
+  }
+
   return (
     <LoginShell>
+      {unconfirmedEmail && (
+        <Alert className="mb-5">
+          <AlertTitle>Confirm your email first</AlertTitle>
+          <AlertDescription>
+            <p>
+              We sent a confirmation link to{" "}
+              <strong className="text-foreground">{unconfirmedEmail}</strong>.
+              Click it to activate your account before signing in.
+            </p>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="mt-2"
+              disabled={isResending}
+              onClick={() => onResend(unconfirmedEmail)}
+            >
+              {isResending ? "Resending…" : "Resend confirmation email"}
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
       <form
         className="space-y-5"
         onSubmit={(event) => {

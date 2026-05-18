@@ -1,17 +1,17 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 
-import { ConfirmEmailContent } from "@/components/auth/confirm-email-content";
+import { ConfirmEmailChangeContent } from "@/components/settings/confirm-email-change-content";
 
 export const metadata: Metadata = {
-  title: "Confirm email | Modulith",
+  title: "Confirm email change | Modulith",
 };
 
-export default function ConfirmEmailPage() {
+export default function ConfirmEmailChangePage() {
   return (
     <main className="flex min-h-svh items-center justify-center px-4 py-10">
       <Suspense>
-        <ConfirmEmailContent />
+        <ConfirmEmailChangeContent />
       </Suspense>
     </main>
   );

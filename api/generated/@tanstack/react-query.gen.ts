@@ -16,6 +16,7 @@ import {
   changePassword,
   changeUserRole,
   completeOnboarding,
+  confirmEmail,
   confirmEmailChange,
   confirmTotp,
   createChainJobs,
@@ -78,6 +79,7 @@ import {
   register,
   replayDeadLetters,
   requestEmailChange,
+  resendEmailConfirmation,
   resetPassword,
   restartTickerHost,
   revokeInvitation,
@@ -112,6 +114,9 @@ import type {
   ConfirmEmailChangeData,
   ConfirmEmailChangeError,
   ConfirmEmailChangeResponse2,
+  ConfirmEmailData,
+  ConfirmEmailError,
+  ConfirmEmailResponse2,
   ConfirmTotpData,
   ConfirmTotpError,
   ConfirmTotpResponse2,
@@ -237,6 +242,8 @@ import type {
   RequestEmailChangeData,
   RequestEmailChangeError,
   RequestEmailChangeResponse2,
+  ResendEmailConfirmationData,
+  ResendEmailConfirmationResponse2,
   ResetPasswordData,
   ResetPasswordError,
   ResetPasswordResponse2,
@@ -1937,6 +1944,33 @@ export const changePasswordMutation = (
 };
 
 /**
+ * Confirm a newly registered account using the token from the confirmation email.
+ */
+export const confirmEmailMutation = (
+  options?: Partial<Options<ConfirmEmailData>>,
+): UseMutationOptions<
+  ConfirmEmailResponse2,
+  ConfirmEmailError,
+  Options<ConfirmEmailData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    ConfirmEmailResponse2,
+    ConfirmEmailError,
+    Options<ConfirmEmailData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await confirmEmail({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
  * Request an email address change. A confirmation link will be sent to the new address.
  */
 export const requestEmailChangeMutation = (
@@ -1980,6 +2014,33 @@ export const confirmEmailChangeMutation = (
   > = {
     mutationFn: async (fnOptions) => {
       const { data } = await confirmEmailChange({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * Request another email confirmation link.
+ */
+export const resendEmailConfirmationMutation = (
+  options?: Partial<Options<ResendEmailConfirmationData>>,
+): UseMutationOptions<
+  ResendEmailConfirmationResponse2,
+  DefaultError,
+  Options<ResendEmailConfirmationData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    ResendEmailConfirmationResponse2,
+    DefaultError,
+    Options<ResendEmailConfirmationData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await resendEmailConfirmation({
         ...options,
         ...fnOptions,
         throwOnError: true,

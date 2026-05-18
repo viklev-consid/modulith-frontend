@@ -15,6 +15,16 @@ function toCamelCase(value: string) {
   return value ? value.charAt(0).toLowerCase() + value.slice(1) : value;
 }
 
+// Matches RFC 9457 fields meant for error categorization (`type`, `title`).
+// `detail` is intentionally excluded — it often carries localized human-readable
+// text that could substring-match an error code by coincidence.
+export function problemHasErrorCode(
+  problem: ProblemDetails,
+  code: string,
+): boolean {
+  return Boolean(problem.type?.includes(code) || problem.title?.includes(code));
+}
+
 export function mapProblemToFieldErrors(problem: ProblemDetails) {
   return Object.fromEntries(
     Object.entries(problem.errors ?? {}).map(([field, messages]) => [

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { LockIcon } from "lucide-react";
+import { LockIcon, MailCheckIcon } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useForm } from "@tanstack/react-form";
 import { useState, type ReactNode } from "react";
@@ -33,10 +33,11 @@ const registrationMode = (process.env.NEXT_PUBLIC_REGISTRATION_MODE ??
   "Open") as RegisterMode;
 
 export function RegisterContent() {
-  const { register } = useAuth();
+  const { register, resendEmailConfirmation } = useAuth();
   const searchParams = useSearchParams();
   const invitationToken = searchParams.get("token");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [registeredEmail, setRegisteredEmail] = useState<string | null>(null);
 
   const form = useForm({
     defaultValues: {
@@ -73,6 +74,7 @@ export function RegisterContent() {
 
       try {
         await register(parsed.data);
+        setRegisteredEmail(parsed.data.email);
       } catch (error) {
         setFieldErrors(mapProblemToFieldErrors(error as ProblemDetails));
       }
@@ -88,6 +90,21 @@ export function RegisterContent() {
       <RegisterMessage
         title="Invitation required"
         description="Registration is currently by invitation only."
+      />
+    );
+  }
+
+  if (registeredEmail) {
+    return (
+      <CheckEmailMessage
+        email={registeredEmail}
+        onResend={async () => {
+          try {
+            await resendEmailConfirmation(registeredEmail);
+          } catch {
+            // handleProblem already surfaced a toast.
+          }
+        }}
       />
     );
   }
@@ -177,6 +194,57 @@ export function RegisterShell() {
           <CardTitle>Create account</CardTitle>
           <CardDescription>Loading registration options.</CardDescription>
         </CardHeader>
+      </Card>
+    </main>
+  );
+}
+
+function CheckEmailMessage({
+  email,
+  onResend,
+}: {
+  email: string;
+  onResend: () => Promise<void>;
+}) {
+  const [isResending, setIsResending] = useState(false);
+
+  return (
+    <main className="flex min-h-svh items-center justify-center px-4 py-10">
+      <Card className="w-full max-w-sm">
+        <CardHeader>
+          <MailCheckIcon className="mb-2 size-5 text-muted-foreground" />
+          <CardTitle>Check your email</CardTitle>
+          <CardDescription>
+            We sent a confirmation link to <strong>{email}</strong>. Click the
+            link in that email to activate your account.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <Button
+            variant="outline"
+            className="w-full"
+            disabled={isResending}
+            onClick={async () => {
+              setIsResending(true);
+              try {
+                await onResend();
+              } finally {
+                setIsResending(false);
+              }
+            }}
+          >
+            {isResending ? "Resending…" : "Resend confirmation email"}
+          </Button>
+          <p className="text-center text-xs text-muted-foreground">
+            Already confirmed?{" "}
+            <Link
+              href="/login"
+              className="text-foreground underline-offset-4 hover:underline"
+            >
+              Sign in
+            </Link>
+          </p>
+        </CardContent>
       </Card>
     </main>
   );

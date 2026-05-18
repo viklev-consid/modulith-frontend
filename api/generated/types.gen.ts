@@ -44,6 +44,14 @@ export type ConfirmEmailChangeResponse = {
   message?: string;
 };
 
+export type ConfirmEmailRequest = {
+  token: string;
+};
+
+export type ConfirmEmailResponse = {
+  message?: string;
+};
+
 export type ConfirmTotpRequest = {
   code: string;
 };
@@ -430,10 +438,7 @@ export type RegisterRequest = {
 
 export type RegisterResponse = {
   userId: string;
-  accessToken: string;
-  accessTokenExpiresAt: string;
-  refreshToken: string;
-  refreshTokenExpiresAt: string;
+  message?: string;
 };
 
 export type RequestEmailChangeRequest = {
@@ -445,6 +450,14 @@ export type RequestEmailChangeRequest = {
  * Always returned — even when the email is taken — to prevent enumeration.
  */
 export type RequestEmailChangeResponse = {
+  message?: string;
+};
+
+export type ResendEmailConfirmationRequest = {
+  email: string;
+};
+
+export type ResendEmailConfirmationResponse = {
   message?: string;
 };
 
@@ -1672,6 +1685,32 @@ export type ChangePasswordResponses = {
 export type ChangePasswordResponse2 =
   ChangePasswordResponses[keyof ChangePasswordResponses];
 
+export type ConfirmEmailData = {
+  body: ConfirmEmailRequest;
+  path?: never;
+  query?: never;
+  url: "/v1/users/email/confirm";
+};
+
+export type ConfirmEmailErrors = {
+  /**
+   * Bad Request
+   */
+  400: ProblemDetails;
+};
+
+export type ConfirmEmailError = ConfirmEmailErrors[keyof ConfirmEmailErrors];
+
+export type ConfirmEmailResponses = {
+  /**
+   * OK
+   */
+  200: ConfirmEmailResponse;
+};
+
+export type ConfirmEmailResponse2 =
+  ConfirmEmailResponses[keyof ConfirmEmailResponses];
+
 export type RequestEmailChangeData = {
   body: RequestEmailChangeRequest;
   path?: never;
@@ -1729,6 +1768,23 @@ export type ConfirmEmailChangeResponses = {
 
 export type ConfirmEmailChangeResponse2 =
   ConfirmEmailChangeResponses[keyof ConfirmEmailChangeResponses];
+
+export type ResendEmailConfirmationData = {
+  body: ResendEmailConfirmationRequest;
+  path?: never;
+  query?: never;
+  url: "/v1/users/email/confirmation/resend";
+};
+
+export type ResendEmailConfirmationResponses = {
+  /**
+   * OK
+   */
+  200: ResendEmailConfirmationResponse;
+};
+
+export type ResendEmailConfirmationResponse2 =
+  ResendEmailConfirmationResponses[keyof ResendEmailConfirmationResponses];
 
 export type RefreshTokenData = {
   body: RefreshTokenRequest;

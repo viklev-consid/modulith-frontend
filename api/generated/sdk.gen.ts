@@ -22,6 +22,9 @@ import type {
   ConfirmEmailChangeData,
   ConfirmEmailChangeErrors,
   ConfirmEmailChangeResponses,
+  ConfirmEmailData,
+  ConfirmEmailErrors,
+  ConfirmEmailResponses,
   ConfirmTotpData,
   ConfirmTotpErrors,
   ConfirmTotpResponses,
@@ -174,6 +177,8 @@ import type {
   RequestEmailChangeData,
   RequestEmailChangeErrors,
   RequestEmailChangeResponses,
+  ResendEmailConfirmationData,
+  ResendEmailConfirmationResponses,
   ResetPasswordData,
   ResetPasswordErrors,
   ResetPasswordResponses,
@@ -1171,6 +1176,25 @@ export const changePassword = <ThrowOnError extends boolean = false>(
   });
 
 /**
+ * Confirm a newly registered account using the token from the confirmation email.
+ */
+export const confirmEmail = <ThrowOnError extends boolean = false>(
+  options: Options<ConfirmEmailData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    ConfirmEmailResponses,
+    ConfirmEmailErrors,
+    ThrowOnError
+  >({
+    url: "/v1/users/email/confirm",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
  * Request an email address change. A confirmation link will be sent to the new address.
  */
 export const requestEmailChange = <ThrowOnError extends boolean = false>(
@@ -1203,6 +1227,25 @@ export const confirmEmailChange = <ThrowOnError extends boolean = false>(
   >({
     security: [{ scheme: "bearer", type: "http" }],
     url: "/v1/users/me/email/confirm",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * Request another email confirmation link.
+ */
+export const resendEmailConfirmation = <ThrowOnError extends boolean = false>(
+  options: Options<ResendEmailConfirmationData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    ResendEmailConfirmationResponses,
+    unknown,
+    ThrowOnError
+  >({
+    url: "/v1/users/email/confirmation/resend",
     ...options,
     headers: {
       "Content-Type": "application/json",
