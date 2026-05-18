@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 import { useAuth } from "@/components/auth-provider";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,6 +11,8 @@ import { adminRoutes } from "@/lib/admin-routes";
 import { cn } from "@/lib/utils";
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
+  const t = useTranslations("admin.shell");
+  const tNav = useTranslations("admin.nav");
   const pathname = usePathname();
   const { isLoading, currentUser, permissions } = useAuth();
 
@@ -30,16 +33,15 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
       <main className="grid min-h-svh place-items-center px-4">
         <Card className="max-w-md">
           <CardContent className="grid gap-2 py-6">
-            <h1 className="text-base font-medium">Access denied</h1>
+            <h1 className="text-base font-medium">{t("accessDenied.title")}</h1>
             <p className="text-muted-foreground">
-              You don&apos;t have permission to view the admin area. If you
-              think this is a mistake, contact a workspace administrator.
+              {t("accessDenied.description")}
             </p>
             <Link
               href="/app"
               className="text-sm font-medium underline underline-offset-4"
             >
-              Back to dashboard
+              {t("accessDenied.back")}
             </Link>
           </CardContent>
         </Card>
@@ -52,10 +54,8 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
       <div className="mx-auto grid w-full max-w-6xl gap-6 px-4 py-6 md:grid-cols-[220px_1fr] md:px-6">
         <aside className="md:border-r md:pr-4">
           <div className="mb-4">
-            <h1 className="text-lg font-semibold">Admin</h1>
-            <p className="text-sm text-muted-foreground">
-              Manage users, invitations, and audit logs.
-            </p>
+            <h1 className="text-lg font-semibold">{t("title")}</h1>
+            <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
           </div>
           <nav className="grid gap-1">
             {visibleLinks.map((item) => {
@@ -73,7 +73,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                   )}
                 >
                   <item.icon className="size-4" />
-                  {item.label}
+                  {tNav(item.labelKey)}
                 </Link>
               );
             })}

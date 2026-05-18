@@ -5,7 +5,7 @@ import "@/api/client";
 import { useId, useState } from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
-import { format, formatDistanceToNow, parseISO } from "date-fns";
+import { useFormatter, useTranslations } from "next-intl";
 import {
   ChevronDownIcon,
   ChevronLeftIcon,
@@ -30,25 +30,17 @@ function toNumber(value: number | string) {
   return typeof value === "string" ? Number.parseInt(value, 10) : value;
 }
 
-function relativeTime(iso: string) {
-  try {
-    return formatDistanceToNow(parseISO(iso), { addSuffix: true });
-  } catch {
-    return iso;
-  }
-}
-
-function fullTime(iso: string) {
-  try {
-    return format(parseISO(iso), "PPpp");
-  } catch {
-    return iso;
-  }
+function safeParse(iso: string): Date | null {
+  const date = new Date(iso);
+  return Number.isNaN(date.getTime()) ? null : date;
 }
 
 function AuditRow({ entry }: { entry: AuditEntryDto }) {
+  const t = useTranslations("adminComponents.auditTrail.row");
+  const format = useFormatter();
   const [expanded, setExpanded] = useState(false);
   const detailId = useId();
+  const occurredAt = safeParse(entry.occurredAt);
   return (
     <li className="border-b last:border-b-0">
       <div className="flex items-start gap-3 py-3">
@@ -70,9 +62,9 @@ function AuditRow({ entry }: { entry: AuditEntryDto }) {
               onClick={() => setExpanded((value) => !value)}
               aria-expanded={expanded}
               aria-controls={detailId}
-              aria-label={`Toggle details for ${entry.eventType}`}
+              aria-label={t("toggleAria", { eventType: entry.eventType })}
             >
-              detail
+              {t("detail")}
               <ChevronDownIcon
                 className={cn(
                   "size-3 transition-transform",
@@ -82,13 +74,23 @@ function AuditRow({ entry }: { entry: AuditEntryDto }) {
             </button>
           </div>
           <div className="text-xs text-muted-foreground">
-            <span title={fullTime(entry.occurredAt)}>
-              {relativeTime(entry.occurredAt)}
+            <span
+              title={
+                occurredAt
+                  ? format.dateTime(occurredAt, {
+                      dateStyle: "long",
+                      timeStyle: "medium",
+                    })
+                  : entry.occurredAt
+              }
+            >
+              {occurredAt ? format.relativeTime(occurredAt) : entry.occurredAt}
             </span>
             {entry.actorId ? (
               <>
                 {" "}
-                · actor <code className="text-[10px]">{entry.actorId}</code>
+                · {t("actorPrefix")}{" "}
+                <code className="text-[10px]">{entry.actorId}</code>
               </>
             ) : null}
           </div>
@@ -107,6 +109,8 @@ function AuditRow({ entry }: { entry: AuditEntryDto }) {
 }
 
 export function AuditTrail() {
+  const t = useTranslations("adminComponents.auditTrail");
+  const tPagination = useTranslations("adminComponents.pagination");
   const [page, setPage] = useQueryState(
     "page",
     parseAsInteger.withDefault(1).withOptions({ clearOnDefault: true }),
@@ -141,9 +145,9 @@ export function AuditTrail() {
   return (
     <div className="grid gap-4">
       <div>
-        <h2 className="text-lg font-semibold">Audit trail</h2>
+        <h2 className="text-lg font-semibold">{t("title")}</h2>
         <p className="text-xs text-muted-foreground">
-          {total} total entries · page {page} of {totalPages}
+          {t("summary", { total, page, totalPages })}
         </p>
       </div>
 
@@ -154,11 +158,11 @@ export function AuditTrail() {
               htmlFor="audit-actor"
               className="text-xs text-muted-foreground"
             >
-              Actor (user ID)
+              {t("filters.actorLabel")}
             </label>
             <Input
               id="audit-actor"
-              placeholder="e.g. 8f3a…c2d1"
+              placeholder={t("filters.actorPlaceholder")}
               value={actorId}
               onChange={(event) => {
                 void setActorId(event.target.value || null);
@@ -171,11 +175,11 @@ export function AuditTrail() {
               htmlFor="audit-event-type"
               className="text-xs text-muted-foreground"
             >
-              Event type
+              {t("filters.eventTypeLabel")}
             </label>
             <Input
               id="audit-event-type"
-              placeholder="e.g. user.role.changed"
+              placeholder={t("filters.eventTypePlaceholder")}
               value={eventType}
               onChange={(event) => {
                 void setEventType(event.target.value || null);
@@ -195,9 +199,7 @@ export function AuditTrail() {
               <Skeleton className="h-8" />
             </div>
           ) : entries.length === 0 ? (
-            <p className="py-4 text-sm text-muted-foreground">
-              No audit entries match these filters.
-            </p>
+            <p className="py-4 text-sm text-muted-foreground">{t("empty")}</p>
           ) : (
             <ul className="grid">
               {entries.map((entry) => (
@@ -217,7 +219,7 @@ export function AuditTrail() {
           disabled={page <= 1 || query.isFetching}
         >
           <ChevronLeftIcon />
-          Prev
+          {tPagination("prev")}
         </Button>
         <span className="text-xs text-muted-foreground">
           {page} / {totalPages}
@@ -228,7 +230,7 @@ export function AuditTrail() {
           onClick={() => setPage(Math.min(totalPages, page + 1))}
           disabled={page >= totalPages || query.isFetching}
         >
-          Next
+          {tPagination("next")}
           <ChevronRightIcon />
         </Button>
       </div>

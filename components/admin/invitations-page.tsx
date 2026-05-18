@@ -5,7 +5,7 @@ import "@/api/client";
 import { useState } from "react";
 import { useForm } from "@tanstack/react-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { format, formatDistanceToNow, parseISO } from "date-fns";
+import { useFormatter, useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import {
@@ -55,36 +55,39 @@ function statusVariant(status: string) {
   return "outline" as const;
 }
 
-function describeStatus(invitation: ListInvitationsInvitationDto) {
+function safeParse(iso: string): Date | null {
+  const date = new Date(iso);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+type InvitationStatus =
+  | { kind: "expired"; variant: "destructive" }
+  | {
+      kind: "other";
+      rawLabel: string;
+      variant: "secondary" | "default" | "outline";
+    };
+
+function describeStatus(
+  invitation: ListInvitationsInvitationDto,
+  now: number,
+): InvitationStatus {
   if (PENDING_STATUSES.has(invitation.status)) {
-    try {
-      const expiresAt = parseISO(invitation.expiresAt);
-      if (expiresAt.getTime() < Date.now()) {
-        return { label: "Expired", variant: "destructive" as const };
-      }
-    } catch {
-      // fall through to default
+    const expiresAt = safeParse(invitation.expiresAt);
+    if (expiresAt && expiresAt.getTime() < now) {
+      return { kind: "expired", variant: "destructive" };
     }
   }
   return {
-    label: invitation.status,
+    kind: "other",
+    rawLabel: invitation.status,
     variant: statusVariant(invitation.status),
   };
 }
 
-function relativeExpiry(invitation: ListInvitationsInvitationDto) {
-  try {
-    const expiresAt = parseISO(invitation.expiresAt);
-    const isPast = expiresAt.getTime() < Date.now();
-    return isPast
-      ? `expired ${formatDistanceToNow(expiresAt, { addSuffix: true })}`
-      : `expires ${formatDistanceToNow(expiresAt, { addSuffix: true })}`;
-  } catch {
-    return invitation.expiresAt;
-  }
-}
-
 export function InvitationsPage() {
+  const t = useTranslations("adminComponents.invitations");
+  const format = useFormatter();
   const queryClient = useQueryClient();
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
@@ -101,11 +104,12 @@ export function InvitationsPage() {
   const createMutation = useMutation({
     ...createInvitationMutation(),
     onSuccess: async (response) => {
-      toast.success("Invitation sent", {
-        description: `An email has been sent to ${response.email}. It expires ${formatDistanceToNow(
-          parseISO(response.expiresAt),
-          { addSuffix: true },
-        )}.`,
+      const expiresAt = safeParse(response.expiresAt);
+      toast.success(t("toast.sent.title"), {
+        description: t("toast.sent.description", {
+          email: response.email,
+          when: expiresAt ? format.relativeTime(expiresAt) : response.expiresAt,
+        }),
       });
       setFieldErrors({});
       form.reset();
@@ -127,8 +131,8 @@ export function InvitationsPage() {
   const revokeMutation = useMutation({
     ...revokeInvitationMutation(),
     onSuccess: async (response) => {
-      toast.success("Invitation revoked", {
-        description: `The invitation for ${response.email} has been revoked.`,
+      toast.success(t("toast.revoked.title"), {
+        description: t("toast.revoked.description", { email: response.email }),
       });
       await queryClient.invalidateQueries({
         queryKey: listInvitationsQueryKey(),
@@ -140,22 +144,20 @@ export function InvitationsPage() {
   });
 
   const invitations = invitationsQuery.data?.invitations ?? [];
+  // Snapshot "now" once on mount; expiry comparisons don't need second-by-second freshness.
+  const [now] = useState(() => Date.now());
 
   return (
     <div className="grid gap-4">
       <div>
-        <h2 className="text-lg font-semibold">Invitations</h2>
-        <p className="text-xs text-muted-foreground">
-          Invite users to your workspace and manage pending invites.
-        </p>
+        <h2 className="text-lg font-semibold">{t("title")}</h2>
+        <p className="text-xs text-muted-foreground">{t("subtitle")}</p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Send invitation</CardTitle>
-          <CardDescription>
-            Invited users receive an email link valid for 7 days.
-          </CardDescription>
+          <CardTitle>{t("send.title")}</CardTitle>
+          <CardDescription>{t("send.description")}</CardDescription>
         </CardHeader>
         <CardContent>
           <form
@@ -169,7 +171,9 @@ export function InvitationsPage() {
               <form.Field name="email">
                 {(field) => (
                   <Field data-invalid={Boolean(fieldErrors.email)}>
-                    <FieldLabel htmlFor={field.name}>Email</FieldLabel>
+                    <FieldLabel htmlFor={field.name}>
+                      {t("send.emailLabel")}
+                    </FieldLabel>
                     <FieldContent>
                       <Input
                         id={field.name}
@@ -190,7 +194,9 @@ export function InvitationsPage() {
             </FieldGroup>
             <div>
               <Button type="submit" disabled={createMutation.isPending}>
-                {createMutation.isPending ? "Sending…" : "Send invite"}
+                {createMutation.isPending
+                  ? t("send.submitting")
+                  : t("send.submit")}
               </Button>
             </div>
           </form>
@@ -199,10 +205,8 @@ export function InvitationsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Pending invitations</CardTitle>
-          <CardDescription>
-            All invitations that have not yet been accepted or revoked.
-          </CardDescription>
+          <CardTitle>{t("list.title")}</CardTitle>
+          <CardDescription>{t("list.description")}</CardDescription>
         </CardHeader>
         <CardContent className="p-0">
           {invitationsQuery.isLoading ? (
@@ -213,24 +217,28 @@ export function InvitationsPage() {
             </div>
           ) : invitations.length === 0 ? (
             <p className="px-4 py-6 text-sm text-muted-foreground">
-              No invitations yet.
+              {t("list.empty")}
             </p>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Expires</TableHead>
-                  <TableHead className="text-right">Action</TableHead>
+                  <TableHead>{t("list.columns.email")}</TableHead>
+                  <TableHead>{t("list.columns.status")}</TableHead>
+                  <TableHead>{t("list.columns.expires")}</TableHead>
+                  <TableHead className="text-right">
+                    {t("list.columns.action")}
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {invitations.map((invitation) => {
-                  const status = describeStatus(invitation);
-                  const isExpired = status.label === "Expired";
+                  const status = describeStatus(invitation, now);
+                  const isExpired = status.kind === "expired";
                   const isRevocable =
                     PENDING_STATUSES.has(invitation.status) && !isExpired;
+                  const expiresAt = safeParse(invitation.expiresAt);
+                  const isPast = expiresAt ? expiresAt.getTime() < now : false;
                   return (
                     <TableRow
                       key={invitation.invitationId}
@@ -238,21 +246,27 @@ export function InvitationsPage() {
                     >
                       <TableCell>{invitation.email}</TableCell>
                       <TableCell>
-                        <Badge variant={status.variant}>{status.label}</Badge>
+                        <Badge variant={status.variant}>
+                          {status.kind === "expired"
+                            ? t("status.expired")
+                            : status.rawLabel}
+                        </Badge>
                       </TableCell>
                       <TableCell
-                        title={(() => {
-                          try {
-                            return format(
-                              parseISO(invitation.expiresAt),
-                              "PPpp",
-                            );
-                          } catch {
-                            return invitation.expiresAt;
-                          }
-                        })()}
+                        title={
+                          expiresAt
+                            ? format.dateTime(expiresAt, {
+                                dateStyle: "long",
+                                timeStyle: "medium",
+                              })
+                            : invitation.expiresAt
+                        }
                       >
-                        {relativeExpiry(invitation)}
+                        {expiresAt
+                          ? t(isPast ? "expiry.past" : "expiry.future", {
+                              when: format.relativeTime(expiresAt),
+                            })
+                          : invitation.expiresAt}
                       </TableCell>
                       <TableCell className="text-right">
                         {isRevocable ? (
@@ -266,7 +280,7 @@ export function InvitationsPage() {
                             }
                             disabled={revokeMutation.isPending}
                           >
-                            Revoke
+                            {t("revoke")}
                           </Button>
                         ) : (
                           <span className="text-xs text-muted-foreground">
