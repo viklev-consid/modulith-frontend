@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { handleProblem, problemFromResponse } from "@/api/problems";
-import type { GetCurrentUserResponse } from "@/api/generated";
+import type { GetCurrentUserResponse, RegisterResponse } from "@/api/generated";
 import {
   currentUserQueryKey,
   fetchCurrentUserQuery,
@@ -46,7 +46,8 @@ type AuthContextValue = {
     nextPath?: string | null,
   ): Promise<void>;
   completeTwoFactorLogin(code: string, nextPath?: string | null): Promise<void>;
-  register(data: RegisterInput): Promise<void>;
+  register(data: RegisterInput): Promise<RegisterResponse>;
+  resendEmailConfirmation(email: string): Promise<void>;
   googleLogin(idToken: string, nextPath?: string | null): Promise<void>;
   googleConfirm(data: {
     token: string;
@@ -129,6 +130,7 @@ function AuthProviderInner({ children }: { children: ReactNode }) {
 
         const result = await fetchJson<LoginResult>("/api/auth/login", {
           method: "POST",
+          redirectOnUnauthorized: false,
           body: JSON.stringify({ email, password }),
         });
 
@@ -188,13 +190,23 @@ function AuthProviderInner({ children }: { children: ReactNode }) {
         );
       },
       async register(data) {
-        const user = await fetchJson<AuthUser>("/api/auth/register", {
+        return await fetchJson<RegisterResponse>("/api/auth/register", {
           method: "POST",
           body: JSON.stringify(data),
         });
-        queryClient.setQueryData(sessionQueryKey, user);
-        await queryClient.invalidateQueries({ queryKey: currentUserQueryKey });
-        push("/onboarding");
+      },
+      async resendEmailConfirmation(email) {
+        await fetchJson<{ message?: string }>(
+          "/api/auth/email/confirmation/resend",
+          {
+            method: "POST",
+            body: JSON.stringify({ email }),
+          },
+        );
+        toast.success("Confirmation email sent", {
+          description:
+            "If an account exists and needs confirmation, a new email is on its way.",
+        });
       },
       async googleLogin(idToken, nextPath) {
         const response = await fetch("/api/auth/google/login", {
