@@ -16,5 +16,12 @@
   "activity": {
     "title": "Your activity",
     "subtitle": "Recent security and account events on your profile."
+  },
+  "language": {
+    "title": "Language",
+    "description": "Choose the language used across the app.",
+    "options": {
+      "en": "English"
+    }
   }
 }
