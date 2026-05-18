@@ -17,6 +17,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldLabel,
+} from "@/components/ui/field";
 
 export default function GoogleConfirmPage() {
   return (
@@ -31,6 +38,7 @@ function GoogleConfirmContent() {
   const searchParams = useSearchParams();
   const { googleConfirm } = useAuth();
   const [error, setError] = useState("");
+  const [useGoogleAvatar, setUseGoogleAvatar] = useState(false);
   const token = searchParams.get("token") ?? "";
   const invitationToken = searchParams.get("invitationToken");
   const email = searchParams.get("email");
@@ -41,6 +49,7 @@ function GoogleConfirmContent() {
     const parsed = zGoogleLoginConfirmRequest.safeParse({
       token,
       invitationToken,
+      useGoogleAvatar,
     });
 
     if (!parsed.success) {
@@ -85,6 +94,21 @@ function GoogleConfirmContent() {
               {email && <p className="text-muted-foreground">{email}</p>}
             </div>
           )}
+          <Field orientation="horizontal">
+            <Checkbox
+              id="useGoogleAvatar"
+              checked={useGoogleAvatar}
+              onCheckedChange={(checked) =>
+                setUseGoogleAvatar(checked === true)
+              }
+            />
+            <FieldContent>
+              <FieldLabel htmlFor="useGoogleAvatar">
+                {t("useGoogleAvatar.label")}
+              </FieldLabel>
+              <FieldDescription>{t("useGoogleAvatar.hint")}</FieldDescription>
+            </FieldContent>
+          </Field>
           {error && <p className="text-xs text-destructive">{error}</p>}
           <Button
             className="w-full"
