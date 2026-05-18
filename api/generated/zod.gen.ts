@@ -197,20 +197,6 @@ export const zGetAuditTrailResponse = z.object({
   ]),
 });
 
-export const zGetCurrentUserResponse = z.object({
-  userId: z.uuid(),
-  email: z.string(),
-  displayName: z.string(),
-  createdAt: z.iso.datetime(),
-  role: z.string(),
-  permissions: z.array(z.string()),
-  permissionsVersion: z.string(),
-  hasPassword: z.boolean(),
-  hasCompletedOnboarding: z.boolean(),
-  twoFactorEnabled: z.boolean(),
-  linkedProviders: z.array(z.string()),
-});
-
 export const zGetProductByIdResponse = z.object({
   id: z.uuid(),
   sku: z.string(),
@@ -308,6 +294,25 @@ export const zHttpValidationProblemDetails = z.object({
   detail: z.string().nullish(),
   instance: z.string().nullish(),
   errors: z.record(z.string(), z.array(z.string())).optional(),
+});
+
+export const zLinkedAccountResponse = z.object({
+  provider: z.string(),
+  providerEmail: z.string(),
+});
+
+export const zGetCurrentUserResponse = z.object({
+  userId: z.uuid(),
+  email: z.string(),
+  displayName: z.string(),
+  createdAt: z.iso.datetime(),
+  role: z.string(),
+  permissions: z.array(z.string()),
+  permissionsVersion: z.string(),
+  hasPassword: z.boolean(),
+  hasCompletedOnboarding: z.boolean(),
+  twoFactorEnabled: z.boolean(),
+  linkedAccounts: z.array(zLinkedAccountResponse),
 });
 
 export const zLinkGoogleLoginRequest = z.object({

@@ -287,6 +287,7 @@ export type {
   GoogleLoginResponses,
   GoogleLoginSessionResponse,
   HttpValidationProblemDetails,
+  LinkedAccountResponse,
   LinkGoogleLoginData,
   LinkGoogleLoginError,
   LinkGoogleLoginErrors,

@@ -162,7 +162,7 @@ export type GetCurrentUserResponse = {
   hasPassword: boolean;
   hasCompletedOnboarding: boolean;
   twoFactorEnabled: boolean;
-  linkedProviders: Array<string>;
+  linkedAccounts: Array<LinkedAccountResponse>;
 };
 
 export type GetMyNotificationPreferencesResponse = {
@@ -243,6 +243,11 @@ export type HttpValidationProblemDetails = {
   errors?: {
     [key: string]: Array<string>;
   };
+};
+
+export type LinkedAccountResponse = {
+  provider: string;
+  providerEmail: string;
 };
 
 export type LinkGoogleLoginRequest = {

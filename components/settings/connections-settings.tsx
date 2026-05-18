@@ -38,7 +38,10 @@ export function ConnectionsSettings() {
   const { currentUser } = useAuth();
   const queryClient = useQueryClient();
   const [isUnlinking, setIsUnlinking] = useState(false);
-  const isLinked = currentUser?.linkedProviders.includes("Google") ?? false;
+  const googleAccount = currentUser?.linkedAccounts.find(
+    (account) => account.provider === "Google",
+  );
+  const isLinked = Boolean(googleAccount);
   const canUnlink = currentUser?.hasPassword ?? false;
 
   const {
@@ -99,7 +102,7 @@ export function ConnectionsSettings() {
               <h2 className="text-sm font-medium">Google</h2>
               <p className="text-sm text-muted-foreground">
                 {isLinked
-                  ? currentUser?.email
+                  ? googleAccount?.providerEmail
                   : "No Google account is connected."}
               </p>
             </div>

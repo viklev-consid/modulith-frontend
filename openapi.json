@@ -3654,7 +3654,7 @@
           "hasPassword",
           "hasCompletedOnboarding",
           "twoFactorEnabled",
-          "linkedProviders"
+          "linkedAccounts"
         ],
         "type": "object",
         "properties": {
@@ -3693,10 +3693,10 @@
           "twoFactorEnabled": {
             "type": "boolean"
           },
-          "linkedProviders": {
+          "linkedAccounts": {
             "type": "array",
             "items": {
-              "type": "string"
+              "$ref": "#/components/schemas/LinkedAccountResponse"
             }
           }
         }
@@ -3959,6 +3959,18 @@
                 "type": "string"
               }
             }
+          }
+        }
+      },
+      "LinkedAccountResponse": {
+        "required": ["provider", "providerEmail"],
+        "type": "object",
+        "properties": {
+          "provider": {
+            "type": "string"
+          },
+          "providerEmail": {
+            "type": "string"
           }
         }
       },
