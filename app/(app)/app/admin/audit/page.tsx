@@ -1,15 +1,17 @@
 import type { Metadata } from "next";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { Suspense } from "react";
+import { getTranslations } from "next-intl/server";
 
 import { serverClient } from "@/api/server-client";
 import { getAuditTrailOptions } from "@/api/generated/@tanstack/react-query.gen";
 import { AuditTrail } from "@/components/admin/audit-trail";
 import { createQueryClient } from "@/lib/query-client";
 
-export const metadata: Metadata = {
-  title: "Audit trail | Admin | Modulith",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("metadata.admin");
+  return { title: t("auditTrail") };
+}
 
 const PAGE_SIZE = 20;
 

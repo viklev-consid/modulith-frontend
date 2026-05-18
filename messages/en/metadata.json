@@ -37,5 +37,31 @@
     "goodbye": {
       "title": "Account deleted | Modulith"
     }
+  },
+  "onboarding": {
+    "title": "Finish setup | Modulith",
+    "description": "Complete onboarding to enter your Modulith workspace."
+  },
+  "app": {
+    "dashboard": "Dashboard | Modulith",
+    "notifications": "Notifications | Modulith"
+  },
+  "settings": {
+    "shell": "Settings | Modulith",
+    "profile": "Profile settings | Modulith",
+    "password": "Password settings | Modulith",
+    "email": "Email settings | Modulith",
+    "security": "Security | Modulith",
+    "activity": "Activity | Modulith",
+    "connections": "Connections | Modulith",
+    "notifications": "Notification settings | Modulith",
+    "data": "Your data | Modulith"
+  },
+  "admin": {
+    "shell": "Admin | Modulith",
+    "users": "Users | Admin | Modulith",
+    "userDetail": "User detail | Admin | Modulith",
+    "invitations": "Invitations | Admin | Modulith",
+    "auditTrail": "Audit trail | Admin | Modulith"
   }
 }

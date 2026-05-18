@@ -1,1 +1,41 @@
-{}
+{
+  "page": {
+    "title": "Finish account setup",
+    "description": "Complete these steps before entering your workspace.",
+    "steps": {
+      "terms": "Terms",
+      "password": "Password",
+      "complete": "Complete"
+    },
+    "terms": {
+      "versionTerms": "Terms v1.0",
+      "versionPrivacy": "Privacy v1.0",
+      "summary": "By continuing, you agree to use Modulith according to the workspace terms and acknowledge how account data is processed for authentication, notifications, audit history, and account administration.",
+      "acceptTerms": "I accept the terms and privacy policy",
+      "acceptMarketing": "Send me product updates by email",
+      "marketingHint": "Optional.",
+      "submit": "Continue",
+      "errorAcceptTerms": "Accept the terms to continue."
+    },
+    "password": {
+      "title": "Set an initial password",
+      "description": "Add a password if you want to sign in without Google later.",
+      "newLabel": "New password",
+      "newHint": "Minimum 10 characters.",
+      "confirmLabel": "Confirm password",
+      "verifyLabel": "Confirm with Google",
+      "verifyDescription": "Re-verify the Google account you signed up with to protect this account before adding a password.",
+      "verifyConfirmed": "Google account verified.",
+      "verifyLoading": "Loading Google verification…",
+      "googleUnavailable": "Google sign-in is not configured. Contact your administrator to finish onboarding.",
+      "skip": "Skip for now",
+      "submit": "Set password",
+      "mismatch": "Passwords must match."
+    },
+    "complete": {
+      "title": "Ready to enter Modulith",
+      "description": "We'll save your onboarding choices and open the app.",
+      "submit": "Complete setup"
+    }
+  }
+}
