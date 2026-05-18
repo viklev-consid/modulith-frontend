@@ -8,6 +8,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "@/components/auth-provider";
 import { NotificationToast } from "@/components/notification-toast";
+import { ProblemLabelsInit } from "@/components/problem-labels-init";
 import { QueryProvider } from "@/components/query-provider";
 
 const fontSans = Geist({
@@ -48,6 +49,7 @@ export default async function RootLayout({
             <NuqsAdapter>
               <QueryProvider>
                 <AuthProvider>
+                  <ProblemLabelsInit />
                   {children}
                   <NotificationToast />
                 </AuthProvider>

@@ -11,6 +11,31 @@ export interface ProblemDetails {
   errors?: Record<string, string[]>;
 }
 
+// Toast / fallback strings used by handleProblem and mapProblemToFieldErrors.
+// Wired through a setter (rather than useTranslations directly) because these
+// helpers are module-scope: they're called from `client-fetch.ts` and from
+// callbacks where hooks can't run. The English values here are the SSR / pre-
+// mount fallback; ProblemLabelsInit (mounted in the root layout) replaces them
+// with locale-aware strings on first client render.
+type ProblemLabels = {
+  generic: { title: string; description: string };
+  failed: string;
+  invalidValue: string;
+};
+
+let labels: ProblemLabels = {
+  generic: {
+    title: "Something went wrong",
+    description: "Please try again in a moment.",
+  },
+  failed: "Request failed",
+  invalidValue: "Invalid value",
+};
+
+export function setProblemLabels(next: ProblemLabels) {
+  labels = next;
+}
+
 function toCamelCase(value: string) {
   return value ? value.charAt(0).toLowerCase() + value.slice(1) : value;
 }
@@ -29,7 +54,7 @@ export function mapProblemToFieldErrors(problem: ProblemDetails) {
   return Object.fromEntries(
     Object.entries(problem.errors ?? {}).map(([field, messages]) => [
       toCamelCase(field),
-      messages[0] ?? problem.title ?? "Invalid value",
+      messages[0] ?? problem.title ?? labels.invalidValue,
     ]),
   );
 }
@@ -51,13 +76,13 @@ export function handleProblem(problem: ProblemDetails) {
   }
 
   if (problem.status >= 500) {
-    toast.error("Something went wrong", {
-      description: "Please try again in a moment.",
+    toast.error(labels.generic.title, {
+      description: labels.generic.description,
     });
     return;
   }
 
-  toast.error(problem.title ?? "Request failed", {
+  toast.error(problem.title ?? labels.failed, {
     description: problem.detail,
   });
 }
