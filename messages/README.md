@@ -8,22 +8,21 @@ One JSON file per top-level namespace. The file basename **is** the namespace
 key — e.g. `auth.json` is loaded under `auth`, so `t('auth.login.title')`
 reads `auth.json` → `login.title`.
 
-| File                   | Scope                                                |
-| ---------------------- | ---------------------------------------------------- |
-| `common.json`          | Generic labels (Save, Cancel, Loading, …)            |
-| `metadata.json`        | Page titles and descriptions for `generateMetadata`  |
-| `errors.json`          | Toast strings from `src/api/problems.ts`, boundaries |
-| `validation.json`      | Field-level form messages not provided by the API    |
-| `marketing.json`       | `app/(marketing)/*`                                  |
-| `auth.json`            | `app/(public)/*` auth pages                          |
-| `authComponents.json`  | `components/auth/*`                                  |
-| `onboarding.json`      | `app/(onboarding)/*`                                 |
-| `app.json`             | `app/(app)/app/*` top-level pages                    |
-| `settings.json`        | `app/(app)/app/settings/*` pages                     |
-| `settingsForms.json`   | `components/settings/*` forms                        |
-| `admin.json`           | `app/(app)/app/admin/*` pages                        |
-| `adminComponents.json` | `components/admin/*`                                 |
-| `components.json`      | Shared top-level `components/*`                      |
+| File                   | Scope                                               |
+| ---------------------- | --------------------------------------------------- |
+| `common.json`          | Generic labels (Save, Cancel, Loading, …)           |
+| `metadata.json`        | Page titles and descriptions for `generateMetadata` |
+| `errors.json`          | Toast strings from `api/problems.ts`, boundaries    |
+| `marketing.json`       | `app/(marketing)/*`                                 |
+| `auth.json`            | `app/(public)/*` auth pages                         |
+| `authComponents.json`  | `components/auth/*`                                 |
+| `onboarding.json`      | `app/(onboarding)/*`                                |
+| `app.json`             | `app/(app)/app/*` top-level pages                   |
+| `settings.json`        | `app/(app)/app/settings/*` pages                    |
+| `settingsForms.json`   | `components/settings/*` forms                       |
+| `admin.json`           | `app/(app)/app/admin/*` pages                       |
+| `adminComponents.json` | `components/admin/*`                                |
+| `components.json`      | Shared top-level `components/*`                     |
 
 To add a locale: drop a sibling folder (e.g. `messages/sv/`) with the same
 file shape, then add it to `LOCALES` in `i18n/locales.ts` and to the

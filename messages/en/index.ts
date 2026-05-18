@@ -11,7 +11,6 @@ import metadata from "./metadata.json";
 import onboarding from "./onboarding.json";
 import settings from "./settings.json";
 import settingsForms from "./settingsForms.json";
-import validation from "./validation.json";
 
 const messages = {
   admin,
@@ -27,7 +26,6 @@ const messages = {
   onboarding,
   settings,
   settingsForms,
-  validation,
 } as const;
 
 export default messages;
