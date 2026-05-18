@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useForm } from "@tanstack/react-form";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import {
   mapProblemToFieldErrors,
@@ -32,12 +33,13 @@ import {
 import { Input } from "@/components/ui/input";
 
 export function LoginShell({ children }: { children?: React.ReactNode }) {
+  const t = useTranslations("auth.login");
   return (
     <main className="flex min-h-svh items-center justify-center px-4 py-10">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle>Sign in</CardTitle>
-          <CardDescription>Access your Modulith workspace.</CardDescription>
+          <CardTitle>{t("title")}</CardTitle>
+          <CardDescription>{t("description")}</CardDescription>
         </CardHeader>
         <CardContent>{children}</CardContent>
       </Card>
@@ -46,6 +48,7 @@ export function LoginShell({ children }: { children?: React.ReactNode }) {
 }
 
 export function LoginForm() {
+  const t = useTranslations("auth.login");
   const { login, resendEmailConfirmation } = useAuth();
   const searchParams = useSearchParams();
   const nextPath = searchParams.get("next");
@@ -99,12 +102,15 @@ export function LoginForm() {
     <LoginShell>
       {unconfirmedEmail && (
         <Alert className="mb-5">
-          <AlertTitle>Confirm your email first</AlertTitle>
+          <AlertTitle>{t("unconfirmed.title")}</AlertTitle>
           <AlertDescription>
             <p>
-              We sent a confirmation link to{" "}
-              <strong className="text-foreground">{unconfirmedEmail}</strong>.
-              Click it to activate your account before signing in.
+              {t.rich("unconfirmed.body", {
+                email: unconfirmedEmail,
+                strong: (chunks) => (
+                  <strong className="text-foreground">{chunks}</strong>
+                ),
+              })}
             </p>
             <Button
               type="button"
@@ -114,7 +120,9 @@ export function LoginForm() {
               disabled={isResending}
               onClick={() => onResend(unconfirmedEmail)}
             >
-              {isResending ? "Resending…" : "Resend confirmation email"}
+              {isResending
+                ? t("unconfirmed.resending")
+                : t("unconfirmed.resend")}
             </Button>
           </AlertDescription>
         </Alert>
@@ -130,7 +138,7 @@ export function LoginForm() {
           <form.Field name="email">
             {(field) => (
               <Field>
-                <FieldLabel htmlFor={field.name}>Email</FieldLabel>
+                <FieldLabel htmlFor={field.name}>{t("emailLabel")}</FieldLabel>
                 <Input
                   id={field.name}
                   type="email"
@@ -149,12 +157,14 @@ export function LoginForm() {
             {(field) => (
               <Field>
                 <div className="flex items-center justify-between gap-3">
-                  <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                  <FieldLabel htmlFor={field.name}>
+                    {t("passwordLabel")}
+                  </FieldLabel>
                   <Link
                     href="/forgot-password"
                     className="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
                   >
-                    Forgot password?
+                    {t("forgot")}
                   </Link>
                 </div>
                 <Input
@@ -173,20 +183,20 @@ export function LoginForm() {
         </FieldGroup>
 
         <Button className="w-full" type="submit">
-          Sign in
+          {t("submit")}
         </Button>
 
-        <FieldSeparator>or</FieldSeparator>
+        <FieldSeparator>{t("or")}</FieldSeparator>
 
         <GoogleSignInButton nextPath={nextPath} />
 
         <p className="text-center text-xs text-muted-foreground">
-          Don&apos;t have an account?{" "}
+          {t("noAccount")}{" "}
           <Link
             href="/register"
             className="text-foreground underline-offset-4 hover:underline"
           >
-            Register
+            {t("register")}
           </Link>
         </p>
       </form>

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
+import { getTranslations } from "next-intl/server";
 
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -17,6 +18,7 @@ export default async function MarketingLayout({
     redirect("/onboarding");
   }
 
+  const t = await getTranslations("marketing.header");
   const isSignedIn = Boolean(session);
 
   return (
@@ -24,12 +26,12 @@ export default async function MarketingLayout({
       <header className="border-b">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-4 md:px-6">
           <Link href="/" className="text-sm font-medium">
-            Modulith
+            {t("brand")}
           </Link>
           <nav className="flex items-center gap-2">
             {isSignedIn ? (
               <Link href="/app" className={cn(buttonVariants({ size: "sm" }))}>
-                Open app
+                {t("openApp")}
               </Link>
             ) : (
               <>
@@ -39,13 +41,13 @@ export default async function MarketingLayout({
                     buttonVariants({ size: "sm", variant: "ghost" }),
                   )}
                 >
-                  Sign in
+                  {t("signIn")}
                 </Link>
                 <Link
                   href="/register"
                   className={cn(buttonVariants({ size: "sm" }))}
                 >
-                  Get started
+                  {t("getStarted")}
                 </Link>
               </>
             )}

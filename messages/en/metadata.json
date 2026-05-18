@@ -2,5 +2,40 @@
   "root": {
     "title": "Modulith",
     "description": "Modulith frontend application"
+  },
+  "landing": {
+    "title": "Modulith",
+    "description": "The modular .NET application template with a Next.js companion frontend."
+  },
+  "auth": {
+    "login": {
+      "title": "Sign in | Modulith",
+      "description": "Access your Modulith workspace."
+    },
+    "twoFactor": {
+      "title": "Verify sign-in | Modulith",
+      "description": "Enter your authenticator code to finish signing in."
+    },
+    "register": {
+      "title": "Create account | Modulith",
+      "description": "Set up your Modulith workspace access."
+    },
+    "forgotPassword": {
+      "title": "Reset password | Modulith",
+      "description": "Request a link to reset your Modulith account password."
+    },
+    "resetPassword": {
+      "title": "Set new password | Modulith",
+      "description": "Choose a new password for your Modulith account."
+    },
+    "confirmEmail": {
+      "title": "Confirm email | Modulith"
+    },
+    "confirmEmailChange": {
+      "title": "Confirm email change | Modulith"
+    },
+    "goodbye": {
+      "title": "Account deleted | Modulith"
+    }
   }
 }
