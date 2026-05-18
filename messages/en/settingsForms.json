@@ -26,5 +26,215 @@
     },
     "archive": "Archive",
     "loadMore": "Load more"
+  },
+  "profile": {
+    "title": "Profile",
+    "description": "Update the name shown across your workspace.",
+    "displayName": "Display name",
+    "email": "Email",
+    "emailHint": "Change it in Email settings.",
+    "role": "Role",
+    "roleFallback": "User",
+    "saved": "Profile updated"
+  },
+  "email": {
+    "title": "Email",
+    "description": "Change the address used for sign-in and account alerts.",
+    "currentLabel": "Current email",
+    "currentHint": "This address remains active.",
+    "newLabel": "New email address",
+    "newHint": "We'll send a confirmation link to the new address.",
+    "passwordLabel": "Current password",
+    "submit": "Request change",
+    "submitting": "Requesting...",
+    "sentToast": "Confirmation link sent",
+    "pending": {
+      "title": "Confirmation pending",
+      "body": "We sent a link to <strong>{email}</strong>. Check your email to complete the change."
+    },
+    "needsPassword": {
+      "title": "Set a password first",
+      "description": "Changing your email requires confirming your password. Set a password before changing your email.",
+      "cta": "Set a password"
+    }
+  },
+  "confirmEmailChange": {
+    "loading": {
+      "title": "Confirming email change",
+      "description": "Please wait while we verify the confirmation link."
+    },
+    "success": {
+      "title": "Email updated",
+      "description": "Your new email address is ready to use.",
+      "cta": "Go to app"
+    },
+    "error": {
+      "title": "Invalid or expired link",
+      "description": "Request a fresh confirmation link from Email settings.",
+      "cta": "Back to Email settings"
+    },
+    "idle": {
+      "title": "Confirm email change",
+      "description": "Paste the confirmation token from your email to finish the change."
+    },
+    "tokenLabel": "Confirmation token",
+    "tokenPlaceholder": "Paste the token from your email",
+    "submit": "Confirm email change"
+  },
+  "password": {
+    "title": "Password",
+    "description": "Use a strong password that you do not use elsewhere.",
+    "currentLabel": "Current password",
+    "newLabel": "New password",
+    "confirmLabel": "Confirm new password",
+    "submit": "Update password",
+    "submitting": "Updating...",
+    "saved": "Password updated",
+    "mismatch": "Passwords must match.",
+    "invalidValue": "Invalid value",
+    "checkPassword": "Check your password."
+  },
+  "setPassword": {
+    "title": "Set a password",
+    "description": "Add a password to your account so you can sign in without Google, and to unlock email changes and unlinking Google later.",
+    "newLabel": "New password",
+    "confirmLabel": "Confirm new password",
+    "verifyLabel": "Verify with Google",
+    "verifyHint": "Confirm your Google identity before setting a password.",
+    "continueWithGoogle": "Continue with Google",
+    "needsVerification": {
+      "title": "Verify with Google to continue",
+      "description": "Click the Google button above to confirm your identity, then submit."
+    },
+    "submit": "Set password",
+    "submitting": "Setting password...",
+    "saved": "Password set",
+    "mismatch": "Passwords must match.",
+    "invalidValue": "Invalid value"
+  },
+  "connections": {
+    "title": "Connections",
+    "description": "Linking an account lets you sign in with it.",
+    "google": {
+      "label": "Google",
+      "notLinked": "No Google account is connected.",
+      "unlink": "Unlink",
+      "unlinking": "Unlinking...",
+      "linkButton": "Link Google account",
+      "linkSuccess": "Google account linked",
+      "linkError": "Failed to link Google account",
+      "unlinkSuccess": "Google account unlinked",
+      "unlinkError": "Failed to unlink Google account",
+      "confirmDialog": {
+        "title": "Unlink Google account?",
+        "description": "You will need to use your email and password the next time you sign in."
+      }
+    },
+    "needsPassword": {
+      "title": "Set a password before unlinking",
+      "description": "Without a password you would lose access to your account.",
+      "cta": "Set a password"
+    }
+  },
+  "data": {
+    "export": {
+      "title": "Export personal data",
+      "description": "Download a JSON file with all data we hold about you.",
+      "submit": "Download my data",
+      "submitting": "Preparing..."
+    },
+    "delete": {
+      "title": "Delete account",
+      "description": "Permanently delete your account and all associated data. This cannot be undone.",
+      "trigger": "Delete my account",
+      "confirmTitle": "Delete your account?",
+      "confirmDescription": "This permanently removes your account and all associated data.",
+      "confirmLabel": "Type your email to confirm",
+      "submit": "Delete forever",
+      "submitting": "Deleting...",
+      "emailMismatch": "Email does not match"
+    }
+  },
+  "security": {
+    "loadingTitle": "Two-factor authentication",
+    "loadingDescription": "Loading your security settings…",
+    "disabled": {
+      "title": "Two-factor authentication",
+      "description": "Add a second step to your sign-in for an extra layer of security.",
+      "status": "Two-factor authentication is off",
+      "explainer": "We'll ask for a code from your authenticator app the next time you sign in.",
+      "start": "Set up authenticator app",
+      "starting": "Starting…",
+      "needsPasswordToast": {
+        "title": "Set a password first",
+        "description": "You need an account password before enabling two-factor authentication."
+      }
+    },
+    "scan": {
+      "title": "Scan with your authenticator",
+      "description": "Use Google Authenticator, 1Password, Authy, or any TOTP app.",
+      "manualPrompt": "Can't scan? Enter this code manually:",
+      "copySecret": "Copy secret",
+      "secretCopied": "Secret copied",
+      "back": "Cancel",
+      "continue": "I've added it, continue"
+    },
+    "confirm": {
+      "title": "Confirm with a code",
+      "description": "Enter the 6-digit code shown in your authenticator app right now.",
+      "codeLabel": "Code from app",
+      "back": "Back",
+      "submit": "Enable two-factor",
+      "submitting": "Confirming…",
+      "wrongCode": "That code did not match."
+    },
+    "codes": {
+      "title": "Save your recovery codes",
+      "description": "Each code works once. Store them somewhere safe, they will not be shown again.",
+      "acknowledge": "I have saved my recovery codes",
+      "finish": "Finish setup",
+      "copyAll": "Copy all",
+      "downloadTxt": "Download .txt",
+      "copied": "Recovery codes copied"
+    },
+    "enabled": {
+      "title": "Two-factor authentication",
+      "description": "You'll be asked for a code at every sign-in.",
+      "status": "Two-factor authentication is on",
+      "disabledToast": "Two-factor authentication is off"
+    },
+    "regenerate": {
+      "title": "Recovery codes",
+      "description": "Lost access to your codes? Generate a new set. Old codes stop working.",
+      "open": "Regenerate recovery codes",
+      "dialog": {
+        "title": "Regenerate recovery codes?",
+        "description": "Your existing recovery codes will stop working immediately. Enter your password and a current code to confirm."
+      },
+      "submit": "Regenerate codes",
+      "submitting": "Regenerating…",
+      "result": {
+        "title": "New recovery codes",
+        "description": "Your old recovery codes have been invalidated. Save these new codes, they will not be shown again.",
+        "acknowledge": "I have saved my new recovery codes",
+        "finish": "Finish saving codes"
+      }
+    },
+    "disableCard": {
+      "title": "Turn off two-factor",
+      "description": "Removes the second step from sign-in. You can turn it back on later.",
+      "open": "Turn off two-factor",
+      "dialog": {
+        "title": "Turn off two-factor authentication?",
+        "description": "Sign-in will no longer require a second step. You can re-enable it later. Enter your password and a current code to confirm."
+      },
+      "submit": "Turn off",
+      "submitting": "Turning off…"
+    },
+    "credentials": {
+      "passwordLabel": "Current password",
+      "codeLabel": "Code from app (or recovery code)",
+      "codePlaceholder": "123456 or abcd-efgh-ij"
+    }
   }
 }
