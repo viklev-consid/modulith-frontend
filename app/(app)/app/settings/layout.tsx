@@ -49,8 +49,10 @@ export default async function SettingsLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const t = await getTranslations("settings.shell");
-  const tNav = await getTranslations("settings.nav");
+  const [t, tNav] = await Promise.all([
+    getTranslations("settings.shell"),
+    getTranslations("settings.nav"),
+  ]);
   return (
     <main className="min-h-svh bg-background">
       <div className="mx-auto grid w-full max-w-6xl gap-6 px-4 py-6 md:grid-cols-[220px_1fr] md:px-6">

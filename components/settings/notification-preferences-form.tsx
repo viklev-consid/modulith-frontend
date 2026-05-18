@@ -68,13 +68,17 @@ export function NotificationPreferencesForm() {
   async function savePreferences() {
     await updatePreferences.mutateAsync({
       body: {
-        preferences: preferences
-          .filter((preference) => !preference.isLocked)
-          .map(({ category, bellEnabled, emailEnabled }) => ({
-            category,
-            bellEnabled,
-            emailEnabled,
-          })),
+        preferences: preferences.flatMap((preference) =>
+          preference.isLocked
+            ? []
+            : [
+                {
+                  category: preference.category,
+                  bellEnabled: preference.bellEnabled,
+                  emailEnabled: preference.emailEnabled,
+                },
+              ],
+        ),
       },
     });
     await queryClient.invalidateQueries({
