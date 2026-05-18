@@ -3,6 +3,7 @@
 import {
   CheckCircle2Icon,
   CheckIcon,
+  ImageIcon,
   KeyRoundIcon,
   ShieldCheckIcon,
 } from "lucide-react";
@@ -16,6 +17,7 @@ import {
   zCompleteOnboardingRequest,
   zSetInitialPasswordRequest,
 } from "@/api/generated/zod.gen";
+import { AvatarUploader } from "@/components/avatar-uploader";
 import { useAuth } from "@/components/auth-provider";
 import { Button } from "@/components/ui/button";
 import {
@@ -58,7 +60,7 @@ declare global {
   }
 }
 
-type Step = "terms" | "password" | "complete";
+type Step = "terms" | "password" | "avatar" | "complete";
 
 export default function OnboardingPage() {
   const t = useTranslations("onboarding.page");
@@ -68,6 +70,7 @@ export default function OnboardingPage() {
   const [marketingAccepted, setMarketingAccepted] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [googleButtonReady, setGoogleButtonReady] = useState(false);
+  const [avatarUploading, setAvatarUploading] = useState(false);
   const googleButtonId = useId().replace(/:/g, "");
   const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 
@@ -75,8 +78,8 @@ export default function OnboardingPage() {
   const steps = useMemo(
     () =>
       needsPasswordStep
-        ? (["terms", "password", "complete"] as Step[])
-        : (["terms", "complete"] as Step[]),
+        ? (["terms", "password", "avatar", "complete"] as Step[])
+        : (["terms", "avatar", "complete"] as Step[]),
     [needsPasswordStep],
   );
 
@@ -112,7 +115,7 @@ export default function OnboardingPage() {
 
       try {
         await setInitialPassword(parsed.data);
-        setStep("complete");
+        setStep("avatar");
       } catch (error) {
         setFieldErrors(mapProblemToFieldErrors(error as ProblemDetails));
       }
@@ -146,7 +149,7 @@ export default function OnboardingPage() {
     }
 
     setFieldErrors({});
-    setStep(needsPasswordStep ? "password" : "complete");
+    setStep(needsPasswordStep ? "password" : "avatar");
   }
 
   function initializeGoogleButton() {
@@ -373,7 +376,7 @@ export default function OnboardingPage() {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => setStep("complete")}
+                  onClick={() => setStep("avatar")}
                 >
                   {t("password.skip")}
                 </Button>
@@ -388,6 +391,44 @@ export default function OnboardingPage() {
                 </passwordForm.Subscribe>
               </div>
             </form>
+          )}
+
+          {step === "avatar" && currentUser && (
+            <section className="space-y-5">
+              <div className="flex items-start gap-2 border border-border p-3">
+                <ImageIcon className="mt-0.5 size-4 text-muted-foreground" />
+                <div className="space-y-1 text-xs">
+                  <FieldTitle>{t("avatar.title")}</FieldTitle>
+                  <FieldDescription>{t("avatar.description")}</FieldDescription>
+                </div>
+              </div>
+              <AvatarUploader
+                user={currentUser}
+                onUploadingChange={setAvatarUploading}
+              />
+              {currentUser.avatar ? (
+                <p className="text-xs text-muted-foreground">
+                  {t("avatar.replaceHint")}
+                </p>
+              ) : null}
+              <div className="grid gap-2 sm:grid-cols-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setStep("complete")}
+                  disabled={avatarUploading}
+                >
+                  {t("avatar.skip")}
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => setStep("complete")}
+                  disabled={avatarUploading}
+                >
+                  {t("avatar.continue")}
+                </Button>
+              </div>
+            </section>
           )}
 
           {step === "complete" && (
@@ -421,12 +462,12 @@ function Stepper({ activeStep, steps }: { activeStep: Step; steps: Step[] }) {
   const activeIndex = steps.indexOf(activeStep);
 
   return (
-    <ol className="grid gap-2 sm:grid-cols-3">
+    <ol className="flex flex-wrap gap-2 sm:flex-nowrap">
       {steps.map((step, index) => (
         <li
           key={step}
           className={cn(
-            "flex items-center gap-2 border border-border px-2.5 py-2 text-xs text-muted-foreground",
+            "flex flex-1 items-center gap-2 border border-border px-2.5 py-2 text-xs text-muted-foreground",
             index <= activeIndex && "border-foreground text-foreground",
           )}
         >
