@@ -8,7 +8,6 @@ import { toast } from "sonner";
 
 import type {
   ConfirmTotpResponse,
-  GetCurrentUserResponse,
   RegenerateRecoveryCodesResponse,
   SetupTotpResponse,
 } from "@/api/generated";
@@ -133,18 +132,10 @@ export function SecuritySettings() {
     return <SecuritySettingsSkeleton />;
   }
 
-  return currentUser.twoFactorEnabled ? (
-    <EnabledPanel />
-  ) : (
-    <DisabledPanel currentUser={currentUser} />
-  );
+  return currentUser.twoFactorEnabled ? <EnabledPanel /> : <DisabledPanel />;
 }
 
-function DisabledPanel({
-  currentUser,
-}: {
-  currentUser: GetCurrentUserResponse;
-}) {
+function DisabledPanel() {
   const t = useTranslations("settingsForms.security.disabled");
   const queryClient = useQueryClient();
   const [step, setStep] = useState<SetupStep | null>(null);
@@ -153,13 +144,6 @@ function DisabledPanel({
   const [starting, setStarting] = useState(false);
 
   async function startSetup() {
-    if (!currentUser.hasPassword) {
-      toast.error(t("needsPasswordToast.title"), {
-        description: t("needsPasswordToast.description"),
-      });
-      return;
-    }
-
     setStarting(true);
     try {
       const response = await fetchJson<SetupTotpResponse>(

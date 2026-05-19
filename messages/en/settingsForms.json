@@ -70,11 +70,6 @@
     "pending": {
       "title": "Confirmation pending",
       "body": "We sent a link to <strong>{email}</strong>. Check your email to complete the change."
-    },
-    "needsPassword": {
-      "title": "Set a password first",
-      "description": "Changing your email requires confirming your password. Set a password before changing your email.",
-      "cta": "Set a password"
     }
   },
   "confirmEmailChange": {
@@ -113,48 +108,6 @@
     "invalidValue": "Invalid value",
     "checkPassword": "Check your password."
   },
-  "setPassword": {
-    "title": "Set a password",
-    "description": "Add a password to your account so you can sign in without Google, and to unlock email changes and unlinking Google later.",
-    "newLabel": "New password",
-    "confirmLabel": "Confirm new password",
-    "verifyLabel": "Verify with Google",
-    "verifyHint": "Confirm your Google identity before setting a password.",
-    "continueWithGoogle": "Continue with Google",
-    "needsVerification": {
-      "title": "Verify with Google to continue",
-      "description": "Click the Google button above to confirm your identity, then submit."
-    },
-    "submit": "Set password",
-    "submitting": "Setting password...",
-    "saved": "Password set",
-    "mismatch": "Passwords must match.",
-    "invalidValue": "Invalid value"
-  },
-  "connections": {
-    "title": "Connections",
-    "description": "Linking an account lets you sign in with it.",
-    "google": {
-      "label": "Google",
-      "notLinked": "No Google account is connected.",
-      "unlink": "Unlink",
-      "unlinking": "Unlinking...",
-      "linkButton": "Link Google account",
-      "linkSuccess": "Google account linked",
-      "linkError": "Failed to link Google account",
-      "unlinkSuccess": "Google account unlinked",
-      "unlinkError": "Failed to unlink Google account",
-      "confirmDialog": {
-        "title": "Unlink Google account?",
-        "description": "You will need to use your email and password the next time you sign in."
-      }
-    },
-    "needsPassword": {
-      "title": "Set a password before unlinking",
-      "description": "Without a password you would lose access to your account.",
-      "cta": "Set a password"
-    }
-  },
   "data": {
     "export": {
       "title": "Export personal data",
@@ -183,11 +136,7 @@
       "status": "Two-factor authentication is off",
       "explainer": "We'll ask for a code from your authenticator app the next time you sign in.",
       "start": "Set up authenticator app",
-      "starting": "Starting…",
-      "needsPasswordToast": {
-        "title": "Set a password first",
-        "description": "You need an account password before enabling two-factor authentication."
-      }
+      "starting": "Starting…"
     },
     "scan": {
       "title": "Scan with your authenticator",

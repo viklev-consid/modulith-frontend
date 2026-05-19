@@ -82,7 +82,6 @@ export function UserDetail({ userId }: { userId: string }) {
   }
 
   const user = userQuery.data;
-  const hasGoogle = user.linkedProviders.includes("Google");
   const activity = activityQuery.data?.entries ?? [];
   const joinedAt = safeParse(user.createdAt);
 
@@ -118,24 +117,6 @@ export function UserDetail({ userId }: { userId: string }) {
                 {joinedAt
                   ? format.dateTime(joinedAt, { dateStyle: "long" })
                   : user.createdAt}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-xs text-muted-foreground">
-                {t("info.loginMethod")}
-              </dt>
-              <dd className="flex items-center gap-2">
-                {user.hasPassword ? (
-                  <Badge variant="outline">{t("info.password")}</Badge>
-                ) : null}
-                {hasGoogle ? (
-                  <Badge variant="outline">{t("info.google")}</Badge>
-                ) : null}
-                {!user.hasPassword && !hasGoogle ? (
-                  <span className="text-muted-foreground">
-                    {t("info.loginMethodNone")}
-                  </span>
-                ) : null}
               </dd>
             </div>
             <div>

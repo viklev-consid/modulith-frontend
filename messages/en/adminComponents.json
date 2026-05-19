@@ -83,13 +83,9 @@
       "description": "Read-only profile details from the user's record.",
       "email": "Email",
       "joined": "Joined",
-      "loginMethod": "Login method",
-      "loginMethodNone": "None",
       "onboarding": "Onboarding",
       "completed": "Completed",
-      "pending": "Pending",
-      "password": "Password",
-      "google": "Google"
+      "pending": "Pending"
     },
     "actions": {
       "title": "Actions",

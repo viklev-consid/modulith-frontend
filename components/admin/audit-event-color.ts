@@ -10,9 +10,6 @@ export function auditEventColor(eventType: string): string {
   if (normalized.includes("password")) {
     return "bg-amber-500";
   }
-  if (normalized.includes("google") || normalized.includes("provider")) {
-    return "bg-purple-500";
-  }
   if (
     normalized.includes("login") ||
     normalized.includes("onboarding") ||
