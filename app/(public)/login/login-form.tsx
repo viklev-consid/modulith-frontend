@@ -13,7 +13,6 @@ import {
 } from "@/api/problems";
 import { zLoginRequest } from "@/api/generated/zod.gen";
 import { useAuth } from "@/components/auth-provider";
-import { GoogleSignInButton } from "@/components/auth/google-sign-in-button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,7 +27,6 @@ import {
   FieldError,
   FieldGroup,
   FieldLabel,
-  FieldSeparator,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
@@ -185,10 +183,6 @@ export function LoginForm() {
         <Button className="w-full" type="submit">
           {t("submit")}
         </Button>
-
-        <FieldSeparator>{t("or")}</FieldSeparator>
-
-        <GoogleSignInButton nextPath={nextPath} />
 
         <p className="text-center text-xs text-muted-foreground">
           {t("noAccount")}{" "}
