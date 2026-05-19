@@ -4,7 +4,6 @@
     "description": "Complete these steps before entering your workspace.",
     "steps": {
       "terms": "Terms",
-      "password": "Password",
       "avatar": "Photo",
       "complete": "Complete"
     },
@@ -18,25 +17,9 @@
       "submit": "Continue",
       "errorAcceptTerms": "Accept the terms to continue."
     },
-    "password": {
-      "title": "Set an initial password",
-      "description": "Add a password if you want to sign in without Google later.",
-      "newLabel": "New password",
-      "newHint": "Minimum 10 characters.",
-      "confirmLabel": "Confirm password",
-      "verifyLabel": "Confirm with Google",
-      "verifyDescription": "Re-verify the Google account you signed up with to protect this account before adding a password.",
-      "verifyConfirmed": "Google account verified.",
-      "verifyLoading": "Loading Google verification…",
-      "googleUnavailable": "Google sign-in is not configured. Contact your administrator to finish onboarding.",
-      "skip": "Skip for now",
-      "submit": "Set password",
-      "mismatch": "Passwords must match."
-    },
     "avatar": {
       "title": "Add a profile picture",
       "description": "Optional. You can change it later in Profile settings.",
-      "replaceHint": "We imported this from your Google account. Replace, remove, or keep it.",
       "skip": "Skip for now",
       "continue": "Continue"
     },

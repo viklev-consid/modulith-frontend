@@ -1,22 +1,11 @@
 "use client";
 
-import {
-  CheckCircle2Icon,
-  CheckIcon,
-  ImageIcon,
-  KeyRoundIcon,
-  ShieldCheckIcon,
-} from "lucide-react";
-import Script from "next/script";
-import { useForm } from "@tanstack/react-form";
-import { useId, useMemo, useState } from "react";
+import { CheckIcon, ImageIcon, ShieldCheckIcon } from "lucide-react";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 
 import { mapProblemToFieldErrors, type ProblemDetails } from "@/api/problems";
-import {
-  zCompleteOnboardingRequest,
-  zSetInitialPasswordRequest,
-} from "@/api/generated/zod.gen";
+import { zCompleteOnboardingRequest } from "@/api/generated/zod.gen";
 import { AvatarUploader } from "@/components/avatar-uploader";
 import { useAuth } from "@/components/auth-provider";
 import { Button } from "@/components/ui/button";
@@ -37,90 +26,20 @@ import {
   FieldLabel,
   FieldTitle,
 } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
-declare global {
-  interface Window {
-    google?: {
-      accounts?: {
-        id?: {
-          initialize: (options: {
-            client_id: string;
-            callback: (response: { credential?: string }) => void;
-          }) => void;
-          renderButton: (
-            element: HTMLElement,
-            options: Record<string, string | boolean | number>,
-          ) => void;
-          prompt?: () => void;
-        };
-      };
-    };
-  }
-}
+type Step = "terms" | "avatar" | "complete";
 
-type Step = "terms" | "password" | "avatar" | "complete";
+const STEPS: Step[] = ["terms", "avatar", "complete"];
 
 export default function OnboardingPage() {
   const t = useTranslations("onboarding.page");
-  const { currentUser, completeOnboarding, setInitialPassword } = useAuth();
+  const { currentUser, completeOnboarding } = useAuth();
   const [step, setStep] = useState<Step>("terms");
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [marketingAccepted, setMarketingAccepted] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-  const [googleButtonReady, setGoogleButtonReady] = useState(false);
   const [avatarUploading, setAvatarUploading] = useState(false);
-  const googleButtonId = useId().replace(/:/g, "");
-  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
-
-  const needsPasswordStep = currentUser ? !currentUser.hasPassword : false;
-  const steps = useMemo(
-    () =>
-      needsPasswordStep
-        ? (["terms", "password", "avatar", "complete"] as Step[])
-        : (["terms", "avatar", "complete"] as Step[]),
-    [needsPasswordStep],
-  );
-
-  const passwordForm = useForm({
-    defaultValues: {
-      password: "",
-      confirmPassword: "",
-      googleIdToken: "",
-    },
-    onSubmit: async ({ value }) => {
-      setFieldErrors({});
-
-      if (value.password !== value.confirmPassword) {
-        setFieldErrors({ confirmPassword: t("password.mismatch") });
-        return;
-      }
-
-      const parsed = zSetInitialPasswordRequest.safeParse({
-        password: value.password,
-        googleIdToken: value.googleIdToken,
-      });
-
-      if (!parsed.success) {
-        setFieldErrors(
-          Object.fromEntries(
-            Object.entries(parsed.error.flatten().fieldErrors).map(
-              ([field, messages]) => [field, messages?.[0] ?? ""],
-            ),
-          ),
-        );
-        return;
-      }
-
-      try {
-        await setInitialPassword(parsed.data);
-        setStep("avatar");
-      } catch (error) {
-        setFieldErrors(mapProblemToFieldErrors(error as ProblemDetails));
-      }
-    },
-  });
 
   async function finishOnboarding() {
     setFieldErrors({});
@@ -149,42 +68,7 @@ export default function OnboardingPage() {
     }
 
     setFieldErrors({});
-    setStep(needsPasswordStep ? "password" : "avatar");
-  }
-
-  function initializeGoogleButton() {
-    if (!googleClientId || !window.google?.accounts?.id) {
-      return;
-    }
-
-    window.google.accounts.id.initialize({
-      client_id: googleClientId,
-      callback: ({ credential }) => {
-        if (!credential) {
-          return;
-        }
-        passwordForm.setFieldValue("googleIdToken", credential);
-        setFieldErrors((current) => {
-          if (!current.googleIdToken) {
-            return current;
-          }
-          const { googleIdToken: _omit, ...rest } = current;
-          return rest;
-        });
-      },
-    });
-
-    const target = document.getElementById(googleButtonId);
-    if (target) {
-      target.innerHTML = "";
-      window.google.accounts.id.renderButton(target, {
-        theme: "outline",
-        size: "large",
-        text: "continue_with",
-        shape: "rectangular",
-      });
-      setGoogleButtonReady(true);
-    }
+    setStep("avatar");
   }
 
   return (
@@ -195,7 +79,7 @@ export default function OnboardingPage() {
           <CardDescription>{t("description")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <Stepper activeStep={step} steps={steps} />
+          <Stepper activeStep={step} />
 
           {step === "terms" && (
             <section className="space-y-5">
@@ -259,140 +143,6 @@ export default function OnboardingPage() {
             </section>
           )}
 
-          {step === "password" && (
-            <form
-              className="space-y-5"
-              onSubmit={(event) => {
-                event.preventDefault();
-                void passwordForm.handleSubmit();
-              }}
-            >
-              <div className="flex items-start gap-2 border border-border p-3">
-                <KeyRoundIcon className="mt-0.5 size-4 text-muted-foreground" />
-                <div className="space-y-1 text-xs">
-                  <FieldTitle>{t("password.title")}</FieldTitle>
-                  <FieldDescription>
-                    {t("password.description")}
-                  </FieldDescription>
-                </div>
-              </div>
-
-              <FieldGroup>
-                <passwordForm.Field name="password">
-                  {(field) => (
-                    <Field>
-                      <FieldLabel htmlFor={field.name}>
-                        {t("password.newLabel")}
-                      </FieldLabel>
-                      <Input
-                        id={field.name}
-                        type="password"
-                        autoComplete="new-password"
-                        value={field.state.value}
-                        aria-invalid={Boolean(fieldErrors.password)}
-                        onBlur={field.handleBlur}
-                        onChange={(event) =>
-                          field.handleChange(event.target.value)
-                        }
-                      />
-                      <FieldDescription>
-                        {t("password.newHint")}
-                      </FieldDescription>
-                      <FieldError>{fieldErrors.password}</FieldError>
-                    </Field>
-                  )}
-                </passwordForm.Field>
-                <passwordForm.Field name="confirmPassword">
-                  {(field) => (
-                    <Field>
-                      <FieldLabel htmlFor={field.name}>
-                        {t("password.confirmLabel")}
-                      </FieldLabel>
-                      <Input
-                        id={field.name}
-                        type="password"
-                        autoComplete="new-password"
-                        value={field.state.value}
-                        aria-invalid={Boolean(fieldErrors.confirmPassword)}
-                        onBlur={field.handleBlur}
-                        onChange={(event) =>
-                          field.handleChange(event.target.value)
-                        }
-                      />
-                      <FieldError>{fieldErrors.confirmPassword}</FieldError>
-                    </Field>
-                  )}
-                </passwordForm.Field>
-                <passwordForm.Field name="googleIdToken">
-                  {(field) => (
-                    <Field>
-                      <FieldLabel>{t("password.verifyLabel")}</FieldLabel>
-                      <FieldDescription>
-                        {t("password.verifyDescription")}
-                      </FieldDescription>
-                      {googleClientId ? (
-                        <>
-                          <Script
-                            src="https://accounts.google.com/gsi/client"
-                            strategy="afterInteractive"
-                            onLoad={initializeGoogleButton}
-                          />
-                          {field.state.value ? (
-                            <div className="flex items-center gap-2 border border-border p-3 text-sm">
-                              <CheckCircle2Icon className="size-4 text-foreground" />
-                              <span>{t("password.verifyConfirmed")}</span>
-                            </div>
-                          ) : (
-                            <>
-                              <div
-                                id={googleButtonId}
-                                className={googleButtonReady ? "" : "hidden"}
-                              />
-                              {!googleButtonReady && (
-                                <Button
-                                  className="w-full"
-                                  type="button"
-                                  variant="outline"
-                                  disabled
-                                >
-                                  {t("password.verifyLoading")}
-                                </Button>
-                              )}
-                            </>
-                          )}
-                        </>
-                      ) : (
-                        <div className="border border-border p-3 text-sm text-muted-foreground">
-                          {t("password.googleUnavailable")}
-                        </div>
-                      )}
-                      <FieldError>{fieldErrors.googleIdToken}</FieldError>
-                    </Field>
-                  )}
-                </passwordForm.Field>
-              </FieldGroup>
-
-              <div className="grid gap-2 sm:grid-cols-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setStep("avatar")}
-                >
-                  {t("password.skip")}
-                </Button>
-                <passwordForm.Subscribe
-                  selector={(state) => state.values.googleIdToken}
-                >
-                  {(googleIdToken) => (
-                    <Button type="submit" disabled={!googleIdToken}>
-                      {t("password.submit")}
-                    </Button>
-                  )}
-                </passwordForm.Subscribe>
-              </div>
-            </form>
-          )}
-
           {step === "avatar" && currentUser && (
             <section className="space-y-5">
               <div className="flex items-start gap-2 border border-border p-3">
@@ -406,11 +156,6 @@ export default function OnboardingPage() {
                 user={currentUser}
                 onUploadingChange={setAvatarUploading}
               />
-              {currentUser.avatar ? (
-                <p className="text-xs text-muted-foreground">
-                  {t("avatar.replaceHint")}
-                </p>
-              ) : null}
               <div className="grid gap-2 sm:grid-cols-2">
                 <Button
                   type="button"
@@ -457,13 +202,13 @@ export default function OnboardingPage() {
   );
 }
 
-function Stepper({ activeStep, steps }: { activeStep: Step; steps: Step[] }) {
+function Stepper({ activeStep }: { activeStep: Step }) {
   const t = useTranslations("onboarding.page.steps");
-  const activeIndex = steps.indexOf(activeStep);
+  const activeIndex = STEPS.indexOf(activeStep);
 
   return (
     <ol className="flex flex-wrap gap-2 sm:flex-nowrap">
-      {steps.map((step, index) => (
+      {STEPS.map((step, index) => (
         <li
           key={step}
           className={cn(

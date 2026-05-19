@@ -53,10 +53,6 @@ type AuthContextValue = {
     acceptTerms: boolean;
     acceptMarketingEmails: boolean;
   }): Promise<void>;
-  setInitialPassword(data: {
-    password: string;
-    googleIdToken: string;
-  }): Promise<void>;
   logout(): Promise<void>;
 };
 
@@ -211,13 +207,6 @@ function AuthProviderInner({ children }: { children: ReactNode }) {
         });
         await queryClient.invalidateQueries({ queryKey: currentUserQueryKey });
         push("/app");
-      },
-      async setInitialPassword(data) {
-        await fetchJson<void>("/api/proxy/v1/users/me/password/initial", {
-          method: "POST",
-          body: JSON.stringify(data),
-        });
-        await queryClient.invalidateQueries({ queryKey: currentUserQueryKey });
       },
       async logout() {
         await fetch("/api/auth/logout", { method: "POST" });
