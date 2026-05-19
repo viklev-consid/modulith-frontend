@@ -14,5 +14,6 @@ export default getRequestConfig(async () => {
   return {
     locale,
     messages,
+    now: new Date(),
   };
 });

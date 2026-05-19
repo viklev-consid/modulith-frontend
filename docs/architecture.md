@@ -6,7 +6,7 @@ All API communication goes through a Next.js server-side proxy. The browser neve
 
 - **Tokens never reach the browser.** Access + refresh tokens are sealed in an encrypted httpOnly cookie via `iron-session`. The cookie holds `{accessToken, refreshToken, expiresAt, user: {id, email, role}}` — no permissions, no display name.
 - **Single proxy chokepoint.** All API calls route through `/api/proxy/[...path]`, which reads the cookie, checks token expiry, refreshes silently if needed, attaches `Authorization: Bearer <jwt>`, and forwards the request.
-- **BFF auth routes** (`/api/auth/*`) handle login, register, logout, refresh, session, and Google OAuth. They proxy to the .NET backend and seal/clear the cookie.
+- **BFF auth routes** (`/api/auth/*`) handle login, register, logout, refresh, and session. They proxy to the .NET backend and seal/clear the cookie.
 - **Middleware** runs on every navigation for coarse route protection only — checks cookie existence and expiry, redirects to `/login` or `/onboarding`. It does NOT check permissions.
 
 ## Permission model

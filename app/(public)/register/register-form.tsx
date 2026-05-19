@@ -10,7 +10,6 @@ import { useTranslations } from "next-intl";
 import { mapProblemToFieldErrors, type ProblemDetails } from "@/api/problems";
 import { zRegisterRequest } from "@/api/generated/zod.gen";
 import { useAuth } from "@/components/auth-provider";
-import { GoogleSignInButton } from "@/components/auth/google-sign-in-button";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -24,7 +23,6 @@ import {
   FieldError,
   FieldGroup,
   FieldLabel,
-  FieldSeparator,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
@@ -165,10 +163,6 @@ export function RegisterContent() {
             <Button className="w-full" type="submit">
               {t("submit")}
             </Button>
-
-            <FieldSeparator>{t("or")}</FieldSeparator>
-
-            <GoogleSignInButton />
 
             <p className="text-center text-xs text-muted-foreground">
               {t("haveAccount")}{" "}

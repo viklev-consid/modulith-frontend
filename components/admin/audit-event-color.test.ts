@@ -13,11 +13,6 @@ describe("auditEventColor", () => {
     expect(auditEventColor("user.password.changed")).toBe("bg-amber-500");
   });
 
-  it("colors google provider events purple", () => {
-    expect(auditEventColor("user.google.linked")).toBe("bg-purple-500");
-    expect(auditEventColor("user.provider.unlinked")).toBe("bg-purple-500");
-  });
-
   it("colors role and invitation events sky", () => {
     expect(auditEventColor("user.role.changed")).toBe("bg-sky-500");
     expect(auditEventColor("invitation.sent")).toBe("bg-sky-500");

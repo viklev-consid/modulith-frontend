@@ -3,7 +3,7 @@
 import "@/api/client";
 
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { useFormatter, useTranslations } from "next-intl";
+import { useFormatter, useNow, useTranslations } from "next-intl";
 
 import { getAuditTrailInfiniteOptions } from "@/api/generated/@tanstack/react-query.gen";
 import type { AuditEntryDto } from "@/api/generated";
@@ -24,7 +24,7 @@ function safeParse(iso: string): Date | null {
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
-function TimelineEntry({ entry }: { entry: AuditEntryDto }) {
+function TimelineEntry({ entry, now }: { entry: AuditEntryDto; now: Date }) {
   const format = useFormatter();
   const occurredAt = safeParse(entry.occurredAt);
   return (
@@ -45,7 +45,7 @@ function TimelineEntry({ entry }: { entry: AuditEntryDto }) {
               : entry.occurredAt
           }
         >
-          {occurredAt ? format.relativeTime(occurredAt) : entry.occurredAt}
+          {occurredAt ? format.relativeTime(occurredAt, now) : entry.occurredAt}
         </span>
       </div>
     </li>
@@ -54,6 +54,7 @@ function TimelineEntry({ entry }: { entry: AuditEntryDto }) {
 
 export function ActivityFeed() {
   const t = useTranslations("components.activityFeed");
+  const now = useNow({ updateInterval: 60_000 });
   const query = useInfiniteQuery({
     ...getAuditTrailInfiniteOptions({
       query: { pageSize: PAGE_SIZE },
@@ -99,7 +100,7 @@ export function ActivityFeed() {
       <CardContent>
         <ul className="grid">
           {entries.map((entry) => (
-            <TimelineEntry key={entry.id} entry={entry} />
+            <TimelineEntry key={entry.id} entry={entry} now={now} />
           ))}
         </ul>
         <div className="flex items-center justify-center gap-2 pt-4">

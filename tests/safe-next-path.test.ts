@@ -21,7 +21,7 @@ describe("safeNextPath", () => {
 
   it("rejects internal API and auth prefixes", () => {
     expect(safeNextPath("/api/proxy/x")).toBe(DEFAULT_NEXT_PATH);
-    expect(safeNextPath("/auth/google/confirm")).toBe(DEFAULT_NEXT_PATH);
+    expect(safeNextPath("/auth/anything")).toBe(DEFAULT_NEXT_PATH);
   });
 
   it("preserves a path with a query string", () => {

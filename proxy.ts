@@ -13,7 +13,7 @@ const publicRoutes = new Set([
   "/goodbye",
 ]);
 
-const publicPrefixes = ["/login/", "/auth/google/confirm"];
+const publicPrefixes = ["/login/"];
 
 function isPublicRoute(pathname: string) {
   return (

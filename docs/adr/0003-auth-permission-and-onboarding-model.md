@@ -22,7 +22,7 @@ Authentication, onboarding, and permissions are split by layer:
 | Layer             | Reads From                                       | Responsibility                                                            |
 | ----------------- | ------------------------------------------------ | ------------------------------------------------------------------------- |
 | `proxy.ts`        | Sealed session cookie                            | Coarse redirects for authenticated, unauthenticated, and onboarding flows |
-| `app/api/auth/**` | `iron-session` and backend auth endpoints        | Login, register, logout, refresh, OAuth, password flows, session exposure |
+| `app/api/auth/**` | `iron-session` and backend auth endpoints        | Login, register, logout, refresh, password flows, session exposure        |
 | Server components | Server-only session helpers and backend profile  | Route data, redirects, onboarding gates, permission-aware routing         |
 | `AuthHydration`   | Server session and `GET /v1/users/me`            | Hydrate session/current-user React Query state for protected routes       |
 | `AuthProvider`    | Hydrated React Query state, with client fallback | Client auth actions, current profile, permissions for interactive UI      |

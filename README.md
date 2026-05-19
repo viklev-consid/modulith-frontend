@@ -49,8 +49,6 @@ pnpm dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
-Google login requires a Google Identity Services Web client ID in `.env.local`. See [Google login setup](docs/google-login.md) for the Google Cloud registration steps.
-
 ## API Contract Workflow
 
 The backend is the source of truth for API shape. To refresh the frontend contract:
