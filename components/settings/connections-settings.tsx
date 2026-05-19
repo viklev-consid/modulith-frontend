@@ -10,7 +10,6 @@ import { toast } from "sonner";
 
 import { useAuth } from "@/components/auth-provider";
 import { fetchJson } from "@/components/settings/client-fetch";
-import { decodeGoogleCredential } from "@/lib/decode-google-credential";
 import {
   GOOGLE_GSI_SRC,
   useGoogleCredential,
@@ -42,42 +41,11 @@ export function ConnectionsSettings() {
   const { currentUser } = useAuth();
   const queryClient = useQueryClient();
   const [isUnlinking, setIsUnlinking] = useState(false);
-  const [pendingCredential, setPendingCredential] = useState<string | null>(
-    null,
-  );
-  const [isLinking, setIsLinking] = useState(false);
   const googleAccount = currentUser?.linkedAccounts.find(
     (account) => account.provider === "Google",
   );
   const isLinked = Boolean(googleAccount);
   const canUnlink = currentUser?.hasPassword ?? false;
-  const hasLocalAvatar = Boolean(currentUser?.avatar);
-
-  async function linkWithGoogle(
-    credential: string,
-    overrideAvatarWithGoogleAvatar?: boolean,
-  ) {
-    setIsLinking(true);
-    try {
-      await fetchJson("/api/proxy/v1/users/me/auth/google/link", {
-        method: "POST",
-        body: JSON.stringify({
-          idToken: credential,
-          ...(overrideAvatarWithGoogleAvatar !== undefined
-            ? { overrideAvatarWithGoogleAvatar }
-            : {}),
-        }),
-      });
-      await queryClient.invalidateQueries({ queryKey: ["current-user"] });
-      toast.success(t("google.linkSuccess"));
-    } catch (error) {
-      console.error("Failed to link Google account", error);
-      toast.error(t("google.linkError"));
-    } finally {
-      setIsLinking(false);
-      setPendingCredential(null);
-    }
-  }
 
   const {
     containerId,
@@ -87,15 +55,19 @@ export function ConnectionsSettings() {
   } = useGoogleCredential({
     disabled: isLinked,
     onCredential: (credential) => {
-      const claims = decodeGoogleCredential(credential);
-      const hasGooglePicture = Boolean(claims?.picture);
-
-      if (hasGooglePicture && hasLocalAvatar) {
-        setPendingCredential(credential);
-        return;
-      }
-
-      void linkWithGoogle(credential, hasGooglePicture ? true : undefined);
+      void (async () => {
+        try {
+          await fetchJson("/api/proxy/v1/users/me/auth/google/link", {
+            method: "POST",
+            body: JSON.stringify({ idToken: credential }),
+          });
+          await queryClient.invalidateQueries({ queryKey: ["current-user"] });
+          toast.success(t("google.linkSuccess"));
+        } catch (error) {
+          console.error("Failed to link Google account", error);
+          toast.error(t("google.linkError"));
+        }
+      })();
     },
   });
 
@@ -214,49 +186,6 @@ export function ConnectionsSettings() {
           </Alert>
         )}
       </CardContent>
-
-      <AlertDialog
-        open={pendingCredential !== null}
-        onOpenChange={(open) => {
-          if (!open && !isLinking) {
-            setPendingCredential(null);
-          }
-        }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              {t("google.overrideDialog.title")}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {t("google.overrideDialog.description")}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel
-              disabled={isLinking}
-              onClick={() => {
-                if (pendingCredential) {
-                  void linkWithGoogle(pendingCredential, false);
-                }
-              }}
-            >
-              {t("google.overrideDialog.keepCurrent")}
-            </AlertDialogCancel>
-            <AlertDialogAction
-              disabled={isLinking}
-              onClick={(event) => {
-                event.preventDefault();
-                if (pendingCredential) {
-                  void linkWithGoogle(pendingCredential, true);
-                }
-              }}
-            >
-              {t("google.overrideDialog.useGoogle")}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </Card>
   );
 }
