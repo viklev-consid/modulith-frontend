@@ -1720,6 +1720,163 @@
         ]
       }
     },
+    "/v1/users/me/avatar": {
+      "put": {
+        "tags": ["Modulith.Api"],
+        "summary": "Upload or replace the authenticated user's avatar.",
+        "operationId": "UpdateAvatar",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/IFormFile"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateAvatarResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": ["Modulith.Api"],
+        "summary": "Remove the authenticated user's avatar.",
+        "operationId": "DeleteAvatar",
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/v1/users/{userId}/avatar": {
+      "get": {
+        "tags": ["Modulith.Api"],
+        "summary": "Get a user's avatar when the authenticated caller is allowed to view it.",
+        "operationId": "GetUserAvatar",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
     "/v1/users/me/personal-data": {
       "get": {
         "tags": ["Modulith.Api"],
@@ -3538,6 +3695,19 @@
           }
         }
       },
+      "CurrentUserAvatarResponse": {
+        "required": ["url", "updatedAt"],
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
       "DeadLetterEnvelopeQuery": {
         "type": "object",
         "properties": {
@@ -3740,6 +3910,7 @@
           "hasPassword",
           "hasCompletedOnboarding",
           "twoFactorEnabled",
+          "avatar",
           "linkedAccounts"
         ],
         "type": "object",
@@ -3778,6 +3949,16 @@
           },
           "twoFactorEnabled": {
             "type": "boolean"
+          },
+          "avatar": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/CurrentUserAvatarResponse"
+              }
+            ]
           },
           "linkedAccounts": {
             "type": "array",
@@ -3903,6 +4084,10 @@
           },
           "invitationToken": {
             "type": ["null", "string"]
+          },
+          "useGoogleAvatar": {
+            "type": "boolean",
+            "default": false
           }
         }
       },
@@ -4048,6 +4233,10 @@
           }
         }
       },
+      "IFormFile": {
+        "type": "string",
+        "format": "binary"
+      },
       "LinkedAccountResponse": {
         "required": ["provider", "providerEmail"],
         "type": "object",
@@ -4066,6 +4255,10 @@
         "properties": {
           "idToken": {
             "type": "string"
+          },
+          "overrideAvatarWithGoogleAvatar": {
+            "type": "boolean",
+            "default": false
           }
         }
       },
@@ -4732,6 +4925,19 @@
           },
           "to": {
             "type": ["null", "string"],
+            "format": "date-time"
+          }
+        }
+      },
+      "UpdateAvatarResponse": {
+        "required": ["url", "updatedAt"],
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string",
             "format": "date-time"
           }
         }

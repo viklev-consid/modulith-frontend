@@ -14,6 +14,18 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     "api/generated/**",
   ]),
+  // Vendored headless UI primitives use ref mutation and other patterns the
+  // React Compiler diagnostics flag. Keep the rules on for app code, disable
+  // them only here.
+  {
+    files: ["components/ui/cropper.tsx", "components/ui/file-upload.tsx"],
+    rules: {
+      "react-hooks/immutability": "off",
+      "react-hooks/preserve-manual-memoization": "off",
+      "jsx-a11y/role-supports-aria-props": "off",
+      "@next/next/no-img-element": "off",
+    },
+  },
 ]);
 
 export default eslintConfig;

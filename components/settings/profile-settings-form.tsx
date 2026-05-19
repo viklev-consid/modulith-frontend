@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { mapProblemToFieldErrors, type ProblemDetails } from "@/api/problems";
+import { AvatarUploader } from "@/components/avatar-uploader";
 import { useAuth } from "@/components/auth-provider";
 import { fetchJson } from "@/components/settings/client-fetch";
 import { Badge } from "@/components/ui/badge";
@@ -78,6 +79,7 @@ export function ProfileSettingsForm() {
             void form.handleSubmit();
           }}
         >
+          {currentUser ? <AvatarUploader user={currentUser} /> : null}
           <FieldGroup>
             <form.Field name="displayName">
               {(field) => (

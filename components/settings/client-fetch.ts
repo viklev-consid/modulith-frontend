@@ -11,12 +11,18 @@ export async function fetchJson<T>(
   init?: RequestInit & { redirectOnUnauthorized?: boolean },
 ) {
   const { redirectOnUnauthorized = true, ...requestInit } = init ?? {};
+  // Let the browser set the multipart boundary itself when sending FormData;
+  // otherwise default to JSON.
+  const isFormData =
+    typeof FormData !== "undefined" && requestInit.body instanceof FormData;
   const response = await fetch(input, {
     ...requestInit,
-    headers: {
-      "content-type": "application/json",
-      ...requestInit.headers,
-    },
+    headers: isFormData
+      ? requestInit.headers
+      : {
+          "content-type": "application/json",
+          ...requestInit.headers,
+        },
   });
 
   if (!response.ok) {

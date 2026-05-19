@@ -5,6 +5,7 @@
     "steps": {
       "terms": "Terms",
       "password": "Password",
+      "avatar": "Photo",
       "complete": "Complete"
     },
     "terms": {
@@ -31,6 +32,13 @@
       "skip": "Skip for now",
       "submit": "Set password",
       "mismatch": "Passwords must match."
+    },
+    "avatar": {
+      "title": "Add a profile picture",
+      "description": "Optional. You can change it later in Profile settings.",
+      "replaceHint": "We imported this from your Google account. Replace, remove, or keep it.",
+      "skip": "Skip for now",
+      "continue": "Continue"
     },
     "complete": {
       "title": "Ready to enter Modulith",
