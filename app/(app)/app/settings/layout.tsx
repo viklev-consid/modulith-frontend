@@ -5,7 +5,6 @@ import {
   BellIcon,
   DatabaseIcon,
   KeyRoundIcon,
-  LinkIcon,
   MailIcon,
   ShieldIcon,
   UserIcon,
@@ -25,7 +24,6 @@ type SettingsLinkKey =
   | "email"
   | "security"
   | "activity"
-  | "connections"
   | "notifications"
   | "data";
 
@@ -35,7 +33,6 @@ const links: { href: string; key: SettingsLinkKey; icon: typeof UserIcon }[] = [
   { href: "/app/settings/email", key: "email", icon: MailIcon },
   { href: "/app/settings/security", key: "security", icon: ShieldIcon },
   { href: "/app/settings/activity", key: "activity", icon: ActivityIcon },
-  { href: "/app/settings/connections", key: "connections", icon: LinkIcon },
   {
     href: "/app/settings/notifications",
     key: "notifications",

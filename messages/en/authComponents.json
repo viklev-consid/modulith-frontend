@@ -24,8 +24,5 @@
     "emailPlaceholder": "you@example.com",
     "resending": "Resending…",
     "resendButton": "Resend confirmation email"
-  },
-  "googleSignIn": {
-    "continue": "Continue with Google"
   }
 }

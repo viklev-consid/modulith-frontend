@@ -26,10 +26,6 @@
       "confirmationSent": {
         "title": "Confirmation email sent",
         "description": "If an account exists and needs confirmation, a new email is on its way."
-      },
-      "checkEmail": {
-        "title": "Check your email",
-        "description": "Use the confirmation link to finish Google sign-in."
       }
     }
   },

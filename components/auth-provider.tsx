@@ -49,11 +49,6 @@ type AuthContextValue = {
   completeTwoFactorLogin(code: string, nextPath?: string | null): Promise<void>;
   register(data: RegisterInput): Promise<RegisterResponse>;
   resendEmailConfirmation(email: string): Promise<void>;
-  googleLogin(idToken: string, nextPath?: string | null): Promise<void>;
-  googleConfirm(data: {
-    token: string;
-    invitationToken?: string | null;
-  }): Promise<void>;
   completeOnboarding(data: {
     acceptTerms: boolean;
     acceptMarketingEmails: boolean;
@@ -208,88 +203,6 @@ function AuthProviderInner({ children }: { children: ReactNode }) {
         toast.success(t("confirmationSent.title"), {
           description: t("confirmationSent.description"),
         });
-      },
-      async googleLogin(idToken, nextPath) {
-        const response = await fetch("/api/auth/google/login", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ idToken }),
-        });
-
-        if (response.status === 202) {
-          const pending = (await response.json()) as {
-            pendingToken?: string;
-            email?: string;
-            displayName?: string;
-            detail?: string;
-          };
-          const params = new URLSearchParams();
-          if (pending.pendingToken) {
-            params.set("token", pending.pendingToken);
-          }
-          if (pending.email) {
-            params.set("email", pending.email);
-          }
-          if (pending.displayName) {
-            params.set("displayName", pending.displayName);
-          }
-
-          if (pending.pendingToken) {
-            push(`/auth/google/confirm?${params.toString()}`);
-            return;
-          }
-
-          toast.success(t("checkEmail.title"), {
-            description: pending.detail ?? t("checkEmail.description"),
-          });
-          return;
-        }
-
-        if (!response.ok) {
-          const problem = await problemFromResponse(response);
-          handleProblem(problem);
-          throw problem;
-        }
-
-        type GoogleLoginResult =
-          | { status: "Authenticated"; user: AuthUser }
-          | {
-              status: "TwoFactorRequired";
-              challengeToken: string;
-              expiresAt: string;
-            };
-
-        const result = (await response.json()) as GoogleLoginResult;
-
-        if (result.status === "TwoFactorRequired") {
-          saveTwoFactorChallenge({
-            challengeToken: result.challengeToken,
-            expiresAt: result.expiresAt,
-            nextPath: nextPath ?? null,
-          });
-          push("/login/two-factor");
-          return;
-        }
-
-        queryClient.setQueryData(sessionQueryKey, result.user);
-        const profile = await queryClient.fetchQuery({
-          queryKey: currentUserQueryKey,
-          queryFn: fetchCurrentUserQuery,
-        });
-        push(
-          profile.hasCompletedOnboarding
-            ? safeNextPath(nextPath)
-            : "/onboarding",
-        );
-      },
-      async googleConfirm(data) {
-        const user = await fetchJson<AuthUser>("/api/auth/google/confirm", {
-          method: "POST",
-          body: JSON.stringify(data),
-        });
-        queryClient.setQueryData(sessionQueryKey, user);
-        await queryClient.invalidateQueries({ queryKey: currentUserQueryKey });
-        push("/onboarding");
       },
       async completeOnboarding(data) {
         await fetchJson<void>("/api/auth/onboarding", {
