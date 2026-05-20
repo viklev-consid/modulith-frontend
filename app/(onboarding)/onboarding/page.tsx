@@ -1,11 +1,19 @@
 "use client";
 
+import "@/api/client";
+
 import { CheckIcon, ImageIcon, ShieldCheckIcon } from "lucide-react";
 import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 
+import type { AcceptedLegalDocumentRequest } from "@/api/generated";
+import { getOnboardingLegalRequirementsOptions } from "@/api/generated/@tanstack/react-query.gen";
 import { mapProblemToFieldErrors, type ProblemDetails } from "@/api/problems";
-import { zCompleteOnboardingRequest } from "@/api/generated/zod.gen";
+import {
+  LegalAcceptanceForm,
+  type LegalDocumentInput,
+} from "@/components/legal/legal-acceptance-form";
 import { AvatarUploader } from "@/components/avatar-uploader";
 import { useAuth } from "@/components/auth-provider";
 import { Button } from "@/components/ui/button";
@@ -35,40 +43,70 @@ const STEPS: Step[] = ["terms", "avatar", "complete"];
 export default function OnboardingPage() {
   const t = useTranslations("onboarding.page");
   const { currentUser, completeOnboarding } = useAuth();
+  const queryClient = useQueryClient();
   const [step, setStep] = useState<Step>("terms");
-  const [termsAccepted, setTermsAccepted] = useState(false);
   const [marketingAccepted, setMarketingAccepted] = useState(false);
+  const [acceptedDocuments, setAcceptedDocuments] = useState<
+    AcceptedLegalDocumentRequest[]
+  >([]);
+  const [staleDocsMessage, setStaleDocsMessage] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [avatarUploading, setAvatarUploading] = useState(false);
+
+  const legalQuery = useQuery({
+    ...getOnboardingLegalRequirementsOptions(),
+    staleTime: 0,
+  });
+
+  const documents: LegalDocumentInput[] = legalQuery.data?.documents ?? [];
+
+  async function refetchLegal() {
+    setAcceptedDocuments([]);
+    await queryClient.invalidateQueries({
+      queryKey: getOnboardingLegalRequirementsOptions().queryKey,
+    });
+  }
+
+  function handleTermsSubmit(documents: AcceptedLegalDocumentRequest[]) {
+    setAcceptedDocuments(documents);
+    setStaleDocsMessage(null);
+    setFieldErrors({});
+    setStep("avatar");
+  }
 
   async function finishOnboarding() {
     setFieldErrors({});
-    const parsed = zCompleteOnboardingRequest.safeParse({
-      acceptTerms: termsAccepted,
-      acceptMarketingEmails: marketingAccepted,
-    });
+    setSubmitError(null);
 
-    if (!parsed.success) {
-      setFieldErrors({ acceptTerms: t("terms.errorAcceptTerms") });
+    if (acceptedDocuments.length === 0) {
       setStep("terms");
       return;
     }
 
     try {
-      await completeOnboarding(parsed.data);
+      await completeOnboarding({
+        acceptMarketingEmails: marketingAccepted,
+        acceptedDocuments,
+      });
     } catch (error) {
-      setFieldErrors(mapProblemToFieldErrors(error as ProblemDetails));
+      const problem = error as ProblemDetails;
+      if (problem.status === 400) {
+        await refetchLegal();
+        setStaleDocsMessage(t("terms.documentsUpdated"));
+        setStep("terms");
+        return;
+      }
+      if (problem.status === 422) {
+        setSubmitError(
+          problem.detail ?? problem.title ?? t("terms.errorAcceptDocuments"),
+        );
+        setStep("terms");
+        return;
+      }
+      setFieldErrors(mapProblemToFieldErrors(problem));
+      setSubmitError(problem.detail ?? problem.title ?? null);
     }
-  }
-
-  function continueFromTerms() {
-    if (!termsAccepted) {
-      setFieldErrors({ acceptTerms: t("terms.errorAcceptTerms") });
-      return;
-    }
-
-    setFieldErrors({});
-    setStep("avatar");
   }
 
   return (
@@ -83,63 +121,68 @@ export default function OnboardingPage() {
 
           {step === "terms" && (
             <section className="space-y-5">
-              <div className="grid gap-3 border border-border p-3 text-xs leading-relaxed text-muted-foreground">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="border border-border px-2 py-0.5 text-foreground">
-                    {t("terms.versionTerms")}
-                  </span>
-                  <span className="border border-border px-2 py-0.5 text-foreground">
-                    {t("terms.versionPrivacy")}
-                  </span>
+              {staleDocsMessage ? (
+                <p
+                  className="border border-border bg-muted/40 px-3 py-2 text-xs text-foreground"
+                  role="status"
+                >
+                  {staleDocsMessage}
+                </p>
+              ) : null}
+
+              {legalQuery.isLoading ? (
+                <p className="text-sm text-muted-foreground">
+                  {t("terms.loading")}
+                </p>
+              ) : legalQuery.isError ? (
+                <div className="space-y-3">
+                  <p className="text-sm text-destructive" role="alert">
+                    {t("terms.loadError")}
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => void legalQuery.refetch()}
+                  >
+                    {t("terms.retry")}
+                  </Button>
                 </div>
-                <p>{t("terms.summary")}</p>
-              </div>
-
-              <FieldGroup>
-                <Field orientation="horizontal">
-                  <Checkbox
-                    id="acceptTerms"
-                    checked={termsAccepted}
-                    aria-invalid={Boolean(fieldErrors.acceptTerms)}
-                    onCheckedChange={(checked) => {
-                      setTermsAccepted(checked === true);
-                      setFieldErrors({});
-                    }}
-                  />
-                  <FieldContent>
-                    <FieldLabel htmlFor="acceptTerms">
-                      {t("terms.acceptTerms")}
-                    </FieldLabel>
-                    <FieldError>{fieldErrors.acceptTerms}</FieldError>
-                  </FieldContent>
-                </Field>
-                <Field orientation="horizontal">
-                  <Checkbox
-                    id="acceptMarketingEmails"
-                    checked={marketingAccepted}
-                    onCheckedChange={(checked) =>
-                      setMarketingAccepted(checked === true)
-                    }
-                  />
-                  <FieldContent>
-                    <FieldLabel htmlFor="acceptMarketingEmails">
-                      {t("terms.acceptMarketing")}
-                    </FieldLabel>
-                    <FieldDescription>
-                      {t("terms.marketingHint")}
-                    </FieldDescription>
-                  </FieldContent>
-                </Field>
-              </FieldGroup>
-
-              <Button
-                className="w-full"
-                type="button"
-                disabled={!termsAccepted}
-                onClick={continueFromTerms}
-              >
-                {t("terms.submit")}
-              </Button>
+              ) : documents.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  {t("terms.noneRequired")}
+                </p>
+              ) : (
+                <LegalAcceptanceForm
+                  documents={documents}
+                  submitLabel={t("terms.submit")}
+                  errorMessage={
+                    fieldErrors.acceptedDocuments ?? submitError ?? undefined
+                  }
+                  onSubmit={handleTermsSubmit}
+                  extraFields={
+                    <FieldGroup>
+                      <Field orientation="horizontal">
+                        <Checkbox
+                          id="acceptMarketingEmails"
+                          checked={marketingAccepted}
+                          onCheckedChange={(checked) =>
+                            setMarketingAccepted(checked === true)
+                          }
+                        />
+                        <FieldContent>
+                          <FieldLabel htmlFor="acceptMarketingEmails">
+                            {t("terms.acceptMarketing")}
+                          </FieldLabel>
+                          <FieldDescription>
+                            {t("terms.marketingHint")}
+                          </FieldDescription>
+                          <FieldError />
+                        </FieldContent>
+                      </Field>
+                    </FieldGroup>
+                  }
+                />
+              )}
             </section>
           )}
 
@@ -187,6 +230,11 @@ export default function OnboardingPage() {
                   </FieldDescription>
                 </div>
               </div>
+              {submitError ? (
+                <p className="text-xs text-destructive" role="alert">
+                  {submitError}
+                </p>
+              ) : null}
               <Button
                 className="w-full"
                 type="button"
