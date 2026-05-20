@@ -9,6 +9,65 @@ export interface ProblemDetails {
   detail?: string;
   instance?: string;
   errors?: Record<string, string[]>;
+  extensions?: Record<string, unknown>;
+  // Backends sometimes inline `extensions` keys directly on the problem body.
+  // Allow indexed access so callers can read `missingDocuments` from either
+  // shape without type gymnastics at the call site.
+  [key: string]: unknown;
+}
+
+export type MissingLegalDocument = {
+  id: string;
+  type: string;
+  title: string;
+  version: string;
+  contentHash: string;
+};
+
+const LEGAL_COMPLIANCE_REQUIRED_EVENT = "modulith:legal-compliance-required";
+
+export type LegalComplianceRequiredDetail = {
+  missingDocuments?: MissingLegalDocument[];
+};
+
+export function emitLegalComplianceRequired(
+  detail: LegalComplianceRequiredDetail,
+) {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(
+    new CustomEvent<LegalComplianceRequiredDetail>(
+      LEGAL_COMPLIANCE_REQUIRED_EVENT,
+      { detail },
+    ),
+  );
+}
+
+export function onLegalComplianceRequired(
+  handler: (detail: LegalComplianceRequiredDetail) => void,
+) {
+  if (typeof window === "undefined") return () => undefined;
+  const listener = (event: Event) => {
+    handler((event as CustomEvent<LegalComplianceRequiredDetail>).detail ?? {});
+  };
+  window.addEventListener(LEGAL_COMPLIANCE_REQUIRED_EVENT, listener);
+  return () => {
+    window.removeEventListener(LEGAL_COMPLIANCE_REQUIRED_EVENT, listener);
+  };
+}
+
+function extractMissingDocuments(
+  problem: ProblemDetails,
+): MissingLegalDocument[] | undefined {
+  const candidates = [
+    problem.extensions?.missingDocuments,
+    (problem as Record<string, unknown>).missingDocuments,
+  ];
+  for (const candidate of candidates) {
+    if (Array.isArray(candidate)) {
+      return candidate as MissingLegalDocument[];
+    }
+  }
+  return undefined;
 }
 
 // Toast / fallback strings used by handleProblem and mapProblemToFieldErrors.
@@ -68,6 +127,13 @@ export function redirectToLogin() {
 export function handleProblem(problem: ProblemDetails) {
   if (problem.status === 401) {
     redirectToLogin();
+    return;
+  }
+
+  if (problem.status === 428) {
+    emitLegalComplianceRequired({
+      missingDocuments: extractMissingDocuments(problem),
+    });
     return;
   }
 
