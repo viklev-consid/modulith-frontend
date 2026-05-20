@@ -8,14 +8,15 @@
       "complete": "Complete"
     },
     "terms": {
-      "versionTerms": "Terms v1.0",
-      "versionPrivacy": "Privacy v1.0",
-      "summary": "By continuing, you agree to use Modulith according to the workspace terms and acknowledge how account data is processed for authentication, notifications, audit history, and account administration.",
-      "acceptTerms": "I accept the terms and privacy policy",
       "acceptMarketing": "Send me product updates by email",
       "marketingHint": "Optional.",
       "submit": "Continue",
-      "errorAcceptTerms": "Accept the terms to continue."
+      "loading": "Loading legal documents…",
+      "loadError": "Couldn't load the legal documents. Try again.",
+      "retry": "Try again",
+      "noneRequired": "No legal documents are currently required.",
+      "documentsUpdated": "These documents were updated while you were reading. Please review the latest version and acknowledge again.",
+      "errorAcceptDocuments": "Please accept all legal documents to continue."
     },
     "avatar": {
       "title": "Add a profile picture",

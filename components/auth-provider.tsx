@@ -7,7 +7,11 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { handleProblem, problemFromResponse } from "@/api/problems";
-import type { GetCurrentUserResponse, RegisterResponse } from "@/api/generated";
+import type {
+  AcceptedLegalDocumentRequest,
+  GetCurrentUserResponse,
+  RegisterResponse,
+} from "@/api/generated";
 import {
   currentUserQueryKey,
   fetchCurrentUserQuery,
@@ -50,8 +54,8 @@ type AuthContextValue = {
   register(data: RegisterInput): Promise<RegisterResponse>;
   resendEmailConfirmation(email: string): Promise<void>;
   completeOnboarding(data: {
-    acceptTerms: boolean;
     acceptMarketingEmails: boolean;
+    acceptedDocuments: AcceptedLegalDocumentRequest[];
   }): Promise<void>;
   logout(): Promise<void>;
 };

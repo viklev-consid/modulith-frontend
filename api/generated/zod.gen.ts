@@ -2,6 +2,23 @@
 
 import * as z from "zod";
 
+export const zAcceptedLegalDocumentRequest = z.object({
+  documentId: z.uuid().optional(),
+  version: z.string().optional(),
+  contentHash: z.string().optional(),
+});
+
+export const zAcceptedLegalDocumentResponse = z.object({
+  type: z.string(),
+  version: z.string(),
+  acceptedAt: z.iso.datetime(),
+  contentHash: z.string().nullable(),
+});
+
+export const zAcceptLegalDocumentsRequest = z.object({
+  acceptedDocuments: z.array(zAcceptedLegalDocumentRequest).optional(),
+});
+
 export const zAuditEntryDto = z.object({
   id: z.uuid(),
   eventType: z.string(),
@@ -30,8 +47,8 @@ export const zChangeUserRoleResponse = z.object({
 });
 
 export const zCompleteOnboardingRequest = z.object({
-  acceptTerms: z.boolean(),
-  acceptMarketingEmails: z.boolean(),
+  acceptMarketingEmails: z.boolean().optional(),
+  acceptedDocuments: z.array(zAcceptedLegalDocumentRequest).nullish(),
 });
 
 export const zConfirmEmailChangeRequest = z.object({
@@ -101,8 +118,8 @@ export const zCurrentUserAvatarResponse = z.object({
 /**
  * Redacted projection of a Wolverine DeadLetterEnvelope.
  * The message body (`Envelope` and `Message` on the source type) is intentionally
- * excluded because integration events such as `PasswordResetRequestedV1`,
- * `EmailChangeRequestedV1`, and `ExternalLoginPendingV1` carry single-use
+ * excluded because integration events such as `PasswordResetRequestedV1`
+ * and `EmailChangeRequestedV1` carry single-use
  * security tokens. Exposing the raw payload to any admin who can call this API would
  * allow token theft without touching the Users module.
  */
@@ -213,6 +230,19 @@ export const zGetAuditTrailResponse = z.object({
   ]),
 });
 
+export const zGetCurrentUserResponse = z.object({
+  userId: z.uuid(),
+  email: z.string(),
+  displayName: z.string(),
+  createdAt: z.iso.datetime(),
+  role: z.string(),
+  permissions: z.array(z.string()),
+  permissionsVersion: z.string(),
+  hasCompletedOnboarding: z.boolean(),
+  twoFactorEnabled: z.boolean(),
+  avatar: zCurrentUserAvatarResponse.nullable(),
+});
+
 export const zGetProductByIdResponse = z.object({
   id: z.uuid(),
   sku: z.string(),
@@ -245,51 +275,7 @@ export const zGetUserByIdResponse = z.object({
   displayName: z.string(),
   role: z.string(),
   createdAt: z.iso.datetime(),
-  hasPassword: z.boolean(),
   hasCompletedOnboarding: z.boolean(),
-  linkedProviders: z.array(z.string()),
-});
-
-export const zGoogleLoginChallengeResponse = z.object({
-  challengeToken: z.string(),
-  expiresAt: z.iso.datetime(),
-});
-
-export const zGoogleLoginConfirmRequest = z.object({
-  token: z.string(),
-  invitationToken: z.string().nullish(),
-  useGoogleAvatar: z.boolean().optional().default(false),
-});
-
-export const zGoogleLoginConfirmResponse = z.object({
-  userId: z.uuid(),
-  accessToken: z.string(),
-  accessTokenExpiresAt: z.iso.datetime(),
-  refreshToken: z.string(),
-  refreshTokenExpiresAt: z.iso.datetime(),
-  isNewUser: z.boolean(),
-});
-
-export const zGoogleLoginPendingResponse = z.object({
-  status: z.string().optional().default("pending_confirmation"),
-});
-
-export const zGoogleLoginRequest = z.object({
-  idToken: z.string(),
-});
-
-export const zGoogleLoginSessionResponse = z.object({
-  userId: z.uuid(),
-  accessToken: z.string(),
-  accessTokenExpiresAt: z.iso.datetime(),
-  refreshToken: z.string(),
-  refreshTokenExpiresAt: z.iso.datetime(),
-});
-
-export const zGoogleLoginResponse = z.object({
-  status: z.string(),
-  session: zGoogleLoginSessionResponse.nullish(),
-  challenge: zGoogleLoginChallengeResponse.nullish(),
 });
 
 export const zHttpValidationProblemDetails = z.object({
@@ -315,29 +301,21 @@ export const zHttpValidationProblemDetails = z.object({
 
 export const zIFormFile = z.string();
 
-export const zLinkedAccountResponse = z.object({
-  provider: z.string(),
-  providerEmail: z.string(),
+export const zLegalComplianceDocumentResponse = z.object({
+  id: z.uuid(),
+  type: z.string(),
+  title: z.string(),
+  version: z.string(),
+  effectiveAt: z.iso.datetime(),
+  contentHash: z.string(),
+  markdown: z.string(),
 });
 
-export const zGetCurrentUserResponse = z.object({
-  userId: z.uuid(),
-  email: z.string(),
-  displayName: z.string(),
-  createdAt: z.iso.datetime(),
-  role: z.string(),
-  permissions: z.array(z.string()),
-  permissionsVersion: z.string(),
-  hasPassword: z.boolean(),
-  hasCompletedOnboarding: z.boolean(),
-  twoFactorEnabled: z.boolean(),
-  avatar: zCurrentUserAvatarResponse.nullable(),
-  linkedAccounts: z.array(zLinkedAccountResponse),
-});
-
-export const zLinkGoogleLoginRequest = z.object({
-  idToken: z.string(),
-  overrideAvatarWithGoogleAvatar: z.boolean().optional().default(false),
+export const zGetLegalComplianceResponse = z.object({
+  isCompliant: z.boolean(),
+  blockingLevel: z.string(),
+  missingDocuments: z.array(zLegalComplianceDocumentResponse),
+  acceptedDocuments: z.array(zAcceptedLegalDocumentResponse),
 });
 
 export const zListInvitationsInvitationDto = z.object({
@@ -525,6 +503,20 @@ export const zListMyNotificationsResponse = z.object({
   nextBefore: z.iso.datetime().nullable(),
 });
 
+export const zOnboardingLegalDocumentResponse = z.object({
+  id: z.uuid(),
+  type: z.string(),
+  title: z.string(),
+  version: z.string(),
+  effectiveAt: z.iso.datetime(),
+  contentHash: z.string(),
+  markdown: z.string(),
+});
+
+export const zGetOnboardingLegalRequirementsResponse = z.object({
+  documents: z.array(zOnboardingLegalDocumentResponse),
+});
+
 export const zPersonalDataExport = z.object({
   userId: z.uuid(),
   moduleName: z.string(),
@@ -654,11 +646,6 @@ export const zRevokeInvitationResponse = z.object({
   invitationId: z.uuid(),
   email: z.string(),
   revokedAt: z.iso.datetime(),
-});
-
-export const zSetInitialPasswordRequest = z.object({
-  password: z.string(),
-  googleIdToken: z.string(),
 });
 
 export const zSetupTotpResponse = z.object({
@@ -1138,6 +1125,31 @@ export const zDeleteAccountResponse = z.void();
  */
 export const zGetCurrentUserResponse2 = zGetCurrentUserResponse;
 
+/**
+ * OK
+ */
+export const zGetLegalComplianceResponse2 = zGetLegalComplianceResponse;
+
+/**
+ * OK
+ */
+export const zGetOnboardingLegalRequirementsResponse2 =
+  zGetOnboardingLegalRequirementsResponse;
+
+export const zAcceptLegalDocumentsBody = zAcceptLegalDocumentsRequest;
+
+/**
+ * No Content
+ */
+export const zAcceptLegalDocumentsResponse = z.void();
+
+export const zCompleteOnboardingBody = zCompleteOnboardingRequest;
+
+/**
+ * No Content
+ */
+export const zCompleteOnboardingResponse = z.void();
+
 export const zUpdateProfileBody = zUpdateProfileRequest;
 
 /**
@@ -1344,46 +1356,6 @@ export const zRevokeInvitationPath = z.object({
  * OK
  */
 export const zRevokeInvitationResponse2 = zRevokeInvitationResponse;
-
-export const zGoogleLoginBody = zGoogleLoginRequest;
-
-export const zGoogleLoginResponse2 = z.union([
-  zGoogleLoginResponse,
-  zGoogleLoginPendingResponse,
-]);
-
-export const zGoogleLoginConfirmBody = zGoogleLoginConfirmRequest;
-
-/**
- * OK
- */
-export const zGoogleLoginConfirmResponse2 = zGoogleLoginConfirmResponse;
-
-export const zLinkGoogleLoginBody = zLinkGoogleLoginRequest;
-
-/**
- * No Content
- */
-export const zLinkGoogleLoginResponse = z.void();
-
-/**
- * No Content
- */
-export const zUnlinkGoogleLoginResponse = z.void();
-
-export const zSetInitialPasswordBody = zSetInitialPasswordRequest;
-
-/**
- * No Content
- */
-export const zSetInitialPasswordResponse = z.void();
-
-export const zCompleteOnboardingBody = zCompleteOnboardingRequest;
-
-/**
- * No Content
- */
-export const zCompleteOnboardingResponse = z.void();
 
 /**
  * OK

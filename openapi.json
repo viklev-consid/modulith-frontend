@@ -1656,6 +1656,168 @@
         ]
       }
     },
+    "/v1/users/me/legal-compliance": {
+      "get": {
+        "tags": ["Modulith.Api"],
+        "summary": "Get the authenticated user's current legal document compliance status.",
+        "operationId": "GetLegalCompliance",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetLegalComplianceResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/v1/users/me/onboarding/legal-requirements": {
+      "get": {
+        "tags": ["Modulith.Api"],
+        "summary": "Get the current legal documents required to complete onboarding.",
+        "operationId": "GetOnboardingLegalRequirements",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetOnboardingLegalRequirementsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/v1/users/me/legal-acceptances": {
+      "post": {
+        "tags": ["Modulith.Api"],
+        "summary": "Accept one or more published legal document versions.",
+        "operationId": "AcceptLegalDocuments",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcceptLegalDocumentsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/v1/users/me/onboarding": {
+      "post": {
+        "tags": ["Modulith.Api"],
+        "summary": "Accept the terms of service to complete account setup.",
+        "operationId": "CompleteOnboarding",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompleteOnboardingRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
     "/v1/users/me/profile": {
       "patch": {
         "tags": ["Modulith.Api"],
@@ -2720,322 +2882,6 @@
         ]
       }
     },
-    "/v1/users/auth/google/login": {
-      "post": {
-        "tags": ["Modulith.Api"],
-        "summary": "Authenticate with a Google ID token. Returns 200 with tokens if the account is linked, or 202 if a confirmation email was sent.",
-        "operationId": "GoogleLogin",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/GoogleLoginRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GoogleLoginResponse"
-                }
-              }
-            }
-          },
-          "202": {
-            "description": "Accepted",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GoogleLoginPendingResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/users/auth/google/confirm": {
-      "post": {
-        "tags": ["Modulith.Api"],
-        "summary": "Confirm a pending Google login using the token sent by email. Returns tokens on success.",
-        "operationId": "GoogleLoginConfirm",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/GoogleLoginConfirmRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GoogleLoginConfirmResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/users/me/auth/google/link": {
-      "post": {
-        "tags": ["Modulith.Api"],
-        "summary": "Link a Google account to the authenticated user.",
-        "operationId": "LinkGoogleLogin",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LinkGoogleLoginRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "204": {
-            "description": "No Content"
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "Bearer": []
-          }
-        ]
-      }
-    },
-    "/v1/users/me/auth/google/unlink": {
-      "delete": {
-        "tags": ["Modulith.Api"],
-        "summary": "Unlink the Google account from the authenticated user.",
-        "operationId": "UnlinkGoogleLogin",
-        "responses": {
-          "204": {
-            "description": "No Content"
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "Bearer": []
-          }
-        ]
-      }
-    },
-    "/v1/users/me/password/initial": {
-      "post": {
-        "tags": ["Modulith.Api"],
-        "summary": "Set a password for an external-only account that has none yet.",
-        "operationId": "SetInitialPassword",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SetInitialPasswordRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "204": {
-            "description": "No Content"
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "Bearer": []
-          }
-        ]
-      }
-    },
-    "/v1/users/me/onboarding": {
-      "post": {
-        "tags": ["Modulith.Api"],
-        "summary": "Accept the terms of service to complete account setup.",
-        "operationId": "CompleteOnboarding",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CompleteOnboardingRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "204": {
-            "description": "No Content"
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "Bearer": []
-          }
-        ]
-      }
-    },
     "/v1/users/me/2fa/totp/setup": {
       "post": {
         "tags": ["Modulith.Api"],
@@ -3474,6 +3320,51 @@
   },
   "components": {
     "schemas": {
+      "AcceptedLegalDocumentRequest": {
+        "type": "object",
+        "properties": {
+          "documentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "string"
+          },
+          "contentHash": {
+            "type": "string"
+          }
+        }
+      },
+      "AcceptedLegalDocumentResponse": {
+        "required": ["type", "version", "acceptedAt", "contentHash"],
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "acceptedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "contentHash": {
+            "type": ["null", "string"]
+          }
+        }
+      },
+      "AcceptLegalDocumentsRequest": {
+        "type": "object",
+        "properties": {
+          "acceptedDocuments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AcceptedLegalDocumentRequest"
+            }
+          }
+        }
+      },
       "AuditEntryDto": {
         "required": [
           "id",
@@ -3553,14 +3444,16 @@
         }
       },
       "CompleteOnboardingRequest": {
-        "required": ["acceptTerms", "acceptMarketingEmails"],
         "type": "object",
         "properties": {
-          "acceptTerms": {
-            "type": "boolean"
-          },
           "acceptMarketingEmails": {
             "type": "boolean"
+          },
+          "acceptedDocuments": {
+            "type": ["null", "array"],
+            "items": {
+              "$ref": "#/components/schemas/AcceptedLegalDocumentRequest"
+            }
           }
         }
       },
@@ -3794,7 +3687,7 @@
             "type": "boolean"
           }
         },
-        "description": "Redacted projection of a Wolverine DeadLetterEnvelope.\nThe message body (`Envelope` and `Message` on the source type) is intentionally\nexcluded because integration events such as `PasswordResetRequestedV1`,\n`EmailChangeRequestedV1`, and `ExternalLoginPendingV1` carry single-use\nsecurity tokens. Exposing the raw payload to any admin who can call this API would\nallow token theft without touching the Users module."
+        "description": "Redacted projection of a Wolverine DeadLetterEnvelope.\nThe message body (`Envelope` and `Message` on the source type) is intentionally\nexcluded because integration events such as `PasswordResetRequestedV1`\nand `EmailChangeRequestedV1` carry single-use\nsecurity tokens. Exposing the raw payload to any admin who can call this API would\nallow token theft without touching the Users module."
       },
       "DeadLetterSummaryResultsDto": {
         "required": ["totalCount", "pageNumber", "envelopes"],
@@ -3907,11 +3800,9 @@
           "role",
           "permissions",
           "permissionsVersion",
-          "hasPassword",
           "hasCompletedOnboarding",
           "twoFactorEnabled",
-          "avatar",
-          "linkedAccounts"
+          "avatar"
         ],
         "type": "object",
         "properties": {
@@ -3941,9 +3832,6 @@
           "permissionsVersion": {
             "type": "string"
           },
-          "hasPassword": {
-            "type": "boolean"
-          },
           "hasCompletedOnboarding": {
             "type": "boolean"
           },
@@ -3959,11 +3847,34 @@
                 "$ref": "#/components/schemas/CurrentUserAvatarResponse"
               }
             ]
+          }
+        }
+      },
+      "GetLegalComplianceResponse": {
+        "required": [
+          "isCompliant",
+          "blockingLevel",
+          "missingDocuments",
+          "acceptedDocuments"
+        ],
+        "type": "object",
+        "properties": {
+          "isCompliant": {
+            "type": "boolean"
           },
-          "linkedAccounts": {
+          "blockingLevel": {
+            "type": "string"
+          },
+          "missingDocuments": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/LinkedAccountResponse"
+              "$ref": "#/components/schemas/LegalComplianceDocumentResponse"
+            }
+          },
+          "acceptedDocuments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AcceptedLegalDocumentResponse"
             }
           }
         }
@@ -3976,6 +3887,18 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/MyNotificationPreferenceResponse"
+            }
+          }
+        }
+      },
+      "GetOnboardingLegalRequirementsResponse": {
+        "required": ["documents"],
+        "type": "object",
+        "properties": {
+          "documents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OnboardingLegalDocumentResponse"
             }
           }
         }
@@ -4025,9 +3948,7 @@
           "displayName",
           "role",
           "createdAt",
-          "hasPassword",
-          "hasCompletedOnboarding",
-          "linkedProviders"
+          "hasCompletedOnboarding"
         ],
         "type": "object",
         "properties": {
@@ -4048,157 +3969,8 @@
             "type": "string",
             "format": "date-time"
           },
-          "hasPassword": {
-            "type": "boolean"
-          },
           "hasCompletedOnboarding": {
             "type": "boolean"
-          },
-          "linkedProviders": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "GoogleLoginChallengeResponse": {
-        "required": ["challengeToken", "expiresAt"],
-        "type": "object",
-        "properties": {
-          "challengeToken": {
-            "type": "string"
-          },
-          "expiresAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "GoogleLoginConfirmRequest": {
-        "required": ["token"],
-        "type": "object",
-        "properties": {
-          "token": {
-            "type": "string"
-          },
-          "invitationToken": {
-            "type": ["null", "string"]
-          },
-          "useGoogleAvatar": {
-            "type": "boolean",
-            "default": false
-          }
-        }
-      },
-      "GoogleLoginConfirmResponse": {
-        "required": [
-          "userId",
-          "accessToken",
-          "accessTokenExpiresAt",
-          "refreshToken",
-          "refreshTokenExpiresAt",
-          "isNewUser"
-        ],
-        "type": "object",
-        "properties": {
-          "userId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "accessToken": {
-            "type": "string"
-          },
-          "accessTokenExpiresAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "refreshToken": {
-            "type": "string"
-          },
-          "refreshTokenExpiresAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "isNewUser": {
-            "type": "boolean"
-          }
-        }
-      },
-      "GoogleLoginPendingResponse": {
-        "type": "object",
-        "properties": {
-          "status": {
-            "type": "string",
-            "default": "pending_confirmation"
-          }
-        }
-      },
-      "GoogleLoginRequest": {
-        "required": ["idToken"],
-        "type": "object",
-        "properties": {
-          "idToken": {
-            "type": "string"
-          }
-        }
-      },
-      "GoogleLoginResponse": {
-        "required": ["status"],
-        "type": "object",
-        "properties": {
-          "status": {
-            "type": "string"
-          },
-          "session": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/GoogleLoginSessionResponse"
-              }
-            ]
-          },
-          "challenge": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/GoogleLoginChallengeResponse"
-              }
-            ]
-          }
-        }
-      },
-      "GoogleLoginSessionResponse": {
-        "required": [
-          "userId",
-          "accessToken",
-          "accessTokenExpiresAt",
-          "refreshToken",
-          "refreshTokenExpiresAt"
-        ],
-        "type": "object",
-        "properties": {
-          "userId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "accessToken": {
-            "type": "string"
-          },
-          "accessTokenExpiresAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "refreshToken": {
-            "type": "string"
-          },
-          "refreshTokenExpiresAt": {
-            "type": "string",
-            "format": "date-time"
           }
         }
       },
@@ -4237,28 +4009,40 @@
         "type": "string",
         "format": "binary"
       },
-      "LinkedAccountResponse": {
-        "required": ["provider", "providerEmail"],
+      "LegalComplianceDocumentResponse": {
+        "required": [
+          "id",
+          "type",
+          "title",
+          "version",
+          "effectiveAt",
+          "contentHash",
+          "markdown"
+        ],
         "type": "object",
         "properties": {
-          "provider": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
             "type": "string"
           },
-          "providerEmail": {
-            "type": "string"
-          }
-        }
-      },
-      "LinkGoogleLoginRequest": {
-        "required": ["idToken"],
-        "type": "object",
-        "properties": {
-          "idToken": {
+          "title": {
             "type": "string"
           },
-          "overrideAvatarWithGoogleAvatar": {
-            "type": "boolean",
-            "default": false
+          "version": {
+            "type": "string"
+          },
+          "effectiveAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "contentHash": {
+            "type": "string"
+          },
+          "markdown": {
+            "type": "string"
           }
         }
       },
@@ -4655,6 +4439,43 @@
       "NotificationSeverity": {
         "type": "integer"
       },
+      "OnboardingLegalDocumentResponse": {
+        "required": [
+          "id",
+          "type",
+          "title",
+          "version",
+          "effectiveAt",
+          "contentHash",
+          "markdown"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "effectiveAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "contentHash": {
+            "type": "string"
+          },
+          "markdown": {
+            "type": "string"
+          }
+        }
+      },
       "PersonalDataExport": {
         "required": ["userId", "moduleName", "data"],
         "type": "object",
@@ -4885,18 +4706,6 @@
           "revokedAt": {
             "type": "string",
             "format": "date-time"
-          }
-        }
-      },
-      "SetInitialPasswordRequest": {
-        "required": ["password", "googleIdToken"],
-        "type": "object",
-        "properties": {
-          "password": {
-            "type": "string"
-          },
-          "googleIdToken": {
-            "type": "string"
           }
         }
       },
