@@ -1,11 +1,35 @@
 {
   "dashboard": {
-    "brand": "Modulith",
-    "tagline": "Auth foundation is ready for the next feature slice.",
-    "admin": "Admin",
-    "settings": "Settings",
-    "signOut": "Sign out",
     "title": "Dashboard",
     "body": "The application shell will grow here once profile, notifications, and admin workflows are wired."
+  },
+  "shell": {
+    "brand": "Modulith",
+    "workspaceLabel": "Workspace",
+    "quickCreate": "Quick create",
+    "search": "Search",
+    "dashboard": "Dashboard",
+    "administration": "Administration",
+    "settings": "Settings",
+    "help": "Get help",
+    "signOut": "Sign out",
+    "profileMenu": {
+      "label": "Account menu"
+    },
+    "command": {
+      "title": "Search",
+      "description": "Find pages and settings",
+      "placeholder": "Search pages, settings…",
+      "empty": "No results found.",
+      "pages": "Pages",
+      "settings": "Settings",
+      "administration": "Administration"
+    },
+    "breadcrumb": {
+      "dashboard": "Dashboard",
+      "settings": "Settings",
+      "administration": "Administration",
+      "notifications": "Notifications"
+    }
   }
 }

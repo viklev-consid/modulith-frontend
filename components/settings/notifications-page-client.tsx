@@ -62,10 +62,10 @@ export function NotificationsPageClient() {
   }
 
   return (
-    <main className="mx-auto grid min-h-svh w-full max-w-4xl gap-5 px-4 py-6 md:px-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold">{t("title")}</h1>
+    <>
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div className="grid gap-1">
+          <h1 className="text-lg font-semibold">{t("title")}</h1>
           <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
         </div>
         <Select
@@ -84,7 +84,7 @@ export function NotificationsPageClient() {
             <SelectItem value="archived">{t("filter.archived")}</SelectItem>
           </SelectContent>
         </Select>
-      </div>
+      </header>
       <Card>
         <CardContent className="grid gap-2 p-3">
           {notifications.length > 0 ? (
@@ -152,6 +152,6 @@ export function NotificationsPageClient() {
           {t("loadMore")}
         </Button>
       )}
-    </main>
+    </>
   );
 }
