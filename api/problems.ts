@@ -10,10 +10,6 @@ export interface ProblemDetails {
   instance?: string;
   errors?: Record<string, string[]>;
   extensions?: Record<string, unknown>;
-  // Backends sometimes inline `extensions` keys directly on the problem body.
-  // Allow indexed access so callers can read `missingDocuments` from either
-  // shape without type gymnastics at the call site.
-  [key: string]: unknown;
 }
 
 export type MissingLegalDocument = {
@@ -55,13 +51,12 @@ export function onLegalComplianceRequired(
   };
 }
 
-function extractMissingDocuments(
+export function extractMissingDocuments(
   problem: ProblemDetails,
 ): MissingLegalDocument[] | undefined {
-  const candidates = [
-    problem.extensions?.missingDocuments,
-    (problem as Record<string, unknown>).missingDocuments,
-  ];
+  const inline = (problem as unknown as Record<string, unknown>)
+    .missingDocuments;
+  const candidates = [problem.extensions?.missingDocuments, inline];
   for (const candidate of candidates) {
     if (Array.isArray(candidate)) {
       return candidate as MissingLegalDocument[];

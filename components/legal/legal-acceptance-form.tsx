@@ -75,7 +75,7 @@ export function LegalAcceptanceForm({
         {documents.map((doc) => (
           <DocumentPanel
             key={doc.id}
-            document={doc}
+            doc={doc}
             acknowledged={Boolean(ackById[doc.id])}
             onAcknowledgeChange={(checked) => toggle(doc.id, checked)}
           />
@@ -109,31 +109,31 @@ export function LegalAcceptanceForm({
 }
 
 type DocumentPanelProps = {
-  document: LegalDocumentInput;
+  doc: LegalDocumentInput;
   acknowledged: boolean;
   onAcknowledgeChange: (checked: boolean) => void;
 };
 
 function DocumentPanel({
-  document,
+  doc,
   acknowledged,
   onAcknowledgeChange,
 }: DocumentPanelProps) {
   const t = useTranslations("components.legal.acceptance");
-  const ackId = `legal-ack-${document.id}`;
+  const ackId = `legal-ack-${doc.id}`;
 
   return (
     <div className="border border-border">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border bg-muted/40 px-3 py-2">
         <span className="text-sm font-semibold text-foreground">
-          {document.title}
+          {doc.title}
         </span>
         <span className="border border-border px-2 py-0.5 text-xs text-muted-foreground">
-          {t("versionLabel", { version: document.version })}
+          {t("versionLabel", { version: doc.version })}
         </span>
       </div>
-      <ScrollArea className="h-56 px-3 py-3">
-        <LegalMarkdown content={document.markdown} />
+      <ScrollArea className="h-56 p-3">
+        <LegalMarkdown content={doc.markdown} />
       </ScrollArea>
       <div className="border-t border-border px-3 py-2">
         <Field orientation="horizontal">
@@ -144,7 +144,7 @@ function DocumentPanel({
           />
           <FieldContent>
             <FieldLabel htmlFor={ackId} className="text-xs">
-              {t("acknowledgeDocument", { title: document.title })}
+              {t("acknowledgeDocument", { title: doc.title })}
             </FieldLabel>
             <FieldError />
           </FieldContent>

@@ -3,7 +3,7 @@
 import "@/api/client";
 
 import { CheckIcon, ImageIcon, ShieldCheckIcon } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 
@@ -46,9 +46,9 @@ export default function OnboardingPage() {
   const queryClient = useQueryClient();
   const [step, setStep] = useState<Step>("terms");
   const [marketingAccepted, setMarketingAccepted] = useState(false);
-  const [acceptedDocuments, setAcceptedDocuments] = useState<
-    AcceptedLegalDocumentRequest[]
-  >([]);
+  // The accepted-documents payload is only read inside the submit handler;
+  // keeping it in a ref avoids a re-render every time the user advances steps.
+  const acceptedDocumentsRef = useRef<AcceptedLegalDocumentRequest[]>([]);
   const [staleDocsMessage, setStaleDocsMessage] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -62,14 +62,14 @@ export default function OnboardingPage() {
   const documents: LegalDocumentInput[] = legalQuery.data?.documents ?? [];
 
   async function refetchLegal() {
-    setAcceptedDocuments([]);
+    acceptedDocumentsRef.current = [];
     await queryClient.invalidateQueries({
       queryKey: getOnboardingLegalRequirementsOptions().queryKey,
     });
   }
 
-  function handleTermsSubmit(documents: AcceptedLegalDocumentRequest[]) {
-    setAcceptedDocuments(documents);
+  function handleTermsSubmit(accepted: AcceptedLegalDocumentRequest[]) {
+    acceptedDocumentsRef.current = accepted;
     setStaleDocsMessage(null);
     setFieldErrors({});
     setStep("avatar");
@@ -79,6 +79,7 @@ export default function OnboardingPage() {
     setFieldErrors({});
     setSubmitError(null);
 
+    const acceptedDocuments = acceptedDocumentsRef.current;
     if (acceptedDocuments.length === 0) {
       setStep("terms");
       return;
