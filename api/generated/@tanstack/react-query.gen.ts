@@ -10,6 +10,7 @@ import {
 
 import { client } from "../client.gen";
 import {
+  acceptLegalDocuments,
   addCronTicker,
   archiveNotification,
   cancelTicker,
@@ -46,9 +47,11 @@ import {
   getDeadLetter,
   getJobStatuses,
   getLastWeekJobStatus,
+  getLegalCompliance,
   getMachineJobs,
   getMyNotificationPreferences,
   getNextTicker,
+  getOnboardingLegalRequirements,
   getOptions,
   getProductById,
   getTickerFunctions,
@@ -61,9 +64,6 @@ import {
   getUnreadNotificationCount,
   getUserAvatar,
   getUserById,
-  googleLogin,
-  googleLoginConfirm,
-  linkGoogleLogin,
   listDeadLetters,
   listInvitations,
   listMyNotifications,
@@ -86,12 +86,10 @@ import {
   restartTickerHost,
   revokeInvitation,
   runCronTickerOnDemand,
-  setInitialPassword,
   setupTotp,
   startTickerHost,
   stopTickerHost,
   streamMyNotifications,
-  unlinkGoogleLogin,
   updateAvatar,
   updateCronTicker,
   updateMyNotificationPreferences,
@@ -100,6 +98,9 @@ import {
   validateAuth,
 } from "../sdk.gen";
 import type {
+  AcceptLegalDocumentsData,
+  AcceptLegalDocumentsError,
+  AcceptLegalDocumentsResponse,
   AddCronTickerData,
   ArchiveNotificationData,
   ArchiveNotificationError,
@@ -171,11 +172,17 @@ import type {
   GetDeadLetterResponse,
   GetJobStatusesData,
   GetLastWeekJobStatusData,
+  GetLegalComplianceData,
+  GetLegalComplianceError,
+  GetLegalComplianceResponse2,
   GetMachineJobsData,
   GetMyNotificationPreferencesData,
   GetMyNotificationPreferencesError,
   GetMyNotificationPreferencesResponse2,
   GetNextTickerData,
+  GetOnboardingLegalRequirementsData,
+  GetOnboardingLegalRequirementsError,
+  GetOnboardingLegalRequirementsResponse2,
   GetOptionsData,
   GetProductByIdData,
   GetProductByIdError,
@@ -195,15 +202,6 @@ import type {
   GetUserByIdData,
   GetUserByIdError,
   GetUserByIdResponse2,
-  GoogleLoginConfirmData,
-  GoogleLoginConfirmError,
-  GoogleLoginConfirmResponse2,
-  GoogleLoginData,
-  GoogleLoginError,
-  GoogleLoginResponse2,
-  LinkGoogleLoginData,
-  LinkGoogleLoginError,
-  LinkGoogleLoginResponse,
   ListDeadLettersData,
   ListDeadLettersError,
   ListDeadLettersResponse,
@@ -260,9 +258,6 @@ import type {
   RevokeInvitationError,
   RevokeInvitationResponse2,
   RunCronTickerOnDemandData,
-  SetInitialPasswordData,
-  SetInitialPasswordError,
-  SetInitialPasswordResponse,
   SetupTotpData,
   SetupTotpError,
   SetupTotpResponse2,
@@ -270,9 +265,6 @@ import type {
   StopTickerHostData,
   StreamMyNotificationsData,
   StreamMyNotificationsError,
-  UnlinkGoogleLoginData,
-  UnlinkGoogleLoginError,
-  UnlinkGoogleLoginResponse,
   UpdateAvatarData,
   UpdateAvatarError,
   UpdateAvatarResponse2,
@@ -1818,6 +1810,116 @@ export const getCurrentUserOptions = (options?: Options<GetCurrentUserData>) =>
     queryKey: getCurrentUserQueryKey(options),
   });
 
+export const getLegalComplianceQueryKey = (
+  options?: Options<GetLegalComplianceData>,
+) => createQueryKey("getLegalCompliance", options);
+
+/**
+ * Get the authenticated user's current legal document compliance status.
+ */
+export const getLegalComplianceOptions = (
+  options?: Options<GetLegalComplianceData>,
+) =>
+  queryOptions<
+    GetLegalComplianceResponse2,
+    GetLegalComplianceError,
+    GetLegalComplianceResponse2,
+    ReturnType<typeof getLegalComplianceQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getLegalCompliance({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getLegalComplianceQueryKey(options),
+  });
+
+export const getOnboardingLegalRequirementsQueryKey = (
+  options?: Options<GetOnboardingLegalRequirementsData>,
+) => createQueryKey("getOnboardingLegalRequirements", options);
+
+/**
+ * Get the current legal documents required to complete onboarding.
+ */
+export const getOnboardingLegalRequirementsOptions = (
+  options?: Options<GetOnboardingLegalRequirementsData>,
+) =>
+  queryOptions<
+    GetOnboardingLegalRequirementsResponse2,
+    GetOnboardingLegalRequirementsError,
+    GetOnboardingLegalRequirementsResponse2,
+    ReturnType<typeof getOnboardingLegalRequirementsQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getOnboardingLegalRequirements({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getOnboardingLegalRequirementsQueryKey(options),
+  });
+
+/**
+ * Accept one or more published legal document versions.
+ */
+export const acceptLegalDocumentsMutation = (
+  options?: Partial<Options<AcceptLegalDocumentsData>>,
+): UseMutationOptions<
+  AcceptLegalDocumentsResponse,
+  AcceptLegalDocumentsError,
+  Options<AcceptLegalDocumentsData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    AcceptLegalDocumentsResponse,
+    AcceptLegalDocumentsError,
+    Options<AcceptLegalDocumentsData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await acceptLegalDocuments({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * Accept the terms of service to complete account setup.
+ */
+export const completeOnboardingMutation = (
+  options?: Partial<Options<CompleteOnboardingData>>,
+): UseMutationOptions<
+  CompleteOnboardingResponse,
+  CompleteOnboardingError,
+  Options<CompleteOnboardingData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    CompleteOnboardingResponse,
+    CompleteOnboardingError,
+    Options<CompleteOnboardingData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await completeOnboarding({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
 /**
  * Update the authenticated user's profile.
  */
@@ -2467,168 +2569,6 @@ export const revokeInvitationMutation = (
   > = {
     mutationFn: async (fnOptions) => {
       const { data } = await revokeInvitation({
-        ...options,
-        ...fnOptions,
-        throwOnError: true,
-      });
-      return data;
-    },
-  };
-  return mutationOptions;
-};
-
-/**
- * Authenticate with a Google ID token. Returns 200 with tokens if the account is linked, or 202 if a confirmation email was sent.
- */
-export const googleLoginMutation = (
-  options?: Partial<Options<GoogleLoginData>>,
-): UseMutationOptions<
-  GoogleLoginResponse2,
-  GoogleLoginError,
-  Options<GoogleLoginData>
-> => {
-  const mutationOptions: UseMutationOptions<
-    GoogleLoginResponse2,
-    GoogleLoginError,
-    Options<GoogleLoginData>
-  > = {
-    mutationFn: async (fnOptions) => {
-      const { data } = await googleLogin({
-        ...options,
-        ...fnOptions,
-        throwOnError: true,
-      });
-      return data;
-    },
-  };
-  return mutationOptions;
-};
-
-/**
- * Confirm a pending Google login using the token sent by email. Returns tokens on success.
- */
-export const googleLoginConfirmMutation = (
-  options?: Partial<Options<GoogleLoginConfirmData>>,
-): UseMutationOptions<
-  GoogleLoginConfirmResponse2,
-  GoogleLoginConfirmError,
-  Options<GoogleLoginConfirmData>
-> => {
-  const mutationOptions: UseMutationOptions<
-    GoogleLoginConfirmResponse2,
-    GoogleLoginConfirmError,
-    Options<GoogleLoginConfirmData>
-  > = {
-    mutationFn: async (fnOptions) => {
-      const { data } = await googleLoginConfirm({
-        ...options,
-        ...fnOptions,
-        throwOnError: true,
-      });
-      return data;
-    },
-  };
-  return mutationOptions;
-};
-
-/**
- * Link a Google account to the authenticated user.
- */
-export const linkGoogleLoginMutation = (
-  options?: Partial<Options<LinkGoogleLoginData>>,
-): UseMutationOptions<
-  LinkGoogleLoginResponse,
-  LinkGoogleLoginError,
-  Options<LinkGoogleLoginData>
-> => {
-  const mutationOptions: UseMutationOptions<
-    LinkGoogleLoginResponse,
-    LinkGoogleLoginError,
-    Options<LinkGoogleLoginData>
-  > = {
-    mutationFn: async (fnOptions) => {
-      const { data } = await linkGoogleLogin({
-        ...options,
-        ...fnOptions,
-        throwOnError: true,
-      });
-      return data;
-    },
-  };
-  return mutationOptions;
-};
-
-/**
- * Unlink the Google account from the authenticated user.
- */
-export const unlinkGoogleLoginMutation = (
-  options?: Partial<Options<UnlinkGoogleLoginData>>,
-): UseMutationOptions<
-  UnlinkGoogleLoginResponse,
-  UnlinkGoogleLoginError,
-  Options<UnlinkGoogleLoginData>
-> => {
-  const mutationOptions: UseMutationOptions<
-    UnlinkGoogleLoginResponse,
-    UnlinkGoogleLoginError,
-    Options<UnlinkGoogleLoginData>
-  > = {
-    mutationFn: async (fnOptions) => {
-      const { data } = await unlinkGoogleLogin({
-        ...options,
-        ...fnOptions,
-        throwOnError: true,
-      });
-      return data;
-    },
-  };
-  return mutationOptions;
-};
-
-/**
- * Set a password for an external-only account that has none yet.
- */
-export const setInitialPasswordMutation = (
-  options?: Partial<Options<SetInitialPasswordData>>,
-): UseMutationOptions<
-  SetInitialPasswordResponse,
-  SetInitialPasswordError,
-  Options<SetInitialPasswordData>
-> => {
-  const mutationOptions: UseMutationOptions<
-    SetInitialPasswordResponse,
-    SetInitialPasswordError,
-    Options<SetInitialPasswordData>
-  > = {
-    mutationFn: async (fnOptions) => {
-      const { data } = await setInitialPassword({
-        ...options,
-        ...fnOptions,
-        throwOnError: true,
-      });
-      return data;
-    },
-  };
-  return mutationOptions;
-};
-
-/**
- * Accept the terms of service to complete account setup.
- */
-export const completeOnboardingMutation = (
-  options?: Partial<Options<CompleteOnboardingData>>,
-): UseMutationOptions<
-  CompleteOnboardingResponse,
-  CompleteOnboardingError,
-  Options<CompleteOnboardingData>
-> => {
-  const mutationOptions: UseMutationOptions<
-    CompleteOnboardingResponse,
-    CompleteOnboardingError,
-    Options<CompleteOnboardingData>
-  > = {
-    mutationFn: async (fnOptions) => {
-      const { data } = await completeOnboarding({
         ...options,
         ...fnOptions,
         throwOnError: true,

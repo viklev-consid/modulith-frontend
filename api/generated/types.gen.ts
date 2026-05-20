@@ -4,6 +4,23 @@ export type ClientOptions = {
   baseUrl: "https://localhost:7297/" | (string & {});
 };
 
+export type AcceptedLegalDocumentRequest = {
+  documentId?: string;
+  version?: string;
+  contentHash?: string;
+};
+
+export type AcceptedLegalDocumentResponse = {
+  type: string;
+  version: string;
+  acceptedAt: string;
+  contentHash: null | string;
+};
+
+export type AcceptLegalDocumentsRequest = {
+  acceptedDocuments?: Array<AcceptedLegalDocumentRequest>;
+};
+
 export type AuditEntryDto = {
   id: string;
   eventType: string;
@@ -32,8 +49,8 @@ export type ChangeUserRoleResponse = {
 };
 
 export type CompleteOnboardingRequest = {
-  acceptTerms: boolean;
-  acceptMarketingEmails: boolean;
+  acceptMarketingEmails?: boolean;
+  acceptedDocuments?: null | Array<AcceptedLegalDocumentRequest>;
 };
 
 export type ConfirmEmailChangeRequest = {
@@ -106,8 +123,8 @@ export type DeadLetterEnvelopeQuery = {
 /**
  * Redacted projection of a Wolverine DeadLetterEnvelope.
  * The message body (`Envelope` and `Message` on the source type) is intentionally
- * excluded because integration events such as `PasswordResetRequestedV1`,
- * `EmailChangeRequestedV1`, and `ExternalLoginPendingV1` carry single-use
+ * excluded because integration events such as `PasswordResetRequestedV1`
+ * and `EmailChangeRequestedV1` carry single-use
  * security tokens. Exposing the raw payload to any admin who can call this API would
  * allow token theft without touching the Users module.
  */
@@ -172,15 +189,24 @@ export type GetCurrentUserResponse = {
   role: string;
   permissions: Array<string>;
   permissionsVersion: string;
-  hasPassword: boolean;
   hasCompletedOnboarding: boolean;
   twoFactorEnabled: boolean;
   avatar: null | CurrentUserAvatarResponse;
-  linkedAccounts: Array<LinkedAccountResponse>;
+};
+
+export type GetLegalComplianceResponse = {
+  isCompliant: boolean;
+  blockingLevel: string;
+  missingDocuments: Array<LegalComplianceDocumentResponse>;
+  acceptedDocuments: Array<AcceptedLegalDocumentResponse>;
 };
 
 export type GetMyNotificationPreferencesResponse = {
   preferences: Array<MyNotificationPreferenceResponse>;
+};
+
+export type GetOnboardingLegalRequirementsResponse = {
+  documents: Array<OnboardingLegalDocumentResponse>;
 };
 
 export type GetProductByIdResponse = {
@@ -202,51 +228,7 @@ export type GetUserByIdResponse = {
   displayName: string;
   role: string;
   createdAt: string;
-  hasPassword: boolean;
   hasCompletedOnboarding: boolean;
-  linkedProviders: Array<string>;
-};
-
-export type GoogleLoginChallengeResponse = {
-  challengeToken: string;
-  expiresAt: string;
-};
-
-export type GoogleLoginConfirmRequest = {
-  token: string;
-  invitationToken?: null | string;
-  useGoogleAvatar?: boolean;
-};
-
-export type GoogleLoginConfirmResponse = {
-  userId: string;
-  accessToken: string;
-  accessTokenExpiresAt: string;
-  refreshToken: string;
-  refreshTokenExpiresAt: string;
-  isNewUser: boolean;
-};
-
-export type GoogleLoginPendingResponse = {
-  status?: string;
-};
-
-export type GoogleLoginRequest = {
-  idToken: string;
-};
-
-export type GoogleLoginResponse = {
-  status: string;
-  session?: null | GoogleLoginSessionResponse;
-  challenge?: null | GoogleLoginChallengeResponse;
-};
-
-export type GoogleLoginSessionResponse = {
-  userId: string;
-  accessToken: string;
-  accessTokenExpiresAt: string;
-  refreshToken: string;
-  refreshTokenExpiresAt: string;
 };
 
 export type HttpValidationProblemDetails = {
@@ -262,14 +244,14 @@ export type HttpValidationProblemDetails = {
 
 export type IFormFile = Blob | File;
 
-export type LinkedAccountResponse = {
-  provider: string;
-  providerEmail: string;
-};
-
-export type LinkGoogleLoginRequest = {
-  idToken: string;
-  overrideAvatarWithGoogleAvatar?: boolean;
+export type LegalComplianceDocumentResponse = {
+  id: string;
+  type: string;
+  title: string;
+  version: string;
+  effectiveAt: string;
+  contentHash: string;
+  markdown: string;
 };
 
 export type ListInvitationsInvitationDto = {
@@ -394,6 +376,16 @@ export type NotificationLinkDto = {
 
 export type NotificationSeverity = number;
 
+export type OnboardingLegalDocumentResponse = {
+  id: string;
+  type: string;
+  title: string;
+  version: string;
+  effectiveAt: string;
+  contentHash: string;
+  markdown: string;
+};
+
 export type PersonalDataExport = {
   userId: string;
   moduleName: string;
@@ -484,11 +476,6 @@ export type RevokeInvitationResponse = {
   invitationId: string;
   email: string;
   revokedAt: string;
-};
-
-export type SetInitialPasswordRequest = {
-  password: string;
-  googleIdToken: string;
 };
 
 export type SetupTotpResponse = {
@@ -1561,6 +1548,122 @@ export type GetCurrentUserResponses = {
 export type GetCurrentUserResponse2 =
   GetCurrentUserResponses[keyof GetCurrentUserResponses];
 
+export type GetLegalComplianceData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/v1/users/me/legal-compliance";
+};
+
+export type GetLegalComplianceErrors = {
+  /**
+   * Unauthorized
+   */
+  401: ProblemDetails;
+};
+
+export type GetLegalComplianceError =
+  GetLegalComplianceErrors[keyof GetLegalComplianceErrors];
+
+export type GetLegalComplianceResponses = {
+  /**
+   * OK
+   */
+  200: GetLegalComplianceResponse;
+};
+
+export type GetLegalComplianceResponse2 =
+  GetLegalComplianceResponses[keyof GetLegalComplianceResponses];
+
+export type GetOnboardingLegalRequirementsData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/v1/users/me/onboarding/legal-requirements";
+};
+
+export type GetOnboardingLegalRequirementsErrors = {
+  /**
+   * Unauthorized
+   */
+  401: ProblemDetails;
+};
+
+export type GetOnboardingLegalRequirementsError =
+  GetOnboardingLegalRequirementsErrors[keyof GetOnboardingLegalRequirementsErrors];
+
+export type GetOnboardingLegalRequirementsResponses = {
+  /**
+   * OK
+   */
+  200: GetOnboardingLegalRequirementsResponse;
+};
+
+export type GetOnboardingLegalRequirementsResponse2 =
+  GetOnboardingLegalRequirementsResponses[keyof GetOnboardingLegalRequirementsResponses];
+
+export type AcceptLegalDocumentsData = {
+  body: AcceptLegalDocumentsRequest;
+  path?: never;
+  query?: never;
+  url: "/v1/users/me/legal-acceptances";
+};
+
+export type AcceptLegalDocumentsErrors = {
+  /**
+   * Bad Request
+   */
+  400: HttpValidationProblemDetails;
+  /**
+   * Unauthorized
+   */
+  401: ProblemDetails;
+};
+
+export type AcceptLegalDocumentsError =
+  AcceptLegalDocumentsErrors[keyof AcceptLegalDocumentsErrors];
+
+export type AcceptLegalDocumentsResponses = {
+  /**
+   * No Content
+   */
+  204: void;
+};
+
+export type AcceptLegalDocumentsResponse =
+  AcceptLegalDocumentsResponses[keyof AcceptLegalDocumentsResponses];
+
+export type CompleteOnboardingData = {
+  body: CompleteOnboardingRequest;
+  path?: never;
+  query?: never;
+  url: "/v1/users/me/onboarding";
+};
+
+export type CompleteOnboardingErrors = {
+  /**
+   * Bad Request
+   */
+  400: HttpValidationProblemDetails;
+  /**
+   * Unauthorized
+   */
+  401: ProblemDetails;
+};
+
+export type CompleteOnboardingError =
+  CompleteOnboardingErrors[keyof CompleteOnboardingErrors];
+
+export type CompleteOnboardingResponses = {
+  /**
+   * No Content
+   */
+  204: void;
+};
+
+export type CompleteOnboardingResponse =
+  CompleteOnboardingResponses[keyof CompleteOnboardingResponses];
+
 export type UpdateProfileData = {
   body: UpdateProfileRequest;
   path?: never;
@@ -2178,207 +2281,6 @@ export type RevokeInvitationResponses = {
 
 export type RevokeInvitationResponse2 =
   RevokeInvitationResponses[keyof RevokeInvitationResponses];
-
-export type GoogleLoginData = {
-  body: GoogleLoginRequest;
-  path?: never;
-  query?: never;
-  url: "/v1/users/auth/google/login";
-};
-
-export type GoogleLoginErrors = {
-  /**
-   * Bad Request
-   */
-  400: HttpValidationProblemDetails;
-  /**
-   * Unauthorized
-   */
-  401: ProblemDetails;
-  /**
-   * Conflict
-   */
-  409: ProblemDetails;
-};
-
-export type GoogleLoginError = GoogleLoginErrors[keyof GoogleLoginErrors];
-
-export type GoogleLoginResponses = {
-  /**
-   * OK
-   */
-  200: GoogleLoginResponse;
-  /**
-   * Accepted
-   */
-  202: GoogleLoginPendingResponse;
-};
-
-export type GoogleLoginResponse2 =
-  GoogleLoginResponses[keyof GoogleLoginResponses];
-
-export type GoogleLoginConfirmData = {
-  body: GoogleLoginConfirmRequest;
-  path?: never;
-  query?: never;
-  url: "/v1/users/auth/google/confirm";
-};
-
-export type GoogleLoginConfirmErrors = {
-  /**
-   * Bad Request
-   */
-  400: HttpValidationProblemDetails;
-  /**
-   * Unauthorized
-   */
-  401: ProblemDetails;
-};
-
-export type GoogleLoginConfirmError =
-  GoogleLoginConfirmErrors[keyof GoogleLoginConfirmErrors];
-
-export type GoogleLoginConfirmResponses = {
-  /**
-   * OK
-   */
-  200: GoogleLoginConfirmResponse;
-};
-
-export type GoogleLoginConfirmResponse2 =
-  GoogleLoginConfirmResponses[keyof GoogleLoginConfirmResponses];
-
-export type LinkGoogleLoginData = {
-  body: LinkGoogleLoginRequest;
-  path?: never;
-  query?: never;
-  url: "/v1/users/me/auth/google/link";
-};
-
-export type LinkGoogleLoginErrors = {
-  /**
-   * Bad Request
-   */
-  400: HttpValidationProblemDetails;
-  /**
-   * Unauthorized
-   */
-  401: ProblemDetails;
-  /**
-   * Conflict
-   */
-  409: ProblemDetails;
-};
-
-export type LinkGoogleLoginError =
-  LinkGoogleLoginErrors[keyof LinkGoogleLoginErrors];
-
-export type LinkGoogleLoginResponses = {
-  /**
-   * No Content
-   */
-  204: void;
-};
-
-export type LinkGoogleLoginResponse =
-  LinkGoogleLoginResponses[keyof LinkGoogleLoginResponses];
-
-export type UnlinkGoogleLoginData = {
-  body?: never;
-  path?: never;
-  query?: never;
-  url: "/v1/users/me/auth/google/unlink";
-};
-
-export type UnlinkGoogleLoginErrors = {
-  /**
-   * Unauthorized
-   */
-  401: ProblemDetails;
-  /**
-   * Conflict
-   */
-  409: ProblemDetails;
-};
-
-export type UnlinkGoogleLoginError =
-  UnlinkGoogleLoginErrors[keyof UnlinkGoogleLoginErrors];
-
-export type UnlinkGoogleLoginResponses = {
-  /**
-   * No Content
-   */
-  204: void;
-};
-
-export type UnlinkGoogleLoginResponse =
-  UnlinkGoogleLoginResponses[keyof UnlinkGoogleLoginResponses];
-
-export type SetInitialPasswordData = {
-  body: SetInitialPasswordRequest;
-  path?: never;
-  query?: never;
-  url: "/v1/users/me/password/initial";
-};
-
-export type SetInitialPasswordErrors = {
-  /**
-   * Bad Request
-   */
-  400: HttpValidationProblemDetails;
-  /**
-   * Unauthorized
-   */
-  401: ProblemDetails;
-  /**
-   * Conflict
-   */
-  409: ProblemDetails;
-};
-
-export type SetInitialPasswordError =
-  SetInitialPasswordErrors[keyof SetInitialPasswordErrors];
-
-export type SetInitialPasswordResponses = {
-  /**
-   * No Content
-   */
-  204: void;
-};
-
-export type SetInitialPasswordResponse =
-  SetInitialPasswordResponses[keyof SetInitialPasswordResponses];
-
-export type CompleteOnboardingData = {
-  body: CompleteOnboardingRequest;
-  path?: never;
-  query?: never;
-  url: "/v1/users/me/onboarding";
-};
-
-export type CompleteOnboardingErrors = {
-  /**
-   * Bad Request
-   */
-  400: HttpValidationProblemDetails;
-  /**
-   * Unauthorized
-   */
-  401: ProblemDetails;
-};
-
-export type CompleteOnboardingError =
-  CompleteOnboardingErrors[keyof CompleteOnboardingErrors];
-
-export type CompleteOnboardingResponses = {
-  /**
-   * No Content
-   */
-  204: void;
-};
-
-export type CompleteOnboardingResponse =
-  CompleteOnboardingResponses[keyof CompleteOnboardingResponses];
 
 export type SetupTotpData = {
   body?: never;

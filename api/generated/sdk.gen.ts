@@ -8,6 +8,9 @@ import {
 } from "./client";
 import { client } from "./client.gen";
 import type {
+  AcceptLegalDocumentsData,
+  AcceptLegalDocumentsErrors,
+  AcceptLegalDocumentsResponses,
   AddCronTickerData,
   AddCronTickerResponses,
   ArchiveNotificationData,
@@ -97,6 +100,9 @@ import type {
   GetJobStatusesResponses,
   GetLastWeekJobStatusData,
   GetLastWeekJobStatusResponses,
+  GetLegalComplianceData,
+  GetLegalComplianceErrors,
+  GetLegalComplianceResponses,
   GetMachineJobsData,
   GetMachineJobsResponses,
   GetMyNotificationPreferencesData,
@@ -104,6 +110,9 @@ import type {
   GetMyNotificationPreferencesResponses,
   GetNextTickerData,
   GetNextTickerResponses,
+  GetOnboardingLegalRequirementsData,
+  GetOnboardingLegalRequirementsErrors,
+  GetOnboardingLegalRequirementsResponses,
   GetOptionsData,
   GetOptionsResponses,
   GetProductByIdData,
@@ -132,15 +141,6 @@ import type {
   GetUserByIdData,
   GetUserByIdErrors,
   GetUserByIdResponses,
-  GoogleLoginConfirmData,
-  GoogleLoginConfirmErrors,
-  GoogleLoginConfirmResponses,
-  GoogleLoginData,
-  GoogleLoginErrors,
-  GoogleLoginResponses,
-  LinkGoogleLoginData,
-  LinkGoogleLoginErrors,
-  LinkGoogleLoginResponses,
   ListDeadLettersData,
   ListDeadLettersErrors,
   ListDeadLettersResponses,
@@ -200,9 +200,6 @@ import type {
   RevokeInvitationResponses,
   RunCronTickerOnDemandData,
   RunCronTickerOnDemandResponses,
-  SetInitialPasswordData,
-  SetInitialPasswordErrors,
-  SetInitialPasswordResponses,
   SetupTotpData,
   SetupTotpErrors,
   SetupTotpResponses,
@@ -213,9 +210,6 @@ import type {
   StreamMyNotificationsData,
   StreamMyNotificationsErrors,
   StreamMyNotificationsResponses,
-  UnlinkGoogleLoginData,
-  UnlinkGoogleLoginErrors,
-  UnlinkGoogleLoginResponses,
   UpdateAvatarData,
   UpdateAvatarErrors,
   UpdateAvatarResponses,
@@ -1096,6 +1090,80 @@ export const getCurrentUser = <ThrowOnError extends boolean = false>(
   });
 
 /**
+ * Get the authenticated user's current legal document compliance status.
+ */
+export const getLegalCompliance = <ThrowOnError extends boolean = false>(
+  options?: Options<GetLegalComplianceData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    GetLegalComplianceResponses,
+    GetLegalComplianceErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/v1/users/me/legal-compliance",
+    ...options,
+  });
+
+/**
+ * Get the current legal documents required to complete onboarding.
+ */
+export const getOnboardingLegalRequirements = <
+  ThrowOnError extends boolean = false,
+>(
+  options?: Options<GetOnboardingLegalRequirementsData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    GetOnboardingLegalRequirementsResponses,
+    GetOnboardingLegalRequirementsErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/v1/users/me/onboarding/legal-requirements",
+    ...options,
+  });
+
+/**
+ * Accept one or more published legal document versions.
+ */
+export const acceptLegalDocuments = <ThrowOnError extends boolean = false>(
+  options: Options<AcceptLegalDocumentsData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    AcceptLegalDocumentsResponses,
+    AcceptLegalDocumentsErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/v1/users/me/legal-acceptances",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * Accept the terms of service to complete account setup.
+ */
+export const completeOnboarding = <ThrowOnError extends boolean = false>(
+  options: Options<CompleteOnboardingData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    CompleteOnboardingResponses,
+    CompleteOnboardingErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/v1/users/me/onboarding",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
  * Update the authenticated user's profile.
  */
 export const updateProfile = <ThrowOnError extends boolean = false>(
@@ -1473,120 +1541,6 @@ export const revokeInvitation = <ThrowOnError extends boolean = false>(
     security: [{ scheme: "bearer", type: "http" }],
     url: "/v1/users/invitations/{invitationId}",
     ...options,
-  });
-
-/**
- * Authenticate with a Google ID token. Returns 200 with tokens if the account is linked, or 202 if a confirmation email was sent.
- */
-export const googleLogin = <ThrowOnError extends boolean = false>(
-  options: Options<GoogleLoginData, ThrowOnError>,
-) =>
-  (options.client ?? client).post<
-    GoogleLoginResponses,
-    GoogleLoginErrors,
-    ThrowOnError
-  >({
-    url: "/v1/users/auth/google/login",
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...options.headers,
-    },
-  });
-
-/**
- * Confirm a pending Google login using the token sent by email. Returns tokens on success.
- */
-export const googleLoginConfirm = <ThrowOnError extends boolean = false>(
-  options: Options<GoogleLoginConfirmData, ThrowOnError>,
-) =>
-  (options.client ?? client).post<
-    GoogleLoginConfirmResponses,
-    GoogleLoginConfirmErrors,
-    ThrowOnError
-  >({
-    url: "/v1/users/auth/google/confirm",
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...options.headers,
-    },
-  });
-
-/**
- * Link a Google account to the authenticated user.
- */
-export const linkGoogleLogin = <ThrowOnError extends boolean = false>(
-  options: Options<LinkGoogleLoginData, ThrowOnError>,
-) =>
-  (options.client ?? client).post<
-    LinkGoogleLoginResponses,
-    LinkGoogleLoginErrors,
-    ThrowOnError
-  >({
-    security: [{ scheme: "bearer", type: "http" }],
-    url: "/v1/users/me/auth/google/link",
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...options.headers,
-    },
-  });
-
-/**
- * Unlink the Google account from the authenticated user.
- */
-export const unlinkGoogleLogin = <ThrowOnError extends boolean = false>(
-  options?: Options<UnlinkGoogleLoginData, ThrowOnError>,
-) =>
-  (options?.client ?? client).delete<
-    UnlinkGoogleLoginResponses,
-    UnlinkGoogleLoginErrors,
-    ThrowOnError
-  >({
-    security: [{ scheme: "bearer", type: "http" }],
-    url: "/v1/users/me/auth/google/unlink",
-    ...options,
-  });
-
-/**
- * Set a password for an external-only account that has none yet.
- */
-export const setInitialPassword = <ThrowOnError extends boolean = false>(
-  options: Options<SetInitialPasswordData, ThrowOnError>,
-) =>
-  (options.client ?? client).post<
-    SetInitialPasswordResponses,
-    SetInitialPasswordErrors,
-    ThrowOnError
-  >({
-    security: [{ scheme: "bearer", type: "http" }],
-    url: "/v1/users/me/password/initial",
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...options.headers,
-    },
-  });
-
-/**
- * Accept the terms of service to complete account setup.
- */
-export const completeOnboarding = <ThrowOnError extends boolean = false>(
-  options: Options<CompleteOnboardingData, ThrowOnError>,
-) =>
-  (options.client ?? client).post<
-    CompleteOnboardingResponses,
-    CompleteOnboardingErrors,
-    ThrowOnError
-  >({
-    security: [{ scheme: "bearer", type: "http" }],
-    url: "/v1/users/me/onboarding",
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...options.headers,
-    },
   });
 
 /**
