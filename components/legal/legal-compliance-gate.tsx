@@ -72,6 +72,9 @@ export function LegalComplianceGate() {
     ...getLegalComplianceOptions(),
     enabled: open && isAuthenticated,
     staleTime: 0,
+    // Opt out of the global 428 handler so a 428 from the gate's own
+    // endpoint cannot re-fire the gate event and lock the user in.
+    meta: { skipLegalGate: true },
   });
 
   // Cross-tab sync: when the compliance query reports compliant, hide the
@@ -87,6 +90,7 @@ export function LegalComplianceGate() {
 
   const acceptMutation = useMutation({
     ...acceptLegalDocumentsMutation(),
+    meta: { skipLegalGate: true },
     onSuccess: async () => {
       setSubmitError(null);
       setOpen(false);
@@ -101,9 +105,10 @@ export function LegalComplianceGate() {
 
   const documents: LegalDocumentInput[] = (
     complianceQuery.data?.missingDocuments ?? []
-  )
-    .map(toFormInput)
-    .filter((doc): doc is LegalDocumentInput => doc !== null);
+  ).flatMap((doc) => {
+    const input = toFormInput(doc);
+    return input ? [input] : [];
+  });
 
   async function handleAccept(accepted: AcceptedLegalDocumentRequest[]) {
     setSubmitError(null);
@@ -166,6 +171,14 @@ export function LegalComplianceGate() {
           <Link
             href="/app/settings"
             className={buttonVariants({ variant: "ghost", size: "sm" })}
+            onClick={() => {
+              // The gate is rendered inside the (app) layout, so client-side
+              // navigation does not unmount it. Close manually so the user can
+              // reach settings (data export, delete account) without the modal
+              // shadowing the next page.
+              setSubmitError(null);
+              setOpen(false);
+            }}
           >
             {t("manageAccount")}
           </Link>

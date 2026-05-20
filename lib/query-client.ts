@@ -2,27 +2,36 @@ import { MutationCache, QueryCache, QueryClient } from "@tanstack/react-query";
 
 import {
   emitLegalComplianceRequired,
+  extractMissingDocuments,
   type ProblemDetails,
 } from "@/api/problems";
 
-function maybeHandleLegalComplianceRequired(error: unknown) {
+declare module "@tanstack/react-query" {
+  interface Register {
+    queryMeta: { skipLegalGate?: boolean };
+    mutationMeta: { skipLegalGate?: boolean };
+  }
+}
+
+function maybeHandleLegalComplianceRequired(
+  error: unknown,
+  source:
+    | { meta?: { skipLegalGate?: boolean } }
+    | { options?: { meta?: { skipLegalGate?: boolean } } },
+) {
   const problem = error as ProblemDetails | undefined;
   if (!problem || problem.status !== 428) return;
 
-  const extensionsMissing = (
-    problem.extensions as Record<string, unknown> | undefined
-  )?.missingDocuments;
-  const inlineMissing = (problem as Record<string, unknown>).missingDocuments;
-  const missingDocuments = Array.isArray(extensionsMissing)
-    ? extensionsMissing
-    : Array.isArray(inlineMissing)
-      ? inlineMissing
-      : undefined;
+  const meta =
+    "meta" in source
+      ? source.meta
+      : "options" in source
+        ? source.options?.meta
+        : undefined;
+  if (meta?.skipLegalGate) return;
 
   emitLegalComplianceRequired({
-    missingDocuments: missingDocuments as
-      | Parameters<typeof emitLegalComplianceRequired>[0]["missingDocuments"]
-      | undefined,
+    missingDocuments: extractMissingDocuments(problem),
   });
 }
 
@@ -34,10 +43,12 @@ export function createQueryClient() {
       },
     },
     queryCache: new QueryCache({
-      onError: maybeHandleLegalComplianceRequired,
+      onError: (error, query) =>
+        maybeHandleLegalComplianceRequired(error, query),
     }),
     mutationCache: new MutationCache({
-      onError: maybeHandleLegalComplianceRequired,
+      onError: (error, _vars, _ctx, mutation) =>
+        maybeHandleLegalComplianceRequired(error, mutation),
     }),
   });
 }
