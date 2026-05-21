@@ -21,6 +21,8 @@ import { AccessModeBadge } from "@/components/organizations/access-mode-badge";
 import { OrgRoleBadge } from "@/components/organizations/org-role-badge";
 import { Spinner } from "@/components/ui/spinner";
 import { OrgContext, type OrgContextValue } from "@/lib/org-context";
+import { ORG_PERMISSION } from "@/lib/org-permission-strings";
+import { hasOrgPermission } from "@/lib/org-permissions";
 
 type OrgShellProps = {
   slug: string;
@@ -128,6 +130,17 @@ export function OrgShell({ slug, children }: OrgShellProps) {
   // Tabs that always render. Each underlying page additionally guards by
   // scoped permission via <Can inOrg=... /> — disabled tabs would just lead
   // to empty/forbidden states.
+  //
+  // Audit is the exception: it's a narrowly-scoped capability and the page
+  // surface itself is dense + slow to load, so we hide the tab when the
+  // caller lacks `organizations.audit.read` to avoid teasing UI they can't
+  // use.
+  const canReadAudit = hasOrgPermission(
+    queryClient,
+    contextValue.organizationId,
+    ORG_PERMISSION.AuditRead,
+  );
+
   const tabs = [
     { href: `/app/organizations/o/${slug}`, key: "overview", exact: true },
     {
@@ -140,6 +153,15 @@ export function OrgShell({ slug, children }: OrgShellProps) {
       key: "invitations",
       exact: false,
     },
+    ...(canReadAudit
+      ? [
+          {
+            href: `/app/organizations/o/${slug}/audit`,
+            key: "audit" as const,
+            exact: false,
+          },
+        ]
+      : []),
     {
       href: `/app/organizations/o/${slug}/settings`,
       key: "settings",

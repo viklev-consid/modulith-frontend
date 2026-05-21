@@ -109,16 +109,14 @@ function CreateInviteContent({ onClose }: { onClose: () => void }) {
   });
 
   if (result) {
-    // Build the invite URL on the client. Includes the email so the
-    // landing page can prefill + lock it during registration.
+    // Mirror the URL pattern the backend embeds in its own invitation
+    // emails so the manual copy-and-share path produces an identical
+    // experience to the auto-sent link.
+    const path = `/register/organization-invitation?token=${encodeURIComponent(
+      result.rawToken,
+    )}&email=${encodeURIComponent(result.email)}`;
     const inviteUrl =
-      typeof window !== "undefined"
-        ? `${window.location.origin}/invite?token=${encodeURIComponent(
-            result.rawToken,
-          )}&email=${encodeURIComponent(result.email)}`
-        : `/invite?token=${encodeURIComponent(
-            result.rawToken,
-          )}&email=${encodeURIComponent(result.email)}`;
+      typeof window !== "undefined" ? `${window.location.origin}${path}` : path;
 
     return (
       <>

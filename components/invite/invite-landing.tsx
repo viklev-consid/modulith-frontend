@@ -170,8 +170,13 @@ export function InviteLanding() {
   const registerUrl = `/register?orgToken=${encodeURIComponent(
     token,
   )}${email ? `&email=${encodeURIComponent(email)}&lockEmail=1` : ""}`;
+  // After sign-in, drop the user back on this exact landing so they
+  // can one-click accept. Matches the URL the backend embeds in
+  // invitation emails.
   const loginUrl = `/login?next=${encodeURIComponent(
-    `/invite?token=${token}${email ? `&email=${email}` : ""}`,
+    `/register/organization-invitation?token=${token}${
+      email ? `&email=${email}` : ""
+    }`,
   )}`;
 
   return (

@@ -55,7 +55,8 @@
       "overview": "Organization | Modulith",
       "settings": "Organization settings | Modulith",
       "members": "Members | Modulith",
-      "invitations": "Invitations | Modulith"
+      "invitations": "Invitations | Modulith",
+      "audit": "Audit | Modulith"
     }
   },
   "settings": {

@@ -12,7 +12,16 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function InvitePage() {
+/**
+ * Public landing page for organization invitation links.
+ *
+ * URL is dictated by the backend: it embeds
+ * `${origin}/register/organization-invitation?token=...&email=...`
+ * in invitation emails. The path lives under `/register/...` because
+ * the dominant case is a new user joining via the invite — but the
+ * `<InviteLanding>` component also handles signed-in acceptance.
+ */
+export default function OrganizationInvitationPage() {
   return (
     <Suspense>
       <InviteLanding />

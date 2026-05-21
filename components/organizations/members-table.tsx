@@ -136,19 +136,23 @@ export function MembersTable() {
         header: () => <span className="sr-only">{t("columns.actions")}</span>,
         cell: ({ row }) => {
           const member = row.original;
-          const isSelf = currentUser?.userId === member.userId;
+          // userId went nullable in the May 2026 backend update — represents
+          // a fully-erased member with no actionable identity. Without a
+          // userId we can't address mutation endpoints, so this branch is
+          // off the table entirely.
+          if (member.userId === null || member.isAnonymized) return null;
+          const memberUserId = member.userId;
+
+          const isSelf = currentUser?.userId === memberUserId;
           const memberRank = roleRank(member.role);
           const isOnlyOwner =
             member.role.toLowerCase() === "owner" && activeOwnerCount <= 1;
 
           // Affordance rules:
-          // - Anonymized rows have no actionable identity → never show actions.
           // - Non-managers see no actions at all.
           // - Self always sees a "Leave" affordance (gated by last-owner).
           // - Caller can change role of strictly-lower-rank members only.
           // - Caller can remove strictly-lower-rank members (or self).
-          if (member.isAnonymized) return null;
-
           const canChangeThisRole =
             canManage && !isSelf && callerRank > memberRank && !isOnlyOwner;
           const canRemoveThis =
@@ -158,7 +162,7 @@ export function MembersTable() {
           if (!canChangeThisRole && !canRemoveThis && !canLeave) return null;
 
           const displayName =
-            member.displayName ?? member.email ?? member.userId;
+            member.displayName ?? member.email ?? memberUserId;
 
           return (
             <DropdownMenu>
@@ -180,7 +184,7 @@ export function MembersTable() {
                     onClick={() =>
                       setDialog({
                         kind: "role",
-                        userId: member.userId,
+                        userId: memberUserId,
                         userName: displayName,
                         currentRole: member.role,
                       })
@@ -195,7 +199,7 @@ export function MembersTable() {
                     onClick={() =>
                       setDialog({
                         kind: "remove",
-                        userId: member.userId,
+                        userId: memberUserId,
                         userName: displayName,
                         isSelf: false,
                       })
@@ -210,7 +214,7 @@ export function MembersTable() {
                     onClick={() =>
                       setDialog({
                         kind: "remove",
-                        userId: member.userId,
+                        userId: memberUserId,
                         userName: displayName,
                         isSelf: true,
                       })

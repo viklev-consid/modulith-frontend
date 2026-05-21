@@ -17,10 +17,6 @@ import {
   problemFromResponse,
   type ProblemDetails,
 } from "@/api/problems";
-import { useQueryClient } from "@tanstack/react-query";
-
-import { listMyOrganizationsQueryKey } from "@/api/generated/@tanstack/react-query.gen";
-import type { ListMyOrganizationsResponse } from "@/api/generated";
 import { useAuth } from "@/components/auth-provider";
 import { fetchJson } from "@/components/settings/client-fetch";
 import { LegalAcceptancesCard } from "@/components/settings/legal-acceptances-card";
@@ -35,6 +31,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Card,
@@ -62,7 +59,6 @@ export function DataSettings() {
   const tCommon = useTranslations("common.actions");
   const { currentUser } = useAuth();
   const { replace } = useRouter();
-  const queryClient = useQueryClient();
   const [confirmEmail, setConfirmEmail] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
@@ -114,39 +110,12 @@ export function DataSettings() {
 
       const problem = (await problemFromResponse(response)) as ProblemDetails;
 
-      // Two detection paths for "user owns orgs that must be transferred
-      // or deleted first":
-      // 1. Canonical: the Organizations module problem code +
-      //    blockingOrganizations extension (per the handover spec).
-      // 2. Fallback for the backend's current shape (May 2026): generic
-      //    409 with a Conflict title + a detail string hinting at the
-      //    transfer-ownership remediation. We treat that as blocked and
-      //    synthesise the org list from the cached /my response —
-      //    showing every org where the caller is an Owner. We can't
-      //    distinguish sole-Owner vs co-Owner from /my alone, but the
-      //    remediation actions (manage members / delete) work for both.
+      // The Organizations module attaches a structured
+      // blockingOrganizations list to UserErasureBlocked. Each entry
+      // carries `isSoleOwner` so the remediation panel can flag the
+      // hard blockers distinctly.
       if (isOrgError(problem, ORG_ERRORS.UserErasureBlocked)) {
         setBlockingOrgs(extractBlockingOrganizations(problem));
-        return;
-      }
-      if (
-        problem.status === 409 &&
-        problem.detail?.toLowerCase().includes("transfer ownership")
-      ) {
-        const my = queryClient.getQueryData<ListMyOrganizationsResponse>(
-          listMyOrganizationsQueryKey(),
-        );
-        const ownedOrgs =
-          my?.organizations.filter(
-            (org) => org.role.toLowerCase() === "owner",
-          ) ?? [];
-        setBlockingOrgs(
-          ownedOrgs.map((org) => ({
-            organizationId: org.organizationId,
-            name: org.name,
-            slug: org.slug,
-          })),
-        );
         return;
       }
 
@@ -308,7 +277,12 @@ function BlockingOrgsRemediation({
             <div className="flex items-center gap-2">
               <Building2Icon className="size-4 text-muted-foreground" />
               <div className="grid">
-                <span className="text-sm font-medium">{org.name}</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium">{org.name}</span>
+                  {org.isSoleOwner ? (
+                    <Badge variant="destructive">{t("soleOwnerBadge")}</Badge>
+                  ) : null}
+                </div>
                 <span className="text-xs text-muted-foreground">
                   /{org.slug}
                 </span>

@@ -42,9 +42,13 @@ export function RegisterContent() {
   // can't accidentally diverge from what the backend expects.
   const organizationInvitationToken = searchParams.get("orgToken");
   const prefilledEmail = searchParams.get("email") ?? "";
+  // Both invite paths lock the email when explicitly requested — the
+  // backend enforces that the registered address matches the one the
+  // invitation was issued to, so letting the user edit it just
+  // produces a guaranteed validation error.
   const lockEmail =
     searchParams.get("lockEmail") === "1" &&
-    Boolean(organizationInvitationToken);
+    Boolean(organizationInvitationToken || invitationToken);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [registeredEmail, setRegisteredEmail] = useState<string | null>(null);
 

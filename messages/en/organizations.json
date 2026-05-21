@@ -18,6 +18,7 @@
       "overview": "Overview",
       "members": "Members",
       "invitations": "Invitations",
+      "audit": "Audit",
       "settings": "Settings"
     },
     "removed": {
@@ -30,6 +31,25 @@
     "description": "Organization overview.",
     "slugLabel": "Slug",
     "roleLabel": "Your role"
+  },
+  "audit": {
+    "columns": {
+      "occurredAt": "When",
+      "eventType": "Event",
+      "actor": "Actor",
+      "resource": "Resource",
+      "payload": "Payload"
+    },
+    "system": "System",
+    "empty": {
+      "title": "No audit entries",
+      "description": "Actions taken in this organization will show up here."
+    },
+    "pagination": {
+      "summary": "Page {page} of {total}",
+      "prev": "Previous page",
+      "next": "Next page"
+    }
   },
   "invitations": {
     "table": {
@@ -59,16 +79,16 @@
     },
     "create": {
       "title": "Invite to organization",
-      "description": "We'll generate a one-time link that the invitee can use to join.",
+      "description": "We'll email an invitation link to the address below. You can also copy the link from the next step and share it yourself.",
       "emailLabel": "Email",
       "emailRequired": "Email is required.",
       "roleLabel": "Role",
       "rolePlaceholder": "Select a role",
       "roleRequired": "Pick a role.",
-      "submit": "Create invitation",
-      "submitting": "Creating…",
-      "successTitle": "Invitation created",
-      "successDescription": "Share this link with {email}. They'll need it to join."
+      "submit": "Send invitation",
+      "submitting": "Sending…",
+      "successTitle": "Invitation sent",
+      "successDescription": "An email is on its way to {email}. If you'd rather share the link yourself, copy it below."
     },
     "revoke": {
       "title": "Revoke invitation for {email}?",
@@ -78,8 +98,8 @@
       "toast": "Invitation for {email} revoked."
     },
     "rawToken": {
-      "warningTitle": "Copy this link now",
-      "warningBody": "The invitation token isn't recoverable once you close this dialog. Send it to the invitee right away, or revoke and create a new invitation if you lose it.",
+      "warningTitle": "This is the only time you'll see this link",
+      "warningBody": "We've also emailed it to the invitee, but if you'd like to send it through another channel, copy it now. The token isn't recoverable once you close this dialog — you'd have to revoke and reissue.",
       "urlLabel": "Invite link",
       "tokenLabel": "Raw token",
       "copyUrl": "Copy invite link",

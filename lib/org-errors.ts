@@ -31,13 +31,19 @@ export function isOrgError(
 /**
  * Shape of the extension payload on `Organizations.Owner.UserErasureBlocked`.
  *
- * The backend lists the orgs the user is the sole Owner of, so the UI can
- * route them to a remediation page (transfer ownership / delete org).
+ * The backend lists every org that's preventing account deletion so the
+ * UI can route to a remediation page (transfer ownership / delete org).
+ * `isSoleOwner` is `true` when the user is the only active owner — those
+ * rows are the hard blockers; the others appear when the user owns the
+ * org but at least one co-owner exists (still preventing deletion in
+ * v1, but transferable without destroying the org).
  */
 export type BlockingOrganization = {
   organizationId: string;
   name: string;
   slug: string;
+  role: string;
+  isSoleOwner: boolean;
 };
 
 export function extractBlockingOrganizations(

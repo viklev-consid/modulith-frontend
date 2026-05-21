@@ -127,9 +127,10 @@
       "emailMismatch": "Email does not match",
       "blocking": {
         "title": "Action needed before you can delete your account",
-        "description": "You own the organizations below. For each one, either transfer ownership to another member or delete the organization — then come back and try again.",
+        "description": "You still own the organizations below. Transfer ownership or delete each one, then come back and try again. \"Sole owner\" rows have no other owners to inherit access — those have to be transferred or the organization deleted.",
         "transferCta": "Manage members",
-        "deleteOrgCta": "Delete organization"
+        "deleteOrgCta": "Delete organization",
+        "soleOwnerBadge": "Sole owner"
       }
     },
     "legal": {
