@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  Building2Icon,
   GaugeIcon,
   HelpCircleIcon,
-  PlusIcon,
   SearchIcon,
   SettingsIcon,
   ShieldIcon,
@@ -14,7 +14,7 @@ import { useTranslations } from "next-intl";
 
 import { Can } from "@/components/can";
 import { ProfileMenu } from "@/components/app-shell/profile-menu";
-import { Button } from "@/components/ui/button";
+import { OrgSwitcher } from "@/components/organizations/org-switcher";
 import {
   Sidebar,
   SidebarContent,
@@ -53,20 +53,8 @@ export function AppSidebar({ onSearchOpen }: { onSearchOpen: () => void }) {
             </span>
           </div>
         </div>
-        <div className="px-2 group-data-[collapsible=icon]:px-0">
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            disabled
-            aria-label={t("quickCreate")}
-            className="w-full justify-start gap-2 group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
-          >
-            <PlusIcon className="size-4" />
-            <span className="group-data-[collapsible=icon]:hidden">
-              {t("quickCreate")}
-            </span>
-          </Button>
+        <div className="px-2 group-data-[collapsible=icon]:hidden">
+          <OrgSwitcher />
         </div>
       </SidebarHeader>
 
@@ -82,6 +70,16 @@ export function AppSidebar({ onSearchOpen }: { onSearchOpen: () => void }) {
               >
                 <GaugeIcon />
                 <span>{t("dashboard")}</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                isActive={isActive("/app/organizations")}
+                tooltip={t("organizations")}
+                render={<Link href="/app/organizations" />}
+              >
+                <Building2Icon />
+                <span>{t("organizations")}</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>

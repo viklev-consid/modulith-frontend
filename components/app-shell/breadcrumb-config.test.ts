@@ -52,6 +52,34 @@ describe("resolveBreadcrumb", () => {
     ]);
   });
 
+  it("returns Organizations for /app/organizations", () => {
+    expect(resolveBreadcrumb("/app/organizations")).toEqual([
+      { ns: "app.shell.breadcrumb", key: "organizations" },
+    ]);
+  });
+
+  it("returns Organizations › Create for /app/organizations/new", () => {
+    expect(resolveBreadcrumb("/app/organizations/new")).toEqual([
+      {
+        ns: "app.shell.breadcrumb",
+        key: "organizations",
+        href: "/app/organizations",
+      },
+      { ns: "app.shell.breadcrumb", key: "organizationsNew" },
+    ]);
+  });
+
+  it("returns Organizations › Organization for /app/organizations/o/:slug", () => {
+    expect(resolveBreadcrumb("/app/organizations/o/acme")).toEqual([
+      {
+        ns: "app.shell.breadcrumb",
+        key: "organizations",
+        href: "/app/organizations",
+      },
+      { ns: "app.shell.breadcrumb", key: "organizationsActive" },
+    ]);
+  });
+
   it("falls back to Dashboard for unknown paths", () => {
     expect(resolveBreadcrumb("/somewhere/else")).toEqual([
       { ns: "app.shell.breadcrumb", key: "dashboard" },

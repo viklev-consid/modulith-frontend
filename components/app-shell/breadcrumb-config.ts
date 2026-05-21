@@ -8,7 +8,10 @@ type ShellBreadcrumbKey =
   | "dashboard"
   | "settings"
   | "administration"
-  | "notifications";
+  | "notifications"
+  | "organizations"
+  | "organizationsNew"
+  | "organizationsActive";
 
 export type Crumb =
   | {
@@ -64,6 +67,32 @@ const trails: { match: (path: string) => boolean; build: () => Crumb[] }[] = [
   {
     match: (p) => p === "/app/admin",
     build: () => [{ ns: "app.shell.breadcrumb", key: "administration" }],
+  },
+  {
+    match: (p) => p === "/app/organizations",
+    build: () => [{ ns: "app.shell.breadcrumb", key: "organizations" }],
+  },
+  {
+    match: (p) => p === "/app/organizations/new",
+    build: () => [
+      {
+        ns: "app.shell.breadcrumb",
+        key: "organizations",
+        href: "/app/organizations",
+      },
+      { ns: "app.shell.breadcrumb", key: "organizationsNew" },
+    ],
+  },
+  {
+    match: (p) => p.startsWith("/app/organizations/o/"),
+    build: () => [
+      {
+        ns: "app.shell.breadcrumb",
+        key: "organizations",
+        href: "/app/organizations",
+      },
+      { ns: "app.shell.breadcrumb", key: "organizationsActive" },
+    ],
   },
 ];
 

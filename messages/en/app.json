@@ -9,6 +9,7 @@
     "quickCreate": "Quick create",
     "search": "Search",
     "dashboard": "Dashboard",
+    "organizations": "Organizations",
     "administration": "Administration",
     "settings": "Settings",
     "help": "Get help",
@@ -29,7 +30,10 @@
       "dashboard": "Dashboard",
       "settings": "Settings",
       "administration": "Administration",
-      "notifications": "Notifications"
+      "notifications": "Notifications",
+      "organizations": "Organizations",
+      "organizationsNew": "Create",
+      "organizationsActive": "Organization"
     }
   }
 }

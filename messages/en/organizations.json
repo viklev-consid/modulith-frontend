@@ -1,0 +1,48 @@
+{
+  "shell": {
+    "switcher": {
+      "label": "Organization",
+      "placeholder": "Select an organization",
+      "search": "Search organizations…",
+      "empty": "No organizations.",
+      "viewAll": "All organizations",
+      "create": "Create organization",
+      "noMemberships": "You aren't a member of any organization yet."
+    }
+  },
+  "list": {
+    "title": "Organizations",
+    "description": "Organizations you belong to.",
+    "create": "Create organization",
+    "empty": {
+      "title": "No organizations yet",
+      "description": "Create one to start inviting members.",
+      "action": "Create your first organization"
+    },
+    "role": {
+      "Owner": "Owner",
+      "Admin": "Admin",
+      "Member": "Member"
+    },
+    "open": "Open"
+  },
+  "create": {
+    "title": "Create organization",
+    "description": "Pick a name and a URL slug. The slug can be changed later, but existing links will break.",
+    "name": {
+      "label": "Name",
+      "placeholder": "Acme, Inc.",
+      "hint": "Up to 200 characters."
+    },
+    "slug": {
+      "label": "Slug",
+      "placeholder": "acme",
+      "hint": "Lowercase letters, numbers, and single hyphens.",
+      "invalid": "Use lowercase letters, numbers, and single hyphens. No leading or trailing hyphens."
+    },
+    "submit": "Create organization",
+    "submitting": "Creating…",
+    "cancel": "Cancel",
+    "back": "Back to organizations"
+  }
+}

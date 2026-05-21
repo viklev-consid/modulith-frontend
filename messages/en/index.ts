@@ -9,6 +9,7 @@ import errors from "./errors.json";
 import marketing from "./marketing.json";
 import metadata from "./metadata.json";
 import onboarding from "./onboarding.json";
+import organizations from "./organizations.json";
 import settings from "./settings.json";
 import settingsForms from "./settingsForms.json";
 
@@ -24,6 +25,7 @@ const messages = {
   marketing,
   metadata,
   onboarding,
+  organizations,
   settings,
   settingsForms,
 } as const;

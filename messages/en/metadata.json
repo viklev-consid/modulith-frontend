@@ -44,7 +44,11 @@
   },
   "app": {
     "dashboard": "Dashboard | Modulith",
-    "notifications": "Notifications | Modulith"
+    "notifications": "Notifications | Modulith",
+    "organizations": {
+      "list": "Organizations | Modulith",
+      "create": "Create organization | Modulith"
+    }
   },
   "settings": {
     "shell": "Settings | Modulith",
