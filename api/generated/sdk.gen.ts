@@ -103,6 +103,9 @@ import type {
   GetLegalComplianceData,
   GetLegalComplianceErrors,
   GetLegalComplianceResponses,
+  GetLegalDocumentData,
+  GetLegalDocumentErrors,
+  GetLegalDocumentResponses,
   GetMachineJobsData,
   GetMachineJobsResponses,
   GetMyNotificationPreferencesData,
@@ -1086,6 +1089,22 @@ export const getCurrentUser = <ThrowOnError extends boolean = false>(
   >({
     security: [{ scheme: "bearer", type: "http" }],
     url: "/v1/users/me",
+    ...options,
+  });
+
+/**
+ * Get the current published content for a legal document version.
+ */
+export const getLegalDocument = <ThrowOnError extends boolean = false>(
+  options: Options<GetLegalDocumentData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    GetLegalDocumentResponses,
+    GetLegalDocumentErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/v1/users/legal-documents/{type}/{version}",
     ...options,
   });
 

@@ -201,6 +201,17 @@ export type GetLegalComplianceResponse = {
   acceptedDocuments: Array<AcceptedLegalDocumentResponse>;
 };
 
+export type GetLegalDocumentResponse = {
+  id: string;
+  type: string;
+  title: string;
+  version: string;
+  effectiveAt: string;
+  publishedAt: string;
+  contentHash: string;
+  markdown: string;
+};
+
 export type GetMyNotificationPreferencesResponse = {
   preferences: Array<MyNotificationPreferenceResponse>;
 };
@@ -1547,6 +1558,40 @@ export type GetCurrentUserResponses = {
 
 export type GetCurrentUserResponse2 =
   GetCurrentUserResponses[keyof GetCurrentUserResponses];
+
+export type GetLegalDocumentData = {
+  body?: never;
+  path: {
+    type: string;
+    version: string;
+  };
+  query?: never;
+  url: "/v1/users/legal-documents/{type}/{version}";
+};
+
+export type GetLegalDocumentErrors = {
+  /**
+   * Unauthorized
+   */
+  401: ProblemDetails;
+  /**
+   * Not Found
+   */
+  404: ProblemDetails;
+};
+
+export type GetLegalDocumentError =
+  GetLegalDocumentErrors[keyof GetLegalDocumentErrors];
+
+export type GetLegalDocumentResponses = {
+  /**
+   * OK
+   */
+  200: GetLegalDocumentResponse;
+};
+
+export type GetLegalDocumentResponse2 =
+  GetLegalDocumentResponses[keyof GetLegalDocumentResponses];
 
 export type GetLegalComplianceData = {
   body?: never;
