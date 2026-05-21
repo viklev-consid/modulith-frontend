@@ -104,6 +104,10 @@ describe("LegalPendingCard", () => {
       version: "2.0",
       markdown: "# Terms v2 body",
       contentHash: "hash-1",
+      // publishedAt is not on the compliance payload; we seed empty so the
+      // sheet header's truthy check suppresses the "Published" line rather
+      // than displaying a fake date.
+      publishedAt: "",
     });
   });
 });

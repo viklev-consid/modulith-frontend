@@ -82,9 +82,9 @@ function LegalDocumentSheetBody(props: LegalDocumentSheetProps) {
   const documentQuery = useQuery({
     ...getLegalDocumentOptions({ path: { type, version } }),
     enabled: open,
-    // (type, version) is immutable — once fetched, never goes stale.
+    // (type, version) is immutable — once fetched, never goes stale. Let
+    // React Query GC the entry when no observers remain (default behaviour).
     staleTime: Infinity,
-    gcTime: Infinity,
   });
 
   const [acknowledged, setAcknowledged] = useState(false);
