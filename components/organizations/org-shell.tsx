@@ -9,6 +9,7 @@ import { toast } from "sonner";
 
 import {
   getOrganizationOptions,
+  listMyOrganizationsOptions,
   listMyOrganizationsQueryKey,
 } from "@/api/generated/@tanstack/react-query.gen";
 import type {
@@ -57,11 +58,12 @@ export function OrgShell({ slug, children }: OrgShellProps) {
     },
   });
 
-  // Pull the membership record for role + scoped-permission context. Absent
-  // for platform-override admins.
-  const myOrgs = queryClient.getQueryData<ListMyOrganizationsResponse>(
-    listMyOrganizationsQueryKey(),
-  );
+  // Pull the membership record for role + scoped-permission context.
+  // Subscribed (not cache-peek) so the badge / role rerender once /my
+  // resolves on first paint. Absent for platform-override admins who
+  // aren't actually members of this org.
+  const myOrgsQuery = useQuery(listMyOrganizationsOptions());
+  const myOrgs = myOrgsQuery.data;
   const membership = myOrgs?.organizations.find((org) => org.slug === slug);
 
   // Handle 404 as "no longer accessible": evict the stale /my entry (if any)
@@ -159,7 +161,10 @@ export function OrgShell({ slug, children }: OrgShellProps) {
             {contextValue.role ? (
               <OrgRoleBadge role={contextValue.role} />
             ) : null}
-            <AccessModeBadge accessMode={contextValue.accessMode} />
+            <AccessModeBadge
+              accessMode={contextValue.accessMode}
+              isMember={Boolean(membership)}
+            />
           </div>
           <p className="text-xs text-muted-foreground">/{contextValue.slug}</p>
         </header>
