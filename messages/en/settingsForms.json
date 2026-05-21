@@ -124,7 +124,13 @@
       "confirmLabel": "Type your email to confirm",
       "submit": "Delete forever",
       "submitting": "Deleting...",
-      "emailMismatch": "Email does not match"
+      "emailMismatch": "Email does not match",
+      "blocking": {
+        "title": "Action needed before you can delete your account",
+        "description": "You own the organizations below. For each one, either transfer ownership to another member or delete the organization — then come back and try again.",
+        "transferCta": "Manage members",
+        "deleteOrgCta": "Delete organization"
+      }
     },
     "legal": {
       "types": {

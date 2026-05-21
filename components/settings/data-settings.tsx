@@ -1,11 +1,26 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { DownloadIcon, Trash2Icon } from "lucide-react";
+import {
+  Building2Icon,
+  DownloadIcon,
+  ExternalLinkIcon,
+  Trash2Icon,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
+import {
+  handleProblem,
+  problemFromResponse,
+  type ProblemDetails,
+} from "@/api/problems";
+import { useQueryClient } from "@tanstack/react-query";
+
+import { listMyOrganizationsQueryKey } from "@/api/generated/@tanstack/react-query.gen";
+import type { ListMyOrganizationsResponse } from "@/api/generated";
 import { useAuth } from "@/components/auth-provider";
 import { fetchJson } from "@/components/settings/client-fetch";
 import { LegalAcceptancesCard } from "@/components/settings/legal-acceptances-card";
@@ -20,7 +35,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -35,15 +50,29 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import {
+  extractBlockingOrganizations,
+  isOrgError,
+  ORG_ERRORS,
+  type BlockingOrganization,
+} from "@/lib/org-errors";
 
 export function DataSettings() {
   const t = useTranslations("settingsForms.data");
   const tCommon = useTranslations("common.actions");
   const { currentUser } = useAuth();
   const { replace } = useRouter();
+  const queryClient = useQueryClient();
   const [confirmEmail, setConfirmEmail] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  // When the backend rejects deletion because the user is the sole owner
+  // of one or more organizations, we surface them here and switch the
+  // confirm dialog to a remediation view. Cleared on Cancel / dialog
+  // close so a retry starts from a blank slate.
+  const [blockingOrgs, setBlockingOrgs] = useState<
+    BlockingOrganization[] | null
+  >(null);
   const email = currentUser?.email ?? "";
   const canDelete = confirmEmail === email;
 
@@ -70,10 +99,59 @@ export function DataSettings() {
   async function deleteAccount() {
     setIsDeleting(true);
     try {
-      await fetchJson("/api/proxy/v1/users/me", { method: "DELETE" });
-      await fetch("/api/auth/logout", { method: "POST" });
-      replace("/goodbye");
-    } catch {
+      // Bypass fetchJson here so we can inspect the problem ourselves
+      // before its toast fires. The UserErasureBlocked case is a hand-
+      // off to remediation, not a generic error to bark at the user.
+      const response = await fetch("/api/proxy/v1/users/me", {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        await fetch("/api/auth/logout", { method: "POST" });
+        replace("/goodbye");
+        return;
+      }
+
+      const problem = (await problemFromResponse(response)) as ProblemDetails;
+
+      // Two detection paths for "user owns orgs that must be transferred
+      // or deleted first":
+      // 1. Canonical: the Organizations module problem code +
+      //    blockingOrganizations extension (per the handover spec).
+      // 2. Fallback for the backend's current shape (May 2026): generic
+      //    409 with a Conflict title + a detail string hinting at the
+      //    transfer-ownership remediation. We treat that as blocked and
+      //    synthesise the org list from the cached /my response —
+      //    showing every org where the caller is an Owner. We can't
+      //    distinguish sole-Owner vs co-Owner from /my alone, but the
+      //    remediation actions (manage members / delete) work for both.
+      if (isOrgError(problem, ORG_ERRORS.UserErasureBlocked)) {
+        setBlockingOrgs(extractBlockingOrganizations(problem));
+        return;
+      }
+      if (
+        problem.status === 409 &&
+        problem.detail?.toLowerCase().includes("transfer ownership")
+      ) {
+        const my = queryClient.getQueryData<ListMyOrganizationsResponse>(
+          listMyOrganizationsQueryKey(),
+        );
+        const ownedOrgs =
+          my?.organizations.filter(
+            (org) => org.role.toLowerCase() === "owner",
+          ) ?? [];
+        setBlockingOrgs(
+          ownedOrgs.map((org) => ({
+            organizationId: org.organizationId,
+            name: org.name,
+            slug: org.slug,
+          })),
+        );
+        return;
+      }
+
+      handleProblem(problem);
+    } finally {
       setIsDeleting(false);
     }
   }
@@ -109,7 +187,16 @@ export function DataSettings() {
           <CardDescription>{t("delete.description")}</CardDescription>
         </CardHeader>
         <CardContent>
-          <AlertDialog>
+          <AlertDialog
+            onOpenChange={(open) => {
+              if (!open) {
+                // Reset both the email-confirm field and any remediation
+                // state so reopening starts from scratch.
+                setConfirmEmail("");
+                setBlockingOrgs(null);
+              }
+            }}
+          >
             <AlertDialogTrigger
               render={
                 <Button type="button" variant="destructive">
@@ -119,54 +206,143 @@ export function DataSettings() {
               }
             />
             <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle className="text-destructive">
-                  {t("delete.confirmTitle")}
-                </AlertDialogTitle>
-                <AlertDialogDescription>
-                  {t("delete.confirmDescription")}
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <Field>
-                <FieldLabel htmlFor="delete-confirm-email">
-                  {t("delete.confirmLabel")}
-                </FieldLabel>
-                <FieldContent>
-                  <Input
-                    id="delete-confirm-email"
-                    value={confirmEmail}
-                    onChange={(event) => setConfirmEmail(event.target.value)}
-                  />
-                  <FieldDescription>{email}</FieldDescription>
-                </FieldContent>
-              </Field>
-              <AlertDialogFooter>
-                <AlertDialogCancel
-                  onClick={() => {
-                    setConfirmEmail("");
-                  }}
-                >
-                  {tCommon("cancel")}
-                </AlertDialogCancel>
-                <Button
-                  type="button"
-                  variant="destructive"
-                  disabled={!canDelete || isDeleting}
-                  onClick={() => {
-                    if (!canDelete) {
-                      toast.error(t("delete.emailMismatch"));
-                      return;
-                    }
-                    void deleteAccount();
-                  }}
-                >
-                  {isDeleting ? t("delete.submitting") : t("delete.submit")}
-                </Button>
-              </AlertDialogFooter>
+              {blockingOrgs ? (
+                <BlockingOrgsRemediation
+                  organizations={blockingOrgs}
+                  onClose={() => setBlockingOrgs(null)}
+                />
+              ) : (
+                <>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className="text-destructive">
+                      {t("delete.confirmTitle")}
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      {t("delete.confirmDescription")}
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <Field>
+                    <FieldLabel htmlFor="delete-confirm-email">
+                      {t("delete.confirmLabel")}
+                    </FieldLabel>
+                    <FieldContent>
+                      <Input
+                        id="delete-confirm-email"
+                        value={confirmEmail}
+                        onChange={(event) =>
+                          setConfirmEmail(event.target.value)
+                        }
+                      />
+                      <FieldDescription>{email}</FieldDescription>
+                    </FieldContent>
+                  </Field>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel
+                      onClick={() => {
+                        setConfirmEmail("");
+                      }}
+                    >
+                      {tCommon("cancel")}
+                    </AlertDialogCancel>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      disabled={!canDelete || isDeleting}
+                      onClick={() => {
+                        if (!canDelete) {
+                          toast.error(t("delete.emailMismatch"));
+                          return;
+                        }
+                        void deleteAccount();
+                      }}
+                    >
+                      {isDeleting ? t("delete.submitting") : t("delete.submit")}
+                    </Button>
+                  </AlertDialogFooter>
+                </>
+              )}
             </AlertDialogContent>
           </AlertDialog>
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+/**
+ * Remediation panel shown when account deletion is refused because the
+ * user is the sole Owner of one or more organizations.
+ *
+ * Each row offers two deep links:
+ * - "Manage members" → /o/:slug/members so they can transfer ownership.
+ * - "Delete organization" → /o/:slug/settings where the Danger zone
+ *   lives. Deleting all blocking orgs (or transferring ownership)
+ *   unblocks the account-deletion path.
+ *
+ * We intentionally don't auto-retry the deletion after a successful
+ * remediation — the user should explicitly come back and click Delete
+ * again so they reconfirm the irreversible step.
+ */
+function BlockingOrgsRemediation({
+  organizations,
+  onClose,
+}: {
+  organizations: BlockingOrganization[];
+  onClose: () => void;
+}) {
+  const t = useTranslations("settingsForms.data.delete.blocking");
+  const tCommon = useTranslations("common.actions");
+
+  return (
+    <>
+      <AlertDialogHeader>
+        <AlertDialogTitle>{t("title")}</AlertDialogTitle>
+        <AlertDialogDescription>{t("description")}</AlertDialogDescription>
+      </AlertDialogHeader>
+      <ul className="grid gap-2 py-2">
+        {organizations.map((org) => (
+          <li
+            key={org.organizationId}
+            className="grid gap-2 rounded-md border p-3 sm:flex sm:items-center sm:justify-between"
+          >
+            <div className="flex items-center gap-2">
+              <Building2Icon className="size-4 text-muted-foreground" />
+              <div className="grid">
+                <span className="text-sm font-medium">{org.name}</span>
+                <span className="text-xs text-muted-foreground">
+                  /{org.slug}
+                </span>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Link
+                href={`/app/organizations/o/${org.slug}/members`}
+                className={buttonVariants({ size: "sm", variant: "outline" })}
+                onClick={onClose}
+              >
+                {t("transferCta")}
+                <ExternalLinkIcon />
+              </Link>
+              <Link
+                href={`/app/organizations/o/${org.slug}/settings`}
+                className={buttonVariants({
+                  size: "sm",
+                  variant: "destructive",
+                })}
+                onClick={onClose}
+              >
+                {t("deleteOrgCta")}
+                <ExternalLinkIcon />
+              </Link>
+            </div>
+          </li>
+        ))}
+      </ul>
+      <AlertDialogFooter>
+        <AlertDialogCancel onClick={onClose}>
+          {tCommon("close")}
+        </AlertDialogCancel>
+      </AlertDialogFooter>
+    </>
   );
 }
