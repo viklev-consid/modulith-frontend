@@ -21,7 +21,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { humanizeLegalType } from "@/lib/legal";
+import { humanizeLegalType, parseIsoDate } from "@/lib/legal";
 
 import { LegalDocumentSheet } from "./legal-document-sheet";
 
@@ -96,7 +96,7 @@ export function LegalPendingCard() {
                   </div>
                   <span className="text-xs text-muted-foreground">
                     {t("effectiveLabel", {
-                      date: format.dateTime(new Date(doc.effectiveAt), {
+                      date: format.dateTime(parseIsoDate(doc.effectiveAt), {
                         dateStyle: "medium",
                       }),
                     })}

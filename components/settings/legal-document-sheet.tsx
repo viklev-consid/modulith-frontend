@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { currentUserQueryKey } from "@/lib/auth-query";
+import { parseIsoDate } from "@/lib/legal";
 
 export type LegalDocumentSheetMode = "view" | "accept";
 
@@ -140,21 +141,21 @@ function LegalDocumentSheetBody(props: LegalDocumentSheetProps) {
           {t("versionLabel", { version })}
           {data?.publishedAt
             ? ` · ${t("publishedLabel", {
-                date: format.dateTime(new Date(data.publishedAt), {
+                date: format.dateTime(parseIsoDate(data.publishedAt), {
                   dateStyle: "medium",
                 }),
               })}`
             : ""}
           {data?.effectiveAt
             ? ` · ${t("effectiveLabel", {
-                date: format.dateTime(new Date(data.effectiveAt), {
+                date: format.dateTime(parseIsoDate(data.effectiveAt), {
                   dateStyle: "medium",
                 }),
               })}`
             : ""}
           {props.acceptedAt
             ? ` · ${t("acceptedLabel", {
-                date: format.dateTime(new Date(props.acceptedAt), {
+                date: format.dateTime(parseIsoDate(props.acceptedAt), {
                   dateStyle: "medium",
                 }),
               })}`

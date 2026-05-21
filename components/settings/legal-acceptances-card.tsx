@@ -17,7 +17,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { humanizeLegalType } from "@/lib/legal";
+import { humanizeLegalType, parseIsoDate } from "@/lib/legal";
 
 import { LegalDocumentSheet } from "./legal-document-sheet";
 
@@ -43,9 +43,10 @@ export function LegalAcceptancesCard() {
   const accepted = useMemo(() => {
     const list = complianceQuery.data?.acceptedDocuments ?? [];
     // Newest first so the most relevant acceptance is at the top.
-    return [...list].sort(
+    return list.toSorted(
       (a, b) =>
-        new Date(b.acceptedAt).getTime() - new Date(a.acceptedAt).getTime(),
+        parseIsoDate(b.acceptedAt).getTime() -
+        parseIsoDate(a.acceptedAt).getTime(),
     );
   }, [complianceQuery.data?.acceptedDocuments]);
 
@@ -93,7 +94,7 @@ export function LegalAcceptancesCard() {
                       </div>
                       <span className="text-xs text-muted-foreground">
                         {t("acceptedLabel", {
-                          date: format.dateTime(new Date(doc.acceptedAt), {
+                          date: format.dateTime(parseIsoDate(doc.acceptedAt), {
                             dateStyle: "medium",
                           }),
                         })}

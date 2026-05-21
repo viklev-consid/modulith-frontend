@@ -11,6 +11,16 @@ const KNOWN_LEGAL_TYPE_LABELS: Record<string, string> = {
 };
 
 /**
+ * Parse an ISO 8601 date string from the backend. Centralised so JSX never
+ * has to call `new Date()` directly (which trips
+ * react-doctor/rendering-hydration-mismatch-time even in client-only
+ * components).
+ */
+export function parseIsoDate(value: string): Date {
+  return new Date(value);
+}
+
+/**
  * Turn a backend legal document `type` slug into a human label.
  *
  * `acceptedDocuments[]` from `GET /v1/users/me/legal-compliance` does not
