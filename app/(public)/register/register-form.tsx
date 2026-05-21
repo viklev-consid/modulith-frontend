@@ -36,13 +36,22 @@ export function RegisterContent() {
   const { register, resendEmailConfirmation } = useAuth();
   const searchParams = useSearchParams();
   const invitationToken = searchParams.get("token");
+  // Org-invitation flow uses `?orgToken=` to avoid colliding with the
+  // existing system-invitation `?token=` flow. When present we additionally
+  // forward the email from the invite URL and lock the input so the user
+  // can't accidentally diverge from what the backend expects.
+  const organizationInvitationToken = searchParams.get("orgToken");
+  const prefilledEmail = searchParams.get("email") ?? "";
+  const lockEmail =
+    searchParams.get("lockEmail") === "1" &&
+    Boolean(organizationInvitationToken);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [registeredEmail, setRegisteredEmail] = useState<string | null>(null);
 
   const form = useForm({
     defaultValues: {
       displayName: "",
-      email: "",
+      email: prefilledEmail,
       password: "",
       confirmPassword: "",
     },
@@ -59,6 +68,7 @@ export function RegisterContent() {
         email: value.email,
         password: value.password,
         invitationToken,
+        organizationInvitationToken,
       });
 
       if (!parsed.success) {
@@ -85,7 +95,11 @@ export function RegisterContent() {
     return <RegisterMessage title={t("closed.title")} />;
   }
 
-  if (registrationMode === "InviteOnly" && !invitationToken) {
+  if (
+    registrationMode === "InviteOnly" &&
+    !invitationToken &&
+    !organizationInvitationToken
+  ) {
     return (
       <RegisterMessage
         title={t("inviteOnly.title")}
@@ -114,7 +128,9 @@ export function RegisterContent() {
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle>
-            {invitationToken ? t("titleInvited") : t("title")}
+            {invitationToken || organizationInvitationToken
+              ? t("titleInvited")
+              : t("title")}
           </CardTitle>
           <CardDescription>{t("description")}</CardDescription>
         </CardHeader>
@@ -141,6 +157,7 @@ export function RegisterContent() {
                 error={fieldErrors.email}
                 type="email"
                 autoComplete="email"
+                readOnly={lockEmail}
               />
               <FormInput
                 form={form}
@@ -284,6 +301,7 @@ function FormInput({
   error,
   type = "text",
   autoComplete,
+  readOnly,
 }: {
   form: {
     Field: React.ComponentType<{
@@ -301,6 +319,7 @@ function FormInput({
   error?: string;
   type?: string;
   autoComplete?: string;
+  readOnly?: boolean;
 }) {
   return (
     <form.Field name={name}>
@@ -313,6 +332,7 @@ function FormInput({
             autoComplete={autoComplete}
             value={field.state.value}
             aria-invalid={Boolean(error)}
+            readOnly={readOnly}
             onBlur={field.handleBlur}
             onChange={(event) => field.handleChange(event.target.value)}
           />

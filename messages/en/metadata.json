@@ -42,6 +42,10 @@
     "title": "Finish setup | Modulith",
     "description": "Complete onboarding to enter your Modulith workspace."
   },
+  "invite": {
+    "title": "Organization invitation | Modulith",
+    "description": "Accept an invitation to join an organization."
+  },
   "app": {
     "dashboard": "Dashboard | Modulith",
     "notifications": "Notifications | Modulith",

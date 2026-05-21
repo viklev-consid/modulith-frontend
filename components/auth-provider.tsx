@@ -37,7 +37,15 @@ type RegisterInput = {
   displayName: string;
   email: string;
   password: string;
+  /** Token for an existing pending system-level user invitation. */
   invitationToken?: string | null;
+  /**
+   * Token from an organization invitation link
+   * (`/invite?token=...`). The server cross-validates this against the
+   * Organizations module, creates the account, then auto-consumes the
+   * invite — joining the user to the inviting org as part of registration.
+   */
+  organizationInvitationToken?: string | null;
 };
 
 type AuthContextValue = {

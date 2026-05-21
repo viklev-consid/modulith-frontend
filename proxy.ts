@@ -11,6 +11,10 @@ const publicRoutes = new Set([
   "/reset-password",
   "/confirm-email",
   "/goodbye",
+  // Invite landing must be reachable both signed-in (one-click accept)
+  // and signed-out (prompt to register/sign in). The page itself
+  // branches on session state.
+  "/invite",
 ]);
 
 const publicPrefixes = ["/login/"];

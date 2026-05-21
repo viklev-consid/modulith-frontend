@@ -31,6 +31,61 @@
     "slugLabel": "Slug",
     "roleLabel": "Your role"
   },
+  "invitations": {
+    "table": {
+      "title": "Pending invitations",
+      "description": "People who have been invited but haven't joined yet.",
+      "createCta": "Invite person",
+      "rowActionsLabel": "Actions for {email}",
+      "columns": {
+        "email": "Email",
+        "role": "Role",
+        "status": "Status",
+        "expires": "Expires",
+        "actions": "Actions"
+      },
+      "empty": {
+        "title": "No pending invitations",
+        "description": "Invite someone to give them access to this organization."
+      }
+    },
+    "status": {
+      "pending": "Pending",
+      "expired": "Expired",
+      "consumed": "Accepted"
+    },
+    "actions": {
+      "revoke": "Revoke invitation"
+    },
+    "create": {
+      "title": "Invite to organization",
+      "description": "We'll generate a one-time link that the invitee can use to join.",
+      "emailLabel": "Email",
+      "emailRequired": "Email is required.",
+      "roleLabel": "Role",
+      "rolePlaceholder": "Select a role",
+      "roleRequired": "Pick a role.",
+      "submit": "Create invitation",
+      "submitting": "Creating…",
+      "successTitle": "Invitation created",
+      "successDescription": "Share this link with {email}. They'll need it to join."
+    },
+    "revoke": {
+      "title": "Revoke invitation for {email}?",
+      "description": "The link will stop working immediately. You can issue a new invitation later.",
+      "submit": "Revoke",
+      "submitting": "Revoking…",
+      "toast": "Invitation for {email} revoked."
+    },
+    "rawToken": {
+      "warningTitle": "Copy this link now",
+      "warningBody": "The invitation token isn't recoverable once you close this dialog. Send it to the invitee right away, or revoke and create a new invitation if you lose it.",
+      "urlLabel": "Invite link",
+      "tokenLabel": "Raw token",
+      "copyUrl": "Copy invite link",
+      "copyToken": "Copy raw token"
+    }
+  },
   "members": {
     "table": {
       "columns": {
