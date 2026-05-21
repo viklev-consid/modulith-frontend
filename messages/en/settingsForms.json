@@ -125,6 +125,40 @@
       "submit": "Delete forever",
       "submitting": "Deleting...",
       "emailMismatch": "Email does not match"
+    },
+    "legal": {
+      "pending": {
+        "title": "Pending legal updates",
+        "description": "New versions of these documents are available. Please review and accept them.",
+        "versionLabel": "v{version}",
+        "effectiveLabel": "Effective {date}",
+        "viewAndAccept": "Review & accept",
+        "acceptSuccess": "Acceptance recorded"
+      },
+      "accepted": {
+        "title": "Legal documents you've accepted",
+        "description": "A record of every legal document version you've accepted, with timestamps.",
+        "empty": "You haven't accepted any legal documents yet.",
+        "versionLabel": "v{version}",
+        "acceptedLabel": "Accepted {date}",
+        "updateAvailable": "Update available",
+        "view": "View",
+        "loadError": "Couldn't load your acceptances. Refresh to try again."
+      },
+      "sheet": {
+        "loadingTitle": "Loading document…",
+        "loadError": "Couldn't load this document. Close the panel and try again.",
+        "versionLabel": "Version {version}",
+        "publishedLabel": "Published {date}",
+        "effectiveLabel": "effective {date}",
+        "acceptedLabel": "accepted {date}",
+        "acknowledge": "I have read and accept the {title}.",
+        "accept": "Accept",
+        "accepting": "Recording…",
+        "cancel": "Cancel",
+        "close": "Close",
+        "acceptError": "We couldn't record your acceptance. Refresh and try again."
+      }
     }
   },
   "security": {
