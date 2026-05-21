@@ -36,7 +36,7 @@ describe("LegalAcceptancesCard", () => {
       missingDocuments: [
         {
           id: "doc-2",
-          type: "terms-of-service",
+          type: "termsOfService",
           title: "Terms of Service",
           version: "2.0",
           effectiveAt: "2026-04-01T00:00:00Z",
@@ -46,13 +46,13 @@ describe("LegalAcceptancesCard", () => {
       ],
       acceptedDocuments: [
         {
-          type: "privacy-policy",
+          type: "privacyPolicy",
           version: "1.5",
           acceptedAt: "2026-03-15T10:00:00Z",
           contentHash: "hash-pp-1.5",
         },
         {
-          type: "terms-of-service",
+          type: "termsOfService",
           version: "1.0",
           acceptedAt: "2026-01-20T10:00:00Z",
           contentHash: "hash-tos-1",
@@ -78,7 +78,7 @@ describe("LegalAcceptancesCard", () => {
       missingDocuments: [],
       acceptedDocuments: [
         {
-          type: "terms-of-service",
+          type: "termsOfService",
           version: "1.0",
           acceptedAt: "2026-01-20T10:00:00Z",
           contentHash: "hash",

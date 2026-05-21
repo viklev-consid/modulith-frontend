@@ -128,9 +128,9 @@
     },
     "legal": {
       "types": {
-        "terms-of-service": "Terms of Service",
-        "privacy-policy": "Privacy Policy",
-        "cookie-policy": "Cookie Policy",
+        "termsOfService": "Terms of Service",
+        "privacyPolicy": "Privacy Policy",
+        "cookiePolicy": "Cookie Policy",
         "dpa": "Data Processing Agreement"
       },
       "pending": {
@@ -154,6 +154,7 @@
       "sheet": {
         "loadingTitle": "Loading document…",
         "loadError": "Couldn't load this document. Close the panel and try again.",
+        "notFound": "This version is no longer available from the server. Your acceptance record is still on file.",
         "versionLabel": "Version {version}",
         "publishedLabel": "Published {date}",
         "effectiveLabel": "effective {date}",

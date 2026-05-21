@@ -85,7 +85,19 @@ function LegalDocumentSheetBody(props: LegalDocumentSheetProps) {
     // (type, version) is immutable — once fetched, never goes stale. Let
     // React Query GC the entry when no observers remain (default behaviour).
     staleTime: Infinity,
+    // Don't retry on terminal errors: a 404 means the version isn't
+    // published (e.g. the user is viewing an older acceptance that the
+    // backend no longer exposes) and retrying just wastes bandwidth.
+    retry: (failureCount, error) => {
+      const status = (error as { status?: number } | null)?.status;
+      if (status === 404 || status === 401 || status === 403) return false;
+      return failureCount < 2;
+    },
   });
+
+  const documentNotFound =
+    documentQuery.isError &&
+    (documentQuery.error as { status?: number } | null)?.status === 404;
 
   const [acknowledged, setAcknowledged] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -172,6 +184,10 @@ function LegalDocumentSheetBody(props: LegalDocumentSheetProps) {
               <Skeleton className="h-4 w-full" />
               <Skeleton className="h-4 w-4/5" />
             </div>
+          ) : documentNotFound ? (
+            <p className="text-sm text-muted-foreground" role="alert">
+              {t("notFound")}
+            </p>
           ) : documentQuery.isError || !data ? (
             <p className="text-sm text-destructive" role="alert">
               {t("loadError")}

@@ -11,10 +11,11 @@ import {
   renderWithProviders,
 } from "@/tests/test-wrappers";
 
-// Mock the underlying SDK call so the mutation goes through the generated
-// hook (real cache invalidation, real error mapping) but never touches the
-// network.
+// Mock the underlying SDK calls so the mutation and document fetch go
+// through the generated hooks (real cache invalidation, real error
+// mapping, real retry behaviour) but never touch the network.
 const acceptLegalDocumentsMock = vi.fn();
+const getLegalDocumentMock = vi.fn();
 vi.mock("@/api/generated/sdk.gen", async (importOriginal) => {
   const actual =
     await importOriginal<typeof import("@/api/generated/sdk.gen")>();
@@ -22,10 +23,11 @@ vi.mock("@/api/generated/sdk.gen", async (importOriginal) => {
     ...actual,
     acceptLegalDocuments: (...args: unknown[]) =>
       acceptLegalDocumentsMock(...args),
+    getLegalDocument: (...args: unknown[]) => getLegalDocumentMock(...args),
   };
 });
 
-const TYPE = "terms-of-service";
+const TYPE = "termsOfService";
 const VERSION = "2.0";
 const DOC_ID = "doc-1";
 const CONTENT_HASH = "hash-1";
@@ -191,6 +193,42 @@ describe("LegalDocumentSheet (accept mode)", () => {
       );
     });
     expect(onAccepted).not.toHaveBeenCalled();
+  });
+});
+
+describe("LegalDocumentSheet (view mode, 404)", () => {
+  it("renders a friendly 'no longer available' message on 404 and does not retry", async () => {
+    getLegalDocumentMock.mockReset();
+    getLegalDocumentMock.mockRejectedValue({ status: 404 });
+
+    // Empty client so the document fetch actually fires.
+    const queryClient = createTestQueryClient();
+    queryClient.setQueryData(getLegalComplianceQueryKey(), {
+      isCompliant: true,
+      blockingLevel: "none",
+      missingDocuments: [],
+      acceptedDocuments: [],
+    });
+
+    renderWithProviders(
+      <LegalDocumentSheet
+        mode="view"
+        open
+        onOpenChange={() => {}}
+        type="ghostType"
+        version="ghost:1.0"
+        acceptedAt="2026-01-20T10:00:00Z"
+      />,
+      { queryClient },
+    );
+
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        /no longer available/i,
+      );
+    });
+    // Must not retry — 404 is terminal.
+    expect(getLegalDocumentMock).toHaveBeenCalledTimes(1);
   });
 });
 

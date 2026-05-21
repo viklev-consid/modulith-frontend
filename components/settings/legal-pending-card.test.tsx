@@ -38,7 +38,7 @@ describe("LegalPendingCard", () => {
       missingDocuments: [
         {
           id: "doc-1",
-          type: "terms-of-service",
+          type: "termsOfService",
           title: "Terms of Service",
           version: "2.0",
           effectiveAt: "2026-04-01T00:00:00Z",
@@ -47,7 +47,7 @@ describe("LegalPendingCard", () => {
         },
         {
           id: "doc-2",
-          type: "privacy-policy",
+          type: "privacyPolicy",
           title: "Privacy Policy",
           version: "3.0",
           effectiveAt: "2026-04-10T00:00:00Z",
@@ -80,7 +80,7 @@ describe("LegalPendingCard", () => {
       missingDocuments: [
         {
           id: "doc-1",
-          type: "terms-of-service",
+          type: "termsOfService",
           title: "Terms of Service",
           version: "2.0",
           effectiveAt: "2026-04-01T00:00:00Z",
@@ -94,12 +94,12 @@ describe("LegalPendingCard", () => {
 
     const seeded = queryClient.getQueryData(
       getLegalDocumentQueryKey({
-        path: { type: "terms-of-service", version: "2.0" },
+        path: { type: "termsOfService", version: "2.0" },
       }),
     );
     expect(seeded).toMatchObject({
       id: "doc-1",
-      type: "terms-of-service",
+      type: "termsOfService",
       title: "Terms of Service",
       version: "2.0",
       markdown: "# Terms v2 body",

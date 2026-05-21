@@ -15,11 +15,15 @@ export function parseIsoDate(value: string): Date {
  * labels in the i18n catalog. Anything not in this set falls back to
  * `titleCaseLegalType` so a new backend type renders reasonably without
  * a frontend release.
+ *
+ * NOTE: these slugs match the backend's actual emitted values (camelCase),
+ * not what feels canonical (kebab-case). Keep them in sync with
+ * `settingsForms.data.legal.types.*` keys.
  */
 const KNOWN_LEGAL_TYPE_SLUGS = [
-  "terms-of-service",
-  "privacy-policy",
-  "cookie-policy",
+  "termsOfService",
+  "privacyPolicy",
+  "cookiePolicy",
   "dpa",
 ] as const;
 
@@ -54,8 +58,7 @@ export function titleCaseLegalType(type: string): string {
 export function useHumanizeLegalType() {
   const t = useTranslations("settingsForms.data.legal.types");
   return (type: string): string => {
-    const slug = type.toLowerCase();
-    if (isKnownLegalTypeSlug(slug)) return t(slug);
+    if (isKnownLegalTypeSlug(type)) return t(type);
     return titleCaseLegalType(type);
   };
 }
