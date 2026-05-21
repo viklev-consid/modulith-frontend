@@ -8,6 +8,68 @@
       "viewAll": "All organizations",
       "create": "Create organization",
       "noMemberships": "You aren't a member of any organization yet."
+    },
+    "accessMode": {
+      "platformOverrideLabel": "Platform admin",
+      "platformOverrideDescription": "You're acting on this organization as a platform admin. You aren't a member — owners and other members won't see you on the team."
+    },
+    "nav": {
+      "label": "Organization sections",
+      "overview": "Overview",
+      "members": "Members",
+      "invitations": "Invitations",
+      "settings": "Settings"
+    },
+    "removed": {
+      "title": "Organization unavailable",
+      "description": "It may have been deleted or your membership was removed."
+    }
+  },
+  "overview": {
+    "title": "{name}",
+    "description": "Organization overview.",
+    "slugLabel": "Slug",
+    "roleLabel": "Your role"
+  },
+  "settings": {
+    "edit": {
+      "title": "Organization details",
+      "description": "Change the display name or the URL slug.",
+      "name": {
+        "label": "Name",
+        "hint": "Up to 200 characters."
+      },
+      "slug": {
+        "label": "Slug",
+        "hint": "Lowercase letters, numbers, and single hyphens.",
+        "invalid": "Use lowercase letters, numbers, and single hyphens. No leading or trailing hyphens."
+      },
+      "slugChangeWarning": "Changing the slug breaks existing links to this organization. There is no automatic redirect from the old slug.",
+      "submit": "Save changes",
+      "submitConfirm": "Save and update URL",
+      "submitting": "Saving…",
+      "toast": {
+        "saved": "Organization updated."
+      }
+    },
+    "dangerZone": {
+      "title": "Danger zone",
+      "description": "Deleting an organization is permanent. Members lose access immediately."
+    },
+    "delete": {
+      "trigger": "Delete organization",
+      "confirmTitle": "Delete {name}?",
+      "confirmDescription": "This action cannot be undone. All members lose access immediately and there is no restore.",
+      "confirmLabel": "Type the slug to confirm",
+      "confirmAction": "Delete forever",
+      "deleting": "Deleting…",
+      "toast": {
+        "deleted": "{name} deleted."
+      }
+    },
+    "noAccess": {
+      "title": "You can't change this organization",
+      "description": "Only members with update or delete permissions can edit settings."
     }
   },
   "list": {

@@ -47,7 +47,11 @@
     "notifications": "Notifications | Modulith",
     "organizations": {
       "list": "Organizations | Modulith",
-      "create": "Create organization | Modulith"
+      "create": "Create organization | Modulith",
+      "overview": "Organization | Modulith",
+      "settings": "Organization settings | Modulith",
+      "members": "Members | Modulith",
+      "invitations": "Invitations | Modulith"
     }
   },
   "settings": {
