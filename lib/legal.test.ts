@@ -1,33 +1,34 @@
 import { describe, expect, it } from "vitest";
 
-import { humanizeLegalType } from "@/lib/legal";
+import { parseIsoDate, titleCaseLegalType } from "@/lib/legal";
 
-describe("humanizeLegalType", () => {
-  it("maps known canonical types to canonical labels", () => {
-    expect(humanizeLegalType("terms-of-service")).toBe("Terms of Service");
-    expect(humanizeLegalType("privacy-policy")).toBe("Privacy Policy");
-    expect(humanizeLegalType("cookie-policy")).toBe("Cookie Policy");
-    expect(humanizeLegalType("dpa")).toBe("Data Processing Agreement");
-  });
-
-  it("is case-insensitive for known types", () => {
-    expect(humanizeLegalType("Terms-Of-Service")).toBe("Terms of Service");
-    expect(humanizeLegalType("PRIVACY-POLICY")).toBe("Privacy Policy");
-  });
-
-  it("title-cases unknown slugs", () => {
-    expect(humanizeLegalType("acceptable-use-policy")).toBe(
+describe("titleCaseLegalType", () => {
+  it("title-cases hyphen-separated slugs", () => {
+    expect(titleCaseLegalType("acceptable-use-policy")).toBe(
       "Acceptable Use Policy",
     );
-    expect(humanizeLegalType("eu_data_addendum")).toBe("Eu Data Addendum");
-    expect(humanizeLegalType("custom policy")).toBe("Custom Policy");
+  });
+
+  it("title-cases underscore-separated slugs", () => {
+    expect(titleCaseLegalType("eu_data_addendum")).toBe("Eu Data Addendum");
+  });
+
+  it("title-cases space-separated slugs", () => {
+    expect(titleCaseLegalType("custom policy")).toBe("Custom Policy");
   });
 
   it("collapses repeated separators and trims empties", () => {
-    expect(humanizeLegalType("foo--bar__baz")).toBe("Foo Bar Baz");
+    expect(titleCaseLegalType("foo--bar__baz")).toBe("Foo Bar Baz");
   });
 
   it("returns empty string for empty input", () => {
-    expect(humanizeLegalType("")).toBe("");
+    expect(titleCaseLegalType("")).toBe("");
+  });
+});
+
+describe("parseIsoDate", () => {
+  it("parses a valid ISO 8601 timestamp", () => {
+    const date = parseIsoDate("2026-01-20T10:00:00Z");
+    expect(date.getTime()).toBe(Date.UTC(2026, 0, 20, 10, 0, 0));
   });
 });

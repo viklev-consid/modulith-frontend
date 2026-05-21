@@ -17,7 +17,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { humanizeLegalType, parseIsoDate } from "@/lib/legal";
+import { parseIsoDate, useHumanizeLegalType } from "@/lib/legal";
 
 import { LegalDocumentSheet } from "./legal-document-sheet";
 
@@ -26,6 +26,7 @@ type ActiveDoc = { type: string; version: string; acceptedAt: string };
 export function LegalAcceptancesCard() {
   const t = useTranslations("settingsForms.data.legal.accepted");
   const format = useFormatter();
+  const humanizeLegalType = useHumanizeLegalType();
   const [active, setActive] = useState<ActiveDoc | null>(null);
 
   const complianceQuery = useQuery({

@@ -11,7 +11,10 @@ import {
   getLegalComplianceOptions,
   getLegalDocumentQueryKey,
 } from "@/api/generated/@tanstack/react-query.gen";
-import type { LegalComplianceDocumentResponse } from "@/api/generated/types.gen";
+import type {
+  GetLegalDocumentResponse,
+  LegalComplianceDocumentResponse,
+} from "@/api/generated/types.gen";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,7 +24,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { humanizeLegalType, parseIsoDate } from "@/lib/legal";
+import { parseIsoDate, useHumanizeLegalType } from "@/lib/legal";
 
 import { LegalDocumentSheet } from "./legal-document-sheet";
 
@@ -30,6 +33,7 @@ type ActiveDoc = LegalComplianceDocumentResponse;
 export function LegalPendingCard() {
   const t = useTranslations("settingsForms.data.legal.pending");
   const format = useFormatter();
+  const humanizeLegalType = useHumanizeLegalType();
   const queryClient = useQueryClient();
   const [active, setActive] = useState<ActiveDoc | null>(null);
 
@@ -44,27 +48,30 @@ export function LegalPendingCard() {
 
   // Cache pre-warming: missingDocuments[] already includes the full markdown
   // and metadata; seeding the per-document cache means the sheet renders
-  // immediately on click without firing GetLegalDocument. The seeded shape
-  // matches GetLegalDocumentResponse (`publishedAt` is the only extra field
-  // and is non-required on the sheet).
+  // immediately on click without firing GetLegalDocument.
+  //
+  // The compliance payload omits `publishedAt`, but the document response
+  // type declares it as required. We seed an empty string — the sheet's
+  // header renders the Published line via a truthy check, so an empty
+  // string correctly suppresses it (rather than pretending the doc was
+  // published on its effective date).
   useEffect(() => {
     for (const doc of missing) {
       const queryKey = getLegalDocumentQueryKey({
         path: { type: doc.type, version: doc.version },
       });
       if (queryClient.getQueryData(queryKey)) continue;
-      queryClient.setQueryData(queryKey, {
+      const seeded: GetLegalDocumentResponse = {
         id: doc.id,
         type: doc.type,
         title: doc.title,
         version: doc.version,
         effectiveAt: doc.effectiveAt,
-        // No publishedAt in the compliance payload; the sheet renders the
-        // line conditionally so this is fine.
-        publishedAt: doc.effectiveAt,
+        publishedAt: "",
         contentHash: doc.contentHash,
         markdown: doc.markdown,
-      });
+      };
+      queryClient.setQueryData(queryKey, seeded);
     }
   }, [missing, queryClient]);
 

@@ -1,14 +1,4 @@
-// Known canonical legal document types from the backend. Keep the mapping
-// here rather than the i18n catalog because (a) these are stable
-// identifiers the backend owns, not user-facing strings we translate, and
-// (b) the fallback humanizer below handles unknown types gracefully so a
-// new backend type does not require a frontend release to render.
-const KNOWN_LEGAL_TYPE_LABELS: Record<string, string> = {
-  "terms-of-service": "Terms of Service",
-  "privacy-policy": "Privacy Policy",
-  "cookie-policy": "Cookie Policy",
-  dpa: "Data Processing Agreement",
-};
+import { useTranslations } from "next-intl";
 
 /**
  * Parse an ISO 8601 date string from the backend. Centralised so JSX never
@@ -21,19 +11,51 @@ export function parseIsoDate(value: string): Date {
 }
 
 /**
- * Turn a backend legal document `type` slug into a human label.
- *
- * `acceptedDocuments[]` from `GET /v1/users/me/legal-compliance` does not
- * include a `title`, only `type`. This helper produces a readable label
- * without an extra request — used for row labels in the settings ledger.
- * The View sheet still fetches the canonical title via `getLegalDocument`.
+ * Backend legal document type slugs that have curated, locale-aware
+ * labels in the i18n catalog. Anything not in this set falls back to
+ * `titleCaseLegalType` so a new backend type renders reasonably without
+ * a frontend release.
  */
-export function humanizeLegalType(type: string): string {
-  const known = KNOWN_LEGAL_TYPE_LABELS[type.toLowerCase()];
-  if (known) return known;
+const KNOWN_LEGAL_TYPE_SLUGS = [
+  "terms-of-service",
+  "privacy-policy",
+  "cookie-policy",
+  "dpa",
+] as const;
+
+type KnownLegalTypeSlug = (typeof KNOWN_LEGAL_TYPE_SLUGS)[number];
+
+function isKnownLegalTypeSlug(value: string): value is KnownLegalTypeSlug {
+  return (KNOWN_LEGAL_TYPE_SLUGS as readonly string[]).includes(value);
+}
+
+/**
+ * Pure title-case fallback for unknown slugs. Exported for use in
+ * non-React contexts (and unit tests).
+ */
+export function titleCaseLegalType(type: string): string {
   return type
     .split(/[-_\s]+/)
     .filter(Boolean)
     .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
     .join(" ");
+}
+
+/**
+ * Hook returning a function that maps a backend legal-document `type`
+ * slug to a locale-aware human label.
+ *
+ * `acceptedDocuments[]` from `GET /v1/users/me/legal-compliance` does not
+ * include a `title`, only `type`. This helper produces a readable label
+ * without an extra request — used for row labels in the settings ledger
+ * and for accessible `aria-label`s. The View sheet still fetches the
+ * canonical title via `getLegalDocument`.
+ */
+export function useHumanizeLegalType() {
+  const t = useTranslations("settingsForms.data.legal.types");
+  return (type: string): string => {
+    const slug = type.toLowerCase();
+    if (isKnownLegalTypeSlug(slug)) return t(slug);
+    return titleCaseLegalType(type);
+  };
 }

@@ -127,6 +127,12 @@
       "emailMismatch": "Email does not match"
     },
     "legal": {
+      "types": {
+        "terms-of-service": "Terms of Service",
+        "privacy-policy": "Privacy Policy",
+        "cookie-policy": "Cookie Policy",
+        "dpa": "Data Processing Agreement"
+      },
       "pending": {
         "title": "Pending legal updates",
         "description": "New versions of these documents are available. Please review and accept them.",
