@@ -1881,7 +1881,7 @@
     "/v1/organizations/{organizationRef}/audit": {
       "get": {
         "tags": ["Modulith.Api"],
-        "summary": "Get organization audit metadata. Full audit projection is owned by the Audit module.",
+        "summary": "Get organization audit entries.",
         "operationId": "GetOrganizationAudit",
         "parameters": [
           {
@@ -1890,6 +1890,24 @@
             "required": true,
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": ["integer", "string"],
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": ["integer", "string"],
+              "format": "int32"
             }
           }
         ],
@@ -4594,7 +4612,14 @@
         }
       },
       "GetOrganizationAuditResponse": {
-        "required": ["organizationId", "accessMode"],
+        "required": [
+          "organizationId",
+          "accessMode",
+          "entries",
+          "total",
+          "page",
+          "pageSize"
+        ],
         "type": "object",
         "properties": {
           "organizationId": {
@@ -4603,6 +4628,27 @@
           },
           "accessMode": {
             "type": "string"
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrganizationAuditEntryDto"
+            }
+          },
+          "total": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": ["integer", "string"],
+            "format": "int32"
+          },
+          "page": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": ["integer", "string"],
+            "format": "int32"
+          },
+          "pageSize": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": ["integer", "string"],
+            "format": "int32"
           }
         }
       },
@@ -5269,6 +5315,45 @@
           }
         }
       },
+      "OrganizationAuditEntryDto": {
+        "required": [
+          "id",
+          "eventType",
+          "actorId",
+          "resourceType",
+          "resourceId",
+          "occurredAt",
+          "payload"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "actorId": {
+            "type": ["null", "string"],
+            "format": "uuid"
+          },
+          "resourceType": {
+            "type": ["null", "string"]
+          },
+          "resourceId": {
+            "type": ["null", "string"],
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "payload": {
+            "type": "string"
+          }
+        }
+      },
       "OrganizationInvitationItem": {
         "required": ["invitationId", "email", "role", "expiresAt", "isPending"],
         "type": "object",
@@ -5304,7 +5389,7 @@
         "type": "object",
         "properties": {
           "userId": {
-            "type": "string",
+            "type": ["null", "string"],
             "format": "uuid"
           },
           "role": {

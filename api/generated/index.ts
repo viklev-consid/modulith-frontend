@@ -452,6 +452,7 @@ export type {
   NotificationLinkDto,
   NotificationSeverity,
   OnboardingLegalDocumentResponse,
+  OrganizationAuditEntryDto,
   OrganizationInvitationItem,
   OrganizationMemberItem,
   PersonalDataExport,

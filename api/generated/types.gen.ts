@@ -266,6 +266,10 @@ export type GetOnboardingLegalRequirementsResponse = {
 export type GetOrganizationAuditResponse = {
   organizationId: string;
   accessMode: string;
+  entries: Array<OrganizationAuditEntryDto>;
+  total: number | string;
+  page: number | string;
+  pageSize: number | string;
 };
 
 export type GetOrganizationResponse = {
@@ -473,6 +477,16 @@ export type OnboardingLegalDocumentResponse = {
   markdown: string;
 };
 
+export type OrganizationAuditEntryDto = {
+  id: string;
+  eventType: string;
+  actorId: null | string;
+  resourceType: null | string;
+  resourceId: null | string;
+  occurredAt: string;
+  payload: string;
+};
+
 export type OrganizationInvitationItem = {
   invitationId: string;
   email: string;
@@ -482,7 +496,7 @@ export type OrganizationInvitationItem = {
 };
 
 export type OrganizationMemberItem = {
-  userId: string;
+  userId: null | string;
   role: string;
   joinedAt: string;
   isAnonymized: boolean;
@@ -1758,7 +1772,10 @@ export type GetOrganizationAuditData = {
   path: {
     organizationRef: string;
   };
-  query?: never;
+  query?: {
+    page?: number | string;
+    pageSize?: number | string;
+  };
   url: "/v1/organizations/{organizationRef}/audit";
 };
 

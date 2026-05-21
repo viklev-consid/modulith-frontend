@@ -2056,7 +2056,7 @@ export const getOrganizationAuditQueryKey = (
 ) => createQueryKey("getOrganizationAudit", options);
 
 /**
- * Get organization audit metadata. Full audit projection is owned by the Audit module.
+ * Get organization audit entries.
  */
 export const getOrganizationAuditOptions = (
   options: Options<GetOrganizationAuditData>,
@@ -2078,6 +2078,57 @@ export const getOrganizationAuditOptions = (
     },
     queryKey: getOrganizationAuditQueryKey(options),
   });
+
+export const getOrganizationAuditInfiniteQueryKey = (
+  options: Options<GetOrganizationAuditData>,
+): QueryKey<Options<GetOrganizationAuditData>> =>
+  createQueryKey("getOrganizationAudit", options, true);
+
+/**
+ * Get organization audit entries.
+ */
+export const getOrganizationAuditInfiniteOptions = (
+  options: Options<GetOrganizationAuditData>,
+) =>
+  infiniteQueryOptions<
+    GetOrganizationAuditResponse2,
+    DefaultError,
+    InfiniteData<GetOrganizationAuditResponse2>,
+    QueryKey<Options<GetOrganizationAuditData>>,
+    | number
+    | string
+    | Pick<
+        QueryKey<Options<GetOrganizationAuditData>>[0],
+        "body" | "headers" | "path" | "query"
+      >
+  >(
+    // @ts-ignore
+    {
+      queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<
+          QueryKey<Options<GetOrganizationAuditData>>[0],
+          "body" | "headers" | "path" | "query"
+        > =
+          typeof pageParam === "object"
+            ? pageParam
+            : {
+                query: {
+                  page: pageParam,
+                },
+              };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await getOrganizationAudit({
+          ...options,
+          ...params,
+          signal,
+          throwOnError: true,
+        });
+        return data;
+      },
+      queryKey: getOrganizationAuditInfiniteQueryKey(options),
+    },
+  );
 
 /**
  * Register a new user account.

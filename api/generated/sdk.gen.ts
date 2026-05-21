@@ -1257,7 +1257,7 @@ export const revokeOrganizationInvitation = <
   });
 
 /**
- * Get organization audit metadata. Full audit projection is owned by the Audit module.
+ * Get organization audit entries.
  */
 export const getOrganizationAudit = <ThrowOnError extends boolean = false>(
   options: Options<GetOrganizationAuditData, ThrowOnError>,
