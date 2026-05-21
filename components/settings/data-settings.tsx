@@ -8,6 +8,8 @@ import { toast } from "sonner";
 
 import { useAuth } from "@/components/auth-provider";
 import { fetchJson } from "@/components/settings/client-fetch";
+import { LegalAcceptancesCard } from "@/components/settings/legal-acceptances-card";
+import { LegalPendingCard } from "@/components/settings/legal-pending-card";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -78,6 +80,8 @@ export function DataSettings() {
 
   return (
     <div className="grid gap-5">
+      <LegalPendingCard />
+      <LegalAcceptancesCard />
       <Card>
         <CardHeader>
           <CardTitle>{t("export.title")}</CardTitle>
