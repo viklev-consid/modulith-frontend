@@ -31,6 +31,52 @@
     "slugLabel": "Slug",
     "roleLabel": "Your role"
   },
+  "members": {
+    "table": {
+      "columns": {
+        "member": "Member",
+        "role": "Role",
+        "joined": "Joined",
+        "actions": "Actions"
+      },
+      "empty": {
+        "title": "No members",
+        "description": "Invite someone to join this organization."
+      },
+      "anonymized": "Unknown user",
+      "rowActionsLabel": "Actions for {name}"
+    },
+    "actions": {
+      "changeRole": "Change role",
+      "remove": "Remove from organization",
+      "leave": "Leave organization"
+    },
+    "roleChange": {
+      "title": "Change role",
+      "description": "Choose a new role for <strong>{name}</strong>.",
+      "placeholder": "Select a role",
+      "hint": "You can only assign roles below your own.",
+      "submit": "Save role",
+      "submitting": "Saving…",
+      "toast": {
+        "title": "Role updated",
+        "description": "{name} is now {role}."
+      }
+    },
+    "remove": {
+      "removeTitle": "Remove {name}?",
+      "removeDescription": "They'll immediately lose access to this organization. They can be re-invited later.",
+      "removeAction": "Remove",
+      "leaveTitle": "Leave this organization?",
+      "leaveDescription": "You'll immediately lose access. Another owner or admin will need to invite you back.",
+      "leaveAction": "Leave",
+      "submitting": "Working…",
+      "toast": {
+        "removeSuccess": "{name} removed.",
+        "leaveSuccess": "You left the organization."
+      }
+    }
+  },
   "settings": {
     "edit": {
       "title": "Organization details",
