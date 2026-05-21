@@ -174,9 +174,7 @@ export function InviteLanding() {
   // can one-click accept. Matches the URL the backend embeds in
   // invitation emails.
   const loginUrl = `/login?next=${encodeURIComponent(
-    `/register/organization-invitation?token=${token}${
-      email ? `&email=${email}` : ""
-    }`,
+    `/invite?token=${token}${email ? `&email=${email}` : ""}`,
   )}`;
 
   return (

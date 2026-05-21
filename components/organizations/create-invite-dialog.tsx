@@ -112,7 +112,7 @@ function CreateInviteContent({ onClose }: { onClose: () => void }) {
     // Mirror the URL pattern the backend embeds in its own invitation
     // emails so the manual copy-and-share path produces an identical
     // experience to the auto-sent link.
-    const path = `/register/organization-invitation?token=${encodeURIComponent(
+    const path = `/invite?token=${encodeURIComponent(
       result.rawToken,
     )}&email=${encodeURIComponent(result.email)}`;
     const inviteUrl =

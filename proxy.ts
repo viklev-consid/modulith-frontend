@@ -11,14 +11,13 @@ const publicRoutes = new Set([
   "/reset-password",
   "/confirm-email",
   "/goodbye",
+  // Invite landing must be reachable both signed-in (one-click accept)
+  // and signed-out (prompt to register/sign in). The page itself
+  // branches on session state.
+  "/invite",
 ]);
 
-// Org invitation landing (/register/organization-invitation) must be
-// reachable both signed-in (one-click accept) and signed-out (register
-// or sign in). System-invitation landing (/register/invitation) is
-// likewise signed-out-by-default. Both fall under the /register/
-// prefix already public-listed below.
-const publicPrefixes = ["/login/", "/register/"];
+const publicPrefixes = ["/login/"];
 
 function isPublicRoute(pathname: string) {
   return (
