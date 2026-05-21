@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { Building2Icon, PlusIcon } from "lucide-react";
 
 import { listMyOrganizationsOptions } from "@/api/generated/@tanstack/react-query.gen";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -37,13 +37,13 @@ export function OrgList() {
       <Empty>
         <EmptyTitle>{t("empty.title")}</EmptyTitle>
         <EmptyDescription>{t("empty.description")}</EmptyDescription>
-        <Button
-          className="mt-4 w-fit mx-auto"
-          render={<Link href="/app/organizations/new" />}
+        <Link
+          href="/app/organizations/new"
+          className={buttonVariants({ className: "mt-4 w-fit mx-auto" })}
         >
           <PlusIcon />
           <span>{t("empty.action")}</span>
-        </Button>
+        </Link>
       </Empty>
     );
   }
@@ -67,14 +67,16 @@ export function OrgList() {
             </div>
           </CardHeader>
           <CardContent>
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full"
-              render={<Link href={`/app/organizations/o/${org.slug}`} />}
+            <Link
+              href={`/app/organizations/o/${org.slug}`}
+              className={buttonVariants({
+                variant: "outline",
+                size: "sm",
+                className: "w-full",
+              })}
             >
               {t("open")}
-            </Button>
+            </Link>
           </CardContent>
         </Card>
       ))}

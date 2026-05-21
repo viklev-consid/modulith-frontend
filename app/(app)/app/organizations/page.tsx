@@ -8,7 +8,7 @@ import { PlusIcon } from "lucide-react";
 import { listMyOrganizationsOptions } from "@/api/generated/@tanstack/react-query.gen";
 import { serverClient } from "@/api/server-client";
 import { OrgList } from "@/components/organizations/org-list";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { createQueryClient } from "@/lib/query-client";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -32,10 +32,13 @@ export default async function OrganizationsPage() {
             <h1 className="text-lg font-semibold">{t("title")}</h1>
             <p className="text-sm text-muted-foreground">{t("description")}</p>
           </div>
-          <Button size="sm" render={<Link href="/app/organizations/new" />}>
+          <Link
+            href="/app/organizations/new"
+            className={buttonVariants({ size: "sm" })}
+          >
             <PlusIcon />
             <span>{t("create")}</span>
-          </Button>
+          </Link>
         </header>
         <Suspense>
           <OrgList />
