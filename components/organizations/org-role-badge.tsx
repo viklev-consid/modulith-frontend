@@ -1,7 +1,7 @@
 import { useTranslations } from "next-intl";
 
 import { Badge } from "@/components/ui/badge";
-import { isOrgRole } from "@/lib/org-roles";
+import { formatRoleLabel, isOrgRole } from "@/lib/org-roles";
 
 /**
  * Renders an organization role with a rank-aware visual treatment.
@@ -13,20 +13,22 @@ import { isOrgRole } from "@/lib/org-roles";
  */
 export function OrgRoleBadge({ role }: { role: string }) {
   const t = useTranslations("organizations.list.role");
+  const normalised = role.toLowerCase();
 
-  const variant: "default" | "secondary" | "outline" = isOrgRole(role)
-    ? role === "Owner"
+  const variant: "default" | "secondary" | "outline" =
+    normalised === "owner"
       ? "default"
-      : role === "Admin"
+      : normalised === "admin"
         ? "secondary"
-        : "outline"
-    : "outline";
+        : isOrgRole(role)
+          ? "outline"
+          : "outline";
 
-  // Translation may not exist for unknown role strings — fall back to the raw value.
-  let label = role;
-  if (isOrgRole(role)) {
-    label = t(role);
-  }
+  // Translation may not exist for unknown role strings — fall back to the
+  // human-cased raw value.
+  const label = isOrgRole(role)
+    ? t(normalised as "owner" | "admin" | "member")
+    : formatRoleLabel(role);
 
   return <Badge variant={variant}>{label}</Badge>;
 }

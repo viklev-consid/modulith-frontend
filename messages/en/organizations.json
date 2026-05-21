@@ -82,9 +82,9 @@
       "action": "Create your first organization"
     },
     "role": {
-      "Owner": "Owner",
-      "Admin": "Admin",
-      "Member": "Member"
+      "owner": "Owner",
+      "admin": "Admin",
+      "member": "Member"
     },
     "open": "Open"
   },
