@@ -1656,6 +1656,72 @@
         ]
       }
     },
+    "/v1/users/legal-documents/{type}/{version}": {
+      "get": {
+        "tags": ["Modulith.Api"],
+        "summary": "Get the current published content for a legal document version.",
+        "operationId": "GetLegalDocument",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "maxLength": 50,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "maxLength": 50,
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetLegalDocumentResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
     "/v1/users/me/legal-compliance": {
       "get": {
         "tags": ["Modulith.Api"],
@@ -3876,6 +3942,48 @@
             "items": {
               "$ref": "#/components/schemas/AcceptedLegalDocumentResponse"
             }
+          }
+        }
+      },
+      "GetLegalDocumentResponse": {
+        "required": [
+          "id",
+          "type",
+          "title",
+          "version",
+          "effectiveAt",
+          "publishedAt",
+          "contentHash",
+          "markdown"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "effectiveAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "publishedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "contentHash": {
+            "type": "string"
+          },
+          "markdown": {
+            "type": "string"
           }
         }
       },

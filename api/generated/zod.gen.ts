@@ -243,6 +243,17 @@ export const zGetCurrentUserResponse = z.object({
   avatar: zCurrentUserAvatarResponse.nullable(),
 });
 
+export const zGetLegalDocumentResponse = z.object({
+  id: z.uuid(),
+  type: z.string(),
+  title: z.string(),
+  version: z.string(),
+  effectiveAt: z.iso.datetime(),
+  publishedAt: z.iso.datetime(),
+  contentHash: z.string(),
+  markdown: z.string(),
+});
+
 export const zGetProductByIdResponse = z.object({
   id: z.uuid(),
   sku: z.string(),
@@ -1124,6 +1135,16 @@ export const zDeleteAccountResponse = z.void();
  * OK
  */
 export const zGetCurrentUserResponse2 = zGetCurrentUserResponse;
+
+export const zGetLegalDocumentPath = z.object({
+  type: z.string().min(1).max(50),
+  version: z.string().min(1).max(50),
+});
+
+/**
+ * OK
+ */
+export const zGetLegalDocumentResponse2 = zGetLegalDocumentResponse;
 
 /**
  * OK

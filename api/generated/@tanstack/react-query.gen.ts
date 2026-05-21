@@ -48,6 +48,7 @@ import {
   getJobStatuses,
   getLastWeekJobStatus,
   getLegalCompliance,
+  getLegalDocument,
   getMachineJobs,
   getMyNotificationPreferences,
   getNextTicker,
@@ -175,6 +176,9 @@ import type {
   GetLegalComplianceData,
   GetLegalComplianceError,
   GetLegalComplianceResponse2,
+  GetLegalDocumentData,
+  GetLegalDocumentError,
+  GetLegalDocumentResponse2,
   GetMachineJobsData,
   GetMyNotificationPreferencesData,
   GetMyNotificationPreferencesError,
@@ -1808,6 +1812,34 @@ export const getCurrentUserOptions = (options?: Options<GetCurrentUserData>) =>
       return data;
     },
     queryKey: getCurrentUserQueryKey(options),
+  });
+
+export const getLegalDocumentQueryKey = (
+  options: Options<GetLegalDocumentData>,
+) => createQueryKey("getLegalDocument", options);
+
+/**
+ * Get the current published content for a legal document version.
+ */
+export const getLegalDocumentOptions = (
+  options: Options<GetLegalDocumentData>,
+) =>
+  queryOptions<
+    GetLegalDocumentResponse2,
+    GetLegalDocumentError,
+    GetLegalDocumentResponse2,
+    ReturnType<typeof getLegalDocumentQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getLegalDocument({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getLegalDocumentQueryKey(options),
   });
 
 export const getLegalComplianceQueryKey = (
