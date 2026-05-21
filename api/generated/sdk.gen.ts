@@ -11,6 +11,8 @@ import type {
   AcceptLegalDocumentsData,
   AcceptLegalDocumentsErrors,
   AcceptLegalDocumentsResponses,
+  AcceptOrganizationInvitationData,
+  AcceptOrganizationInvitationResponses,
   AddCronTickerData,
   AddCronTickerResponses,
   ArchiveNotificationData,
@@ -18,6 +20,8 @@ import type {
   ArchiveNotificationResponses,
   CancelTickerData,
   CancelTickerResponses,
+  ChangeOrganizationMemberRoleData,
+  ChangeOrganizationMemberRoleResponses,
   ChangePasswordData,
   ChangePasswordErrors,
   ChangePasswordResponses,
@@ -41,6 +45,11 @@ import type {
   CreateInvitationData,
   CreateInvitationErrors,
   CreateInvitationResponses,
+  CreateOrganizationData,
+  CreateOrganizationErrors,
+  CreateOrganizationInvitationData,
+  CreateOrganizationInvitationResponses,
+  CreateOrganizationResponses,
   CreateProductData,
   CreateProductErrors,
   CreateProductResponses,
@@ -54,6 +63,8 @@ import type {
   DeleteCronTickerOccurrenceData,
   DeleteCronTickerOccurrenceResponses,
   DeleteCronTickerResponses,
+  DeleteOrganizationData,
+  DeleteOrganizationResponses,
   DeleteTimeTickerData,
   DeleteTimeTickerResponses,
   DeleteTimeTickersBatchData,
@@ -118,6 +129,10 @@ import type {
   GetOnboardingLegalRequirementsResponses,
   GetOptionsData,
   GetOptionsResponses,
+  GetOrganizationAuditData,
+  GetOrganizationAuditResponses,
+  GetOrganizationData,
+  GetOrganizationResponses,
   GetProductByIdData,
   GetProductByIdErrors,
   GetProductByIdResponses,
@@ -153,6 +168,12 @@ import type {
   ListMyNotificationsData,
   ListMyNotificationsErrors,
   ListMyNotificationsResponses,
+  ListMyOrganizationsData,
+  ListMyOrganizationsResponses,
+  ListOrganizationInvitationsData,
+  ListOrganizationInvitationsResponses,
+  ListOrganizationMembersData,
+  ListOrganizationMembersResponses,
   ListProductsData,
   ListProductsResponses,
   ListUsersData,
@@ -185,6 +206,8 @@ import type {
   RegisterData,
   RegisterErrors,
   RegisterResponses,
+  RemoveOrganizationMemberData,
+  RemoveOrganizationMemberResponses,
   ReplayDeadLettersData,
   ReplayDeadLettersErrors,
   ReplayDeadLettersResponses,
@@ -201,6 +224,8 @@ import type {
   RevokeInvitationData,
   RevokeInvitationErrors,
   RevokeInvitationResponses,
+  RevokeOrganizationInvitationData,
+  RevokeOrganizationInvitationResponses,
   RunCronTickerOnDemandData,
   RunCronTickerOnDemandResponses,
   SetupTotpData,
@@ -221,6 +246,8 @@ import type {
   UpdateMyNotificationPreferencesData,
   UpdateMyNotificationPreferencesErrors,
   UpdateMyNotificationPreferencesResponses,
+  UpdateOrganizationData,
+  UpdateOrganizationResponses,
   UpdateProfileData,
   UpdateProfileErrors,
   UpdateProfileResponses,
@@ -1005,6 +1032,244 @@ export const updateMyNotificationPreferences = <
       "Content-Type": "application/json",
       ...options.headers,
     },
+  });
+
+/**
+ * Create an organization and make the caller its owner.
+ */
+export const createOrganization = <ThrowOnError extends boolean = false>(
+  options: Options<CreateOrganizationData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    CreateOrganizationResponses,
+    CreateOrganizationErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/v1/organizations",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * List organizations where the caller has an active membership.
+ */
+export const listMyOrganizations = <ThrowOnError extends boolean = false>(
+  options?: Options<ListMyOrganizationsData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    ListMyOrganizationsResponses,
+    unknown,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/v1/organizations/my",
+    ...options,
+  });
+
+/**
+ * Soft-delete an organization.
+ */
+export const deleteOrganization = <ThrowOnError extends boolean = false>(
+  options: Options<DeleteOrganizationData, ThrowOnError>,
+) =>
+  (options.client ?? client).delete<
+    DeleteOrganizationResponses,
+    unknown,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/v1/organizations/{organizationRef}",
+    ...options,
+  });
+
+/**
+ * Get an organization by ID or slug.
+ */
+export const getOrganization = <ThrowOnError extends boolean = false>(
+  options: Options<GetOrganizationData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    GetOrganizationResponses,
+    unknown,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/v1/organizations/{organizationRef}",
+    ...options,
+  });
+
+/**
+ * Update organization settings.
+ */
+export const updateOrganization = <ThrowOnError extends boolean = false>(
+  options: Options<UpdateOrganizationData, ThrowOnError>,
+) =>
+  (options.client ?? client).patch<
+    UpdateOrganizationResponses,
+    unknown,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/v1/organizations/{organizationRef}",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * List organization members.
+ */
+export const listOrganizationMembers = <ThrowOnError extends boolean = false>(
+  options: Options<ListOrganizationMembersData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    ListOrganizationMembersResponses,
+    unknown,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/v1/organizations/{organizationRef}/members",
+    ...options,
+  });
+
+/**
+ * Change an organization member role.
+ */
+export const changeOrganizationMemberRole = <
+  ThrowOnError extends boolean = false,
+>(
+  options: Options<ChangeOrganizationMemberRoleData, ThrowOnError>,
+) =>
+  (options.client ?? client).put<
+    ChangeOrganizationMemberRoleResponses,
+    unknown,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/v1/organizations/{organizationRef}/members/{userId}/role",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * Remove a member or leave an organization.
+ */
+export const removeOrganizationMember = <ThrowOnError extends boolean = false>(
+  options: Options<RemoveOrganizationMemberData, ThrowOnError>,
+) =>
+  (options.client ?? client).delete<
+    RemoveOrganizationMemberResponses,
+    unknown,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/v1/organizations/{organizationRef}/members/{userId}",
+    ...options,
+  });
+
+/**
+ * List organization invitations.
+ */
+export const listOrganizationInvitations = <
+  ThrowOnError extends boolean = false,
+>(
+  options: Options<ListOrganizationInvitationsData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    ListOrganizationInvitationsResponses,
+    unknown,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/v1/organizations/{organizationRef}/invitations",
+    ...options,
+  });
+
+/**
+ * Invite a user to an organization.
+ */
+export const createOrganizationInvitation = <
+  ThrowOnError extends boolean = false,
+>(
+  options: Options<CreateOrganizationInvitationData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    CreateOrganizationInvitationResponses,
+    unknown,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/v1/organizations/{organizationRef}/invitations",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * Accept an organization invitation for the current user.
+ */
+export const acceptOrganizationInvitation = <
+  ThrowOnError extends boolean = false,
+>(
+  options: Options<AcceptOrganizationInvitationData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    AcceptOrganizationInvitationResponses,
+    unknown,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/v1/organizations/invitations/accept",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * Revoke an organization invitation.
+ */
+export const revokeOrganizationInvitation = <
+  ThrowOnError extends boolean = false,
+>(
+  options: Options<RevokeOrganizationInvitationData, ThrowOnError>,
+) =>
+  (options.client ?? client).delete<
+    RevokeOrganizationInvitationResponses,
+    unknown,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/v1/organizations/{organizationRef}/invitations/{invitationId}",
+    ...options,
+  });
+
+/**
+ * Get organization audit metadata. Full audit projection is owned by the Audit module.
+ */
+export const getOrganizationAudit = <ThrowOnError extends boolean = false>(
+  options: Options<GetOrganizationAuditData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    GetOrganizationAuditResponses,
+    unknown,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/v1/organizations/{organizationRef}/audit",
+    ...options,
   });
 
 /**

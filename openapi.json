@@ -1440,6 +1440,478 @@
         ]
       }
     },
+    "/v1/organizations": {
+      "post": {
+        "tags": ["Modulith.Api"],
+        "summary": "Create an organization and make the caller its owner.",
+        "operationId": "CreateOrganization",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateOrganizationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateOrganizationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/v1/organizations/my": {
+      "get": {
+        "tags": ["Modulith.Api"],
+        "summary": "List organizations where the caller has an active membership.",
+        "operationId": "ListMyOrganizations",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListMyOrganizationsResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/v1/organizations/{organizationRef}": {
+      "get": {
+        "tags": ["Modulith.Api"],
+        "summary": "Get an organization by ID or slug.",
+        "operationId": "GetOrganization",
+        "parameters": [
+          {
+            "name": "organizationRef",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetOrganizationResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      },
+      "patch": {
+        "tags": ["Modulith.Api"],
+        "summary": "Update organization settings.",
+        "operationId": "UpdateOrganization",
+        "parameters": [
+          {
+            "name": "organizationRef",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateOrganizationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateOrganizationResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": ["Modulith.Api"],
+        "summary": "Soft-delete an organization.",
+        "operationId": "DeleteOrganization",
+        "parameters": [
+          {
+            "name": "organizationRef",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/v1/organizations/{organizationRef}/members": {
+      "get": {
+        "tags": ["Modulith.Api"],
+        "summary": "List organization members.",
+        "operationId": "ListOrganizationMembers",
+        "parameters": [
+          {
+            "name": "organizationRef",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListOrganizationMembersResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/v1/organizations/{organizationRef}/members/{userId}/role": {
+      "put": {
+        "tags": ["Modulith.Api"],
+        "summary": "Change an organization member role.",
+        "operationId": "ChangeOrganizationMemberRole",
+        "parameters": [
+          {
+            "name": "organizationRef",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeOrganizationMemberRoleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChangeOrganizationMemberRoleResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/v1/organizations/{organizationRef}/members/{userId}": {
+      "delete": {
+        "tags": ["Modulith.Api"],
+        "summary": "Remove a member or leave an organization.",
+        "operationId": "RemoveOrganizationMember",
+        "parameters": [
+          {
+            "name": "organizationRef",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/v1/organizations/{organizationRef}/invitations": {
+      "post": {
+        "tags": ["Modulith.Api"],
+        "summary": "Invite a user to an organization.",
+        "operationId": "CreateOrganizationInvitation",
+        "parameters": [
+          {
+            "name": "organizationRef",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateOrganizationInvitationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateOrganizationInvitationResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      },
+      "get": {
+        "tags": ["Modulith.Api"],
+        "summary": "List organization invitations.",
+        "operationId": "ListOrganizationInvitations",
+        "parameters": [
+          {
+            "name": "organizationRef",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListOrganizationInvitationsResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/v1/organizations/invitations/accept": {
+      "post": {
+        "tags": ["Modulith.Api"],
+        "summary": "Accept an organization invitation for the current user.",
+        "operationId": "AcceptOrganizationInvitation",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcceptOrganizationInvitationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AcceptOrganizationInvitationResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/v1/organizations/{organizationRef}/invitations/{invitationId}": {
+      "delete": {
+        "tags": ["Modulith.Api"],
+        "summary": "Revoke an organization invitation.",
+        "operationId": "RevokeOrganizationInvitation",
+        "parameters": [
+          {
+            "name": "organizationRef",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "invitationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/v1/organizations/{organizationRef}/audit": {
+      "get": {
+        "tags": ["Modulith.Api"],
+        "summary": "Get organization audit metadata. Full audit projection is owned by the Audit module.",
+        "operationId": "GetOrganizationAudit",
+        "parameters": [
+          {
+            "name": "organizationRef",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetOrganizationAuditResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
     "/v1/users/register": {
       "post": {
         "tags": ["Modulith.Api"],
@@ -3431,6 +3903,28 @@
           }
         }
       },
+      "AcceptOrganizationInvitationRequest": {
+        "required": ["invitationToken"],
+        "type": "object",
+        "properties": {
+          "invitationToken": {
+            "type": "string"
+          }
+        }
+      },
+      "AcceptOrganizationInvitationResponse": {
+        "required": ["organizationId", "role"],
+        "type": "object",
+        "properties": {
+          "organizationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "role": {
+            "type": "string"
+          }
+        }
+      },
       "AuditEntryDto": {
         "required": [
           "id",
@@ -3463,6 +3957,28 @@
           "occurredAt": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "ChangeOrganizationMemberRoleRequest": {
+        "required": ["role"],
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string"
+          }
+        }
+      },
+      "ChangeOrganizationMemberRoleResponse": {
+        "required": ["userId", "role"],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "role": {
+            "type": "string"
           }
         }
       },
@@ -3606,6 +4122,72 @@
           "expiresAt": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "CreateOrganizationInvitationRequest": {
+        "required": ["email", "role"],
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateOrganizationInvitationResponse": {
+        "required": ["invitationId", "email", "role", "expiresAt", "rawToken"],
+        "type": "object",
+        "properties": {
+          "invitationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "email": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "rawToken": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateOrganizationRequest": {
+        "required": ["name"],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "slug": {
+            "type": ["null", "string"]
+          }
+        }
+      },
+      "CreateOrganizationResponse": {
+        "required": ["organizationId", "name", "slug", "role"],
+        "type": "object",
+        "properties": {
+          "organizationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
           }
         }
       },
@@ -4011,6 +4593,38 @@
           }
         }
       },
+      "GetOrganizationAuditResponse": {
+        "required": ["organizationId", "accessMode"],
+        "type": "object",
+        "properties": {
+          "organizationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "accessMode": {
+            "type": "string"
+          }
+        }
+      },
+      "GetOrganizationResponse": {
+        "required": ["organizationId", "name", "slug", "accessMode"],
+        "type": "object",
+        "properties": {
+          "organizationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "accessMode": {
+            "type": "string"
+          }
+        }
+      },
       "GetProductByIdResponse": {
         "required": ["id", "sku", "name", "price", "currency", "isActive"],
         "type": "object",
@@ -4234,6 +4848,42 @@
           "nextBefore": {
             "type": ["null", "string"],
             "format": "date-time"
+          }
+        }
+      },
+      "ListMyOrganizationsResponse": {
+        "required": ["organizations"],
+        "type": "object",
+        "properties": {
+          "organizations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MyOrganizationItem"
+            }
+          }
+        }
+      },
+      "ListOrganizationInvitationsResponse": {
+        "required": ["invitations"],
+        "type": "object",
+        "properties": {
+          "invitations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrganizationInvitationItem"
+            }
+          }
+        }
+      },
+      "ListOrganizationMembersResponse": {
+        "required": ["members"],
+        "type": "object",
+        "properties": {
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrganizationMemberItem"
+            }
           }
         }
       },
@@ -4529,6 +5179,41 @@
           }
         }
       },
+      "MyOrganizationItem": {
+        "required": [
+          "organizationId",
+          "name",
+          "slug",
+          "role",
+          "permissions",
+          "permissionsVersion"
+        ],
+        "type": "object",
+        "properties": {
+          "organizationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "permissions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "permissionsVersion": {
+            "type": "string"
+          }
+        }
+      },
       "NotificationCategory": {
         "type": "integer"
       },
@@ -4581,6 +5266,62 @@
           },
           "markdown": {
             "type": "string"
+          }
+        }
+      },
+      "OrganizationInvitationItem": {
+        "required": ["invitationId", "email", "role", "expiresAt", "isPending"],
+        "type": "object",
+        "properties": {
+          "invitationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "email": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "isPending": {
+            "type": "boolean"
+          }
+        }
+      },
+      "OrganizationMemberItem": {
+        "required": [
+          "userId",
+          "role",
+          "joinedAt",
+          "isAnonymized",
+          "displayName",
+          "email"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "role": {
+            "type": "string"
+          },
+          "joinedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "isAnonymized": {
+            "type": "boolean"
+          },
+          "displayName": {
+            "type": ["null", "string"]
+          },
+          "email": {
+            "type": ["null", "string"]
           }
         }
       },
@@ -4721,6 +5462,9 @@
             "type": "string"
           },
           "invitationToken": {
+            "type": ["null", "string"]
+          },
+          "organizationInvitationToken": {
             "type": ["null", "string"]
           }
         }
@@ -4883,6 +5627,34 @@
             "items": {
               "$ref": "#/components/schemas/UpdateMyNotificationPreferenceRequest"
             }
+          }
+        }
+      },
+      "UpdateOrganizationRequest": {
+        "required": ["name", "slug"],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdateOrganizationResponse": {
+        "required": ["organizationId", "name", "slug"],
+        "type": "object",
+        "properties": {
+          "organizationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
           }
         }
       },

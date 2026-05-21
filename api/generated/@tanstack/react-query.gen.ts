@@ -11,9 +11,11 @@ import {
 import { client } from "../client.gen";
 import {
   acceptLegalDocuments,
+  acceptOrganizationInvitation,
   addCronTicker,
   archiveNotification,
   cancelTicker,
+  changeOrganizationMemberRole,
   changePassword,
   changeUserRole,
   completeOnboarding,
@@ -22,11 +24,14 @@ import {
   confirmTotp,
   createChainJobs,
   createInvitation,
+  createOrganization,
+  createOrganizationInvitation,
   createProduct,
   deleteAccount,
   deleteAvatar,
   deleteCronTicker,
   deleteCronTickerOccurrence,
+  deleteOrganization,
   deleteTimeTicker,
   deleteTimeTickersBatch,
   disableTwoFactor,
@@ -54,6 +59,8 @@ import {
   getNextTicker,
   getOnboardingLegalRequirements,
   getOptions,
+  getOrganization,
+  getOrganizationAudit,
   getProductById,
   getTickerFunctions,
   getTickerHostStatus,
@@ -68,6 +75,9 @@ import {
   listDeadLetters,
   listInvitations,
   listMyNotifications,
+  listMyOrganizations,
+  listOrganizationInvitations,
+  listOrganizationMembers,
   listProducts,
   listUsers,
   login,
@@ -80,12 +90,14 @@ import {
   refreshToken,
   regenerateRecoveryCodes,
   register,
+  removeOrganizationMember,
   replayDeadLetters,
   requestEmailChange,
   resendEmailConfirmation,
   resetPassword,
   restartTickerHost,
   revokeInvitation,
+  revokeOrganizationInvitation,
   runCronTickerOnDemand,
   setupTotp,
   startTickerHost,
@@ -94,6 +106,7 @@ import {
   updateAvatar,
   updateCronTicker,
   updateMyNotificationPreferences,
+  updateOrganization,
   updateProfile,
   updateTimeTicker,
   validateAuth,
@@ -102,11 +115,15 @@ import type {
   AcceptLegalDocumentsData,
   AcceptLegalDocumentsError,
   AcceptLegalDocumentsResponse,
+  AcceptOrganizationInvitationData,
+  AcceptOrganizationInvitationResponse2,
   AddCronTickerData,
   ArchiveNotificationData,
   ArchiveNotificationError,
   ArchiveNotificationResponse,
   CancelTickerData,
+  ChangeOrganizationMemberRoleData,
+  ChangeOrganizationMemberRoleResponse2,
   ChangePasswordData,
   ChangePasswordError,
   ChangePasswordResponse2,
@@ -129,6 +146,11 @@ import type {
   CreateInvitationData,
   CreateInvitationError,
   CreateInvitationResponse2,
+  CreateOrganizationData,
+  CreateOrganizationError,
+  CreateOrganizationInvitationData,
+  CreateOrganizationInvitationResponse2,
+  CreateOrganizationResponse2,
   CreateProductData,
   CreateProductError,
   CreateProductResponse2,
@@ -140,6 +162,8 @@ import type {
   DeleteAvatarResponse,
   DeleteCronTickerData,
   DeleteCronTickerOccurrenceData,
+  DeleteOrganizationData,
+  DeleteOrganizationResponse,
   DeleteTimeTickerData,
   DeleteTimeTickersBatchData,
   DisableTwoFactorData,
@@ -188,6 +212,10 @@ import type {
   GetOnboardingLegalRequirementsError,
   GetOnboardingLegalRequirementsResponse2,
   GetOptionsData,
+  GetOrganizationAuditData,
+  GetOrganizationAuditResponse2,
+  GetOrganizationData,
+  GetOrganizationResponse2,
   GetProductByIdData,
   GetProductByIdError,
   GetProductByIdResponse2,
@@ -215,6 +243,12 @@ import type {
   ListMyNotificationsData,
   ListMyNotificationsError,
   ListMyNotificationsResponse2,
+  ListMyOrganizationsData,
+  ListMyOrganizationsResponse2,
+  ListOrganizationInvitationsData,
+  ListOrganizationInvitationsResponse2,
+  ListOrganizationMembersData,
+  ListOrganizationMembersResponse2,
   ListProductsData,
   ListProductsResponse2,
   ListUsersData,
@@ -247,6 +281,8 @@ import type {
   RegisterData,
   RegisterError,
   RegisterResponse2,
+  RemoveOrganizationMemberData,
+  RemoveOrganizationMemberResponse,
   ReplayDeadLettersData,
   ReplayDeadLettersError,
   RequestEmailChangeData,
@@ -261,6 +297,8 @@ import type {
   RevokeInvitationData,
   RevokeInvitationError,
   RevokeInvitationResponse2,
+  RevokeOrganizationInvitationData,
+  RevokeOrganizationInvitationResponse,
   RunCronTickerOnDemandData,
   SetupTotpData,
   SetupTotpError,
@@ -276,6 +314,8 @@ import type {
   UpdateMyNotificationPreferencesData,
   UpdateMyNotificationPreferencesError,
   UpdateMyNotificationPreferencesResponse,
+  UpdateOrganizationData,
+  UpdateOrganizationResponse2,
   UpdateProfileData,
   UpdateProfileError,
   UpdateProfileResponse2,
@@ -1684,6 +1724,360 @@ export const updateMyNotificationPreferencesMutation = (
   };
   return mutationOptions;
 };
+
+/**
+ * Create an organization and make the caller its owner.
+ */
+export const createOrganizationMutation = (
+  options?: Partial<Options<CreateOrganizationData>>,
+): UseMutationOptions<
+  CreateOrganizationResponse2,
+  CreateOrganizationError,
+  Options<CreateOrganizationData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    CreateOrganizationResponse2,
+    CreateOrganizationError,
+    Options<CreateOrganizationData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await createOrganization({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const listMyOrganizationsQueryKey = (
+  options?: Options<ListMyOrganizationsData>,
+) => createQueryKey("listMyOrganizations", options);
+
+/**
+ * List organizations where the caller has an active membership.
+ */
+export const listMyOrganizationsOptions = (
+  options?: Options<ListMyOrganizationsData>,
+) =>
+  queryOptions<
+    ListMyOrganizationsResponse2,
+    DefaultError,
+    ListMyOrganizationsResponse2,
+    ReturnType<typeof listMyOrganizationsQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await listMyOrganizations({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: listMyOrganizationsQueryKey(options),
+  });
+
+/**
+ * Soft-delete an organization.
+ */
+export const deleteOrganizationMutation = (
+  options?: Partial<Options<DeleteOrganizationData>>,
+): UseMutationOptions<
+  DeleteOrganizationResponse,
+  DefaultError,
+  Options<DeleteOrganizationData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    DeleteOrganizationResponse,
+    DefaultError,
+    Options<DeleteOrganizationData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await deleteOrganization({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const getOrganizationQueryKey = (
+  options: Options<GetOrganizationData>,
+) => createQueryKey("getOrganization", options);
+
+/**
+ * Get an organization by ID or slug.
+ */
+export const getOrganizationOptions = (options: Options<GetOrganizationData>) =>
+  queryOptions<
+    GetOrganizationResponse2,
+    DefaultError,
+    GetOrganizationResponse2,
+    ReturnType<typeof getOrganizationQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getOrganization({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getOrganizationQueryKey(options),
+  });
+
+/**
+ * Update organization settings.
+ */
+export const updateOrganizationMutation = (
+  options?: Partial<Options<UpdateOrganizationData>>,
+): UseMutationOptions<
+  UpdateOrganizationResponse2,
+  DefaultError,
+  Options<UpdateOrganizationData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    UpdateOrganizationResponse2,
+    DefaultError,
+    Options<UpdateOrganizationData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await updateOrganization({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const listOrganizationMembersQueryKey = (
+  options: Options<ListOrganizationMembersData>,
+) => createQueryKey("listOrganizationMembers", options);
+
+/**
+ * List organization members.
+ */
+export const listOrganizationMembersOptions = (
+  options: Options<ListOrganizationMembersData>,
+) =>
+  queryOptions<
+    ListOrganizationMembersResponse2,
+    DefaultError,
+    ListOrganizationMembersResponse2,
+    ReturnType<typeof listOrganizationMembersQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await listOrganizationMembers({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: listOrganizationMembersQueryKey(options),
+  });
+
+/**
+ * Change an organization member role.
+ */
+export const changeOrganizationMemberRoleMutation = (
+  options?: Partial<Options<ChangeOrganizationMemberRoleData>>,
+): UseMutationOptions<
+  ChangeOrganizationMemberRoleResponse2,
+  DefaultError,
+  Options<ChangeOrganizationMemberRoleData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    ChangeOrganizationMemberRoleResponse2,
+    DefaultError,
+    Options<ChangeOrganizationMemberRoleData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await changeOrganizationMemberRole({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * Remove a member or leave an organization.
+ */
+export const removeOrganizationMemberMutation = (
+  options?: Partial<Options<RemoveOrganizationMemberData>>,
+): UseMutationOptions<
+  RemoveOrganizationMemberResponse,
+  DefaultError,
+  Options<RemoveOrganizationMemberData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    RemoveOrganizationMemberResponse,
+    DefaultError,
+    Options<RemoveOrganizationMemberData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await removeOrganizationMember({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const listOrganizationInvitationsQueryKey = (
+  options: Options<ListOrganizationInvitationsData>,
+) => createQueryKey("listOrganizationInvitations", options);
+
+/**
+ * List organization invitations.
+ */
+export const listOrganizationInvitationsOptions = (
+  options: Options<ListOrganizationInvitationsData>,
+) =>
+  queryOptions<
+    ListOrganizationInvitationsResponse2,
+    DefaultError,
+    ListOrganizationInvitationsResponse2,
+    ReturnType<typeof listOrganizationInvitationsQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await listOrganizationInvitations({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: listOrganizationInvitationsQueryKey(options),
+  });
+
+/**
+ * Invite a user to an organization.
+ */
+export const createOrganizationInvitationMutation = (
+  options?: Partial<Options<CreateOrganizationInvitationData>>,
+): UseMutationOptions<
+  CreateOrganizationInvitationResponse2,
+  DefaultError,
+  Options<CreateOrganizationInvitationData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    CreateOrganizationInvitationResponse2,
+    DefaultError,
+    Options<CreateOrganizationInvitationData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await createOrganizationInvitation({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * Accept an organization invitation for the current user.
+ */
+export const acceptOrganizationInvitationMutation = (
+  options?: Partial<Options<AcceptOrganizationInvitationData>>,
+): UseMutationOptions<
+  AcceptOrganizationInvitationResponse2,
+  DefaultError,
+  Options<AcceptOrganizationInvitationData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    AcceptOrganizationInvitationResponse2,
+    DefaultError,
+    Options<AcceptOrganizationInvitationData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await acceptOrganizationInvitation({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * Revoke an organization invitation.
+ */
+export const revokeOrganizationInvitationMutation = (
+  options?: Partial<Options<RevokeOrganizationInvitationData>>,
+): UseMutationOptions<
+  RevokeOrganizationInvitationResponse,
+  DefaultError,
+  Options<RevokeOrganizationInvitationData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    RevokeOrganizationInvitationResponse,
+    DefaultError,
+    Options<RevokeOrganizationInvitationData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await revokeOrganizationInvitation({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const getOrganizationAuditQueryKey = (
+  options: Options<GetOrganizationAuditData>,
+) => createQueryKey("getOrganizationAudit", options);
+
+/**
+ * Get organization audit metadata. Full audit projection is owned by the Audit module.
+ */
+export const getOrganizationAuditOptions = (
+  options: Options<GetOrganizationAuditData>,
+) =>
+  queryOptions<
+    GetOrganizationAuditResponse2,
+    DefaultError,
+    GetOrganizationAuditResponse2,
+    ReturnType<typeof getOrganizationAuditQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getOrganizationAudit({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getOrganizationAuditQueryKey(options),
+  });
 
 /**
  * Register a new user account.
