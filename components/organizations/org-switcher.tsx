@@ -141,9 +141,8 @@ export function OrgSwitcher() {
           })}
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem render={<Link href="/app/organizations" />}>
-          {t("viewAll")}
-        </DropdownMenuItem>
+        {/* No "View all" — the cross-org dashboard at /app surfaces the
+            full list; duplicating it here just adds menu clutter. */}
         <DropdownMenuItem render={<Link href="/app/organizations/new" />}>
           <PlusIcon />
           <span>{t("create")}</span>

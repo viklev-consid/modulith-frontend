@@ -221,9 +221,7 @@ export function CreateOrgForm({
             <Button
               type="button"
               variant="ghost"
-              onClick={() =>
-                onCancel ? onCancel() : push("/app/organizations")
-              }
+              onClick={() => (onCancel ? onCancel() : push("/app"))}
             >
               {t("cancel")}
             </Button>

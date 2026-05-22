@@ -1,49 +1,14 @@
-import type { Metadata } from "next";
-import Link from "next/link";
-import { Suspense } from "react";
-import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
-import { getTranslations } from "next-intl/server";
-import { PlusIcon } from "lucide-react";
+import { redirect } from "next/navigation";
 
-import { listMyOrganizationsOptions } from "@/api/generated/@tanstack/react-query.gen";
-import { serverClient } from "@/api/server-client";
-import { OrgList } from "@/components/organizations/org-list";
-import { buttonVariants } from "@/components/ui/button";
-import { createQueryClient } from "@/lib/query-client";
-
-export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations("metadata.app.organizations");
-  return { title: t("list") };
-}
-
-export default async function OrganizationsPage() {
-  const t = await getTranslations("organizations.list");
-  const queryClient = createQueryClient();
-
-  await queryClient.prefetchQuery(
-    listMyOrganizationsOptions({ client: serverClient }),
-  );
-
-  return (
-    <HydrationBoundary state={dehydrate(queryClient)}>
-      <section className="grid gap-4">
-        <header className="flex flex-wrap items-end justify-between gap-3">
-          <div className="grid gap-1">
-            <h1 className="text-lg font-semibold">{t("title")}</h1>
-            <p className="text-sm text-muted-foreground">{t("description")}</p>
-          </div>
-          <Link
-            href="/app/organizations/new"
-            className={buttonVariants({ size: "sm" })}
-          >
-            <PlusIcon />
-            <span>{t("create")}</span>
-          </Link>
-        </header>
-        <Suspense>
-          <OrgList />
-        </Suspense>
-      </section>
-    </HydrationBoundary>
-  );
+/**
+ * The standalone "list of organizations" page collapsed into the
+ * cross-org dashboard at `/app`. The picker in the sidebar is the
+ * canonical way to switch / browse / create from inside the app, and
+ * the dashboard surfaces the same list for newcomers.
+ *
+ * Kept as a redirect (not deleted) so external links / bookmarks keep
+ * working. Plan is to delete after one release.
+ */
+export default function OrganizationsListRedirect() {
+  redirect("/app");
 }

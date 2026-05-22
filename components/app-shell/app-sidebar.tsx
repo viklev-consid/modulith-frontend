@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   BellIcon,
-  Building2Icon,
   GaugeIcon,
   HelpCircleIcon,
   SearchIcon,
@@ -85,16 +84,6 @@ export function AppSidebar({ onSearchOpen }: { onSearchOpen: () => void }) {
               >
                 <BellIcon />
                 <span>{t("notifications")}</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                isActive={isActive("/app/organizations")}
-                tooltip={t("organizations")}
-                render={<Link href="/app/organizations" />}
-              >
-                <Building2Icon />
-                <span>{t("organizations")}</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>

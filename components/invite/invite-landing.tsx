@@ -68,7 +68,11 @@ export function InviteLanding() {
         queryKey: listMyOrganizationsQueryKey(),
       });
       toast.success(t("acceptedToast"));
-      replace("/app/organizations");
+      // The accept response only carries `organizationId`, not slug —
+      // bounce to the cross-org dashboard where the freshly-invalidated
+      // /my list will show the new membership. From there the user can
+      // click into the org via the picker or the dashboard's org grid.
+      replace("/app");
     },
     onError: (error) => {
       const problem = error as unknown as ProblemDetails;

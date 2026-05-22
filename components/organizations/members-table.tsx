@@ -391,7 +391,7 @@ function RemoveMemberDialog({
         });
         // After we leave, we no longer have access to this org — route out
         // via the App Router so we don't pay for a full bundle re-boot.
-        replace("/app/organizations");
+        replace("/app");
       }
       onClose();
     },

@@ -16,7 +16,7 @@ export default async function NewOrganizationPage() {
   return (
     <section className="grid gap-4">
       <Link
-        href="/app/organizations"
+        href="/app"
         className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
       >
         <ArrowLeftIcon className="size-3.5" />

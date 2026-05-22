@@ -75,7 +75,7 @@ export function DeleteOrgDialog() {
         queryKey: listMyOrganizationsQueryKey(),
       });
       toast.success(t("toast.deleted", { name: org.name }));
-      push("/app/organizations");
+      push("/app");
     },
     onError: (error) => {
       handleProblem(error as unknown as ProblemDetails);
