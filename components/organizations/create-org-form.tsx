@@ -11,6 +11,7 @@ import {
   createOrganizationMutation,
   listMyOrganizationsQueryKey,
 } from "@/api/generated/@tanstack/react-query.gen";
+import type { CreateOrganizationResponse } from "@/api/generated/types.gen";
 import { zCreateOrganizationRequest } from "@/api/generated/zod.gen";
 import {
   handleProblem,
@@ -36,7 +37,25 @@ import {
 import { Input } from "@/components/ui/input";
 import { isValidSlug, suggestSlug } from "@/lib/slug";
 
-export function CreateOrgForm() {
+type CreateOrgFormProps = {
+  /**
+   * Called after a successful create. When provided, replaces the
+   * default navigation to `/app/o/<slug>`. The modal variant uses this
+   * to navigate AND close itself in one step.
+   */
+  onSuccess?: (data: CreateOrganizationResponse) => void;
+  /**
+   * Called when the user clicks Cancel. When provided, replaces the
+   * default navigation to `/app/organizations`. The modal variant
+   * uses this to close (`router.back()`).
+   */
+  onCancel?: () => void;
+};
+
+export function CreateOrgForm({
+  onSuccess,
+  onCancel,
+}: CreateOrgFormProps = {}) {
   const t = useTranslations("organizations.create");
   const { push } = useRouter();
   const queryClient = useQueryClient();
@@ -56,7 +75,11 @@ export function CreateOrgForm() {
         queryKey: listMyOrganizationsQueryKey(),
       });
       toast.success(data.name);
-      push(`/app/o/${data.slug}`);
+      if (onSuccess) {
+        onSuccess(data);
+      } else {
+        push(`/app/o/${data.slug}`);
+      }
     },
     onError: (error) => {
       const problem = error as unknown as ProblemDetails;
@@ -198,7 +221,9 @@ export function CreateOrgForm() {
             <Button
               type="button"
               variant="ghost"
-              onClick={() => push("/app/organizations")}
+              onClick={() =>
+                onCancel ? onCancel() : push("/app/organizations")
+              }
             >
               {t("cancel")}
             </Button>
