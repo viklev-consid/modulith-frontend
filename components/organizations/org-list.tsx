@@ -68,7 +68,7 @@ export function OrgList() {
           </CardHeader>
           <CardContent>
             <Link
-              href={`/app/organizations/o/${org.slug}`}
+              href={`/app/o/${org.slug}`}
               className={buttonVariants({
                 variant: "outline",
                 size: "sm",

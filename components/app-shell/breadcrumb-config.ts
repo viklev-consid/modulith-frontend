@@ -56,7 +56,7 @@ function orgSubPageCrumbs(slug: string, leafKey: ShellBreadcrumbKey): Crumb[] {
     {
       ns: "app.shell.breadcrumb",
       key: "organizationsActive",
-      href: `/app/organizations/o/${slug}`,
+      href: `/app/o/${slug}`,
     },
     { ns: "app.shell.breadcrumb", key: leafKey },
   ];
@@ -120,16 +120,16 @@ const trails: Trail[] = [
   // suffix matchers must run before the catch-all org-overview entry below.
   ...ORG_SUB_PAGES.map<Trail>(([segment, key]) => ({
     match: (p) => {
-      const m = p.match(/^\/app\/organizations\/o\/([^/]+)\/([^/]+)$/);
+      const m = p.match(/^\/app\/o\/([^/]+)\/([^/]+)$/);
       return m !== null && m[2] === segment;
     },
     build: (p) => {
-      const m = p.match(/^\/app\/organizations\/o\/([^/]+)\//);
+      const m = p.match(/^\/app\/o\/([^/]+)\//);
       return orgSubPageCrumbs(m?.[1] ?? "", key);
     },
   })),
   {
-    match: (p) => p.startsWith("/app/organizations/o/"),
+    match: (p) => p.startsWith("/app/o/"),
     build: () => [
       {
         ns: "app.shell.breadcrumb",

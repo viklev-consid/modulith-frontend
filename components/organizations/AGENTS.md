@@ -7,16 +7,16 @@ make correct judgments without re-deriving them.
 
 ## Source-of-truth files in this repo
 
-| Concern                                                        | File                                                                      |
-| -------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| Active-org context (slug → resolved org + role + accessMode)   | `lib/org-context.ts`                                                      |
-| Role rank + escalation rules                                   | `lib/org-roles.ts`                                                        |
-| Scoped-permission lookups (`/my` projections)                  | `lib/org-permissions.ts`                                                  |
-| Permission string constants                                    | `lib/org-permission-strings.ts`                                           |
-| Error-code constants + `BlockingOrganization` extension shape  | `lib/org-errors.ts`                                                       |
-| AccessMode constants (`ScopedPermission` / `PlatformOverride`) | `lib/org-access-mode.ts`                                                  |
-| Slug validation + suggestion                                   | `lib/slug.ts`                                                             |
-| URL convention                                                 | `app/(app)/app/organizations/o/[slug]/...` (slug, never UUID, in the URL) |
+| Concern                                                        | File                                                        |
+| -------------------------------------------------------------- | ----------------------------------------------------------- |
+| Active-org context (slug → resolved org + role + accessMode)   | `lib/org-context.ts`                                        |
+| Role rank + escalation rules                                   | `lib/org-roles.ts`                                          |
+| Scoped-permission lookups (`/my` projections)                  | `lib/org-permissions.ts`                                    |
+| Permission string constants                                    | `lib/org-permission-strings.ts`                             |
+| Error-code constants + `BlockingOrganization` extension shape  | `lib/org-errors.ts`                                         |
+| AccessMode constants (`ScopedPermission` / `PlatformOverride`) | `lib/org-access-mode.ts`                                    |
+| Slug validation + suggestion                                   | `lib/slug.ts`                                               |
+| URL convention                                                 | `app/(app)/app/o/[slug]/...` (slug, never UUID, in the URL) |
 
 ## Contract points the backend enforces — get them right client-side
 

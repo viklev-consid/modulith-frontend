@@ -69,8 +69,8 @@ describe("resolveBreadcrumb", () => {
     ]);
   });
 
-  it("returns Organizations › Organization for /app/organizations/o/:slug", () => {
-    expect(resolveBreadcrumb("/app/organizations/o/acme")).toEqual([
+  it("returns Organizations › Organization for /app/o/:slug", () => {
+    expect(resolveBreadcrumb("/app/o/acme")).toEqual([
       {
         ns: "app.shell.breadcrumb",
         key: "organizations",
@@ -86,23 +86,21 @@ describe("resolveBreadcrumb", () => {
     ["audit", "organizationsAudit"],
     ["settings", "organizationsSettings"],
   ])(
-    "returns Organizations › Organization › leaf for /app/organizations/o/:slug/%s",
+    "returns Organizations › Organization › leaf for /app/o/:slug/%s",
     (segment, key) => {
-      expect(resolveBreadcrumb(`/app/organizations/o/acme/${segment}`)).toEqual(
-        [
-          {
-            ns: "app.shell.breadcrumb",
-            key: "organizations",
-            href: "/app/organizations",
-          },
-          {
-            ns: "app.shell.breadcrumb",
-            key: "organizationsActive",
-            href: "/app/organizations/o/acme",
-          },
-          { ns: "app.shell.breadcrumb", key },
-        ],
-      );
+      expect(resolveBreadcrumb(`/app/o/acme/${segment}`)).toEqual([
+        {
+          ns: "app.shell.breadcrumb",
+          key: "organizations",
+          href: "/app/organizations",
+        },
+        {
+          ns: "app.shell.breadcrumb",
+          key: "organizationsActive",
+          href: "/app/o/acme",
+        },
+        { ns: "app.shell.breadcrumb", key },
+      ]);
     },
   );
 

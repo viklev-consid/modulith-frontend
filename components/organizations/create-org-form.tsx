@@ -56,7 +56,7 @@ export function CreateOrgForm() {
         queryKey: listMyOrganizationsQueryKey(),
       });
       toast.success(data.name);
-      push(`/app/organizations/o/${data.slug}`);
+      push(`/app/o/${data.slug}`);
     },
     onError: (error) => {
       const problem = error as unknown as ProblemDetails;

@@ -70,7 +70,7 @@ export function EditOrgForm() {
       toast.success(t("toast.saved"));
       // Slug change ⇒ the current URL is stale; route to the new one.
       if (data.slug !== org.slug) {
-        push(`/app/organizations/o/${data.slug}/settings`);
+        push(`/app/o/${data.slug}/settings`);
       }
     },
     onError: (error) => {

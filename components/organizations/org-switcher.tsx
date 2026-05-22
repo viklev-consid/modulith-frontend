@@ -28,7 +28,7 @@ import {
  *
  * Reads `/v1/organizations/my` from the cache (the auth provider prefetches
  * it). The active organization is inferred from the current URL slug
- * (`/app/organizations/o/:slug/...`) — there is no separate server-side
+ * (`/app/o/:slug/...`) — there is no separate server-side
  * "active org" state in v1. The switcher just routes to the chosen slug.
  *
  * When the user has no organizations, the trigger collapses to a
@@ -43,9 +43,9 @@ export function OrgSwitcher() {
   const organizations = data?.organizations ?? [];
 
   // Extract the active slug from the URL so the trigger reflects whatever
-  // org the user is currently inside. Matches `/app/organizations/o/:slug`.
+  // org the user is currently inside. Matches `/app/o/:slug`.
   const activeSlug = (() => {
-    const match = pathname.match(/^\/app\/organizations\/o\/([^/]+)/);
+    const match = pathname.match(/^\/app\/o\/([^/]+)/);
     return match ? match[1] : null;
   })();
 
@@ -107,7 +107,7 @@ export function OrgSwitcher() {
                 key={org.organizationId}
                 render={
                   <Link
-                    href={`/app/organizations/o/${org.slug}`}
+                    href={`/app/o/${org.slug}`}
                     className="flex items-center justify-between gap-2"
                   />
                 }

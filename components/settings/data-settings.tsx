@@ -290,7 +290,7 @@ function BlockingOrgsRemediation({
             </div>
             <div className="flex gap-2">
               <Link
-                href={`/app/organizations/o/${org.slug}/members`}
+                href={`/app/o/${org.slug}/members`}
                 className={buttonVariants({ size: "sm", variant: "outline" })}
                 onClick={onClose}
               >
@@ -298,7 +298,7 @@ function BlockingOrgsRemediation({
                 <ExternalLinkIcon />
               </Link>
               <Link
-                href={`/app/organizations/o/${org.slug}/settings`}
+                href={`/app/o/${org.slug}/settings`}
                 className={buttonVariants({
                   size: "sm",
                   variant: "destructive",

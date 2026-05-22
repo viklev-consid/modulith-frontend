@@ -7,7 +7,7 @@ import type { AccessMode } from "@/lib/org-access-mode";
 /**
  * Active-organization context.
  *
- * Set by `app/(app)/app/organizations/o/[slug]/layout.tsx` after resolving
+ * Set by `app/(app)/app/o/[slug]/layout.tsx` after resolving
  * the slug to an organization GUID. Components beneath the org shell read
  * `organizationId` here rather than re-resolving the slug themselves.
  *

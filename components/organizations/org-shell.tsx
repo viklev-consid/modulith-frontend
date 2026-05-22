@@ -156,28 +156,28 @@ export function OrgShell({ slug, children }: OrgShellProps) {
     membership?.permissions.includes(ORG_PERMISSION.AuditRead) ?? false;
 
   const tabs = [
-    { href: `/app/organizations/o/${slug}`, key: "overview", exact: true },
+    { href: `/app/o/${slug}`, key: "overview", exact: true },
     {
-      href: `/app/organizations/o/${slug}/members`,
+      href: `/app/o/${slug}/members`,
       key: "members",
       exact: false,
     },
     {
-      href: `/app/organizations/o/${slug}/invitations`,
+      href: `/app/o/${slug}/invitations`,
       key: "invitations",
       exact: false,
     },
     ...(canReadAudit
       ? [
           {
-            href: `/app/organizations/o/${slug}/audit`,
+            href: `/app/o/${slug}/audit`,
             key: "audit" as const,
             exact: false,
           },
         ]
       : []),
     {
-      href: `/app/organizations/o/${slug}/settings`,
+      href: `/app/o/${slug}/settings`,
       key: "settings",
       exact: false,
     },
