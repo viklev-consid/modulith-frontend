@@ -10,7 +10,8 @@ Full detail in `docs/architecture.md`. Key constraints:
 
 - **Tokens never reach the browser.** All API calls go through the BFF proxy (`/api/proxy/[...path]`) which manages token attachment and silent refresh.
 - **Permissions are fetched client-side** via React Query (`GET /v1/users/me`), not stored in the cookie.
-- **Do NOT refactor data fetching into server components or server actions.** The BFF proxy pattern is intentional.
+- **Server prefetch + client hydration is the default.** For route-critical first-paint reads, prefetch in the server component with `client: serverClient` and pass dehydrated state through `<HydrationBoundary>`. React Query still owns the data lifecycle on the client (refetch, invalidate, mutate). See `docs/adr/0009-server-default-query-hydration.md`.
+- **What's off-limits:** (a) calling `fetch` directly against the .NET backend from server components — always go through the generated client with `client: serverClient` so the proxy/session boundary still applies; (b) **server actions** for mutations — keep mutations client-side so the ProblemDetails mapper, optimistic updates, and toast handling run uniformly; (c) server components that **own** data lifecycle (fetch + pass plain data as props, bypassing React Query). Prefetch warms the cache; it doesn't replace it.
 
 ## Code generation
 
