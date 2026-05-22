@@ -68,11 +68,22 @@ export function InviteLanding() {
         queryKey: listMyOrganizationsQueryKey(),
       });
       toast.success(t("acceptedToast"));
-      // The accept response only carries `organizationId`, not slug —
-      // bounce to the cross-org dashboard where the freshly-invalidated
-      // /my list will show the new membership. From there the user can
-      // click into the org via the picker or the dashboard's org grid.
-      replace("/app");
+      // An onboarding-incomplete user can land here (the `/invite` route
+      // sits outside the onboarding gate so the token doesn't get lost),
+      // accept successfully, then immediately get bounced back to
+      // /onboarding by the proxy when we push to /app. Route them
+      // directly to /onboarding so the trip is honest. Membership is
+      // already attached to their account — finishing onboarding lands
+      // them in /app with the new org visible.
+      //
+      // The accept response only carries `organizationId`, not slug, so
+      // even when onboarding IS complete we send to /app and let the
+      // dashboard / picker route the user into the org.
+      if (currentUser && !currentUser.hasCompletedOnboarding) {
+        replace("/onboarding");
+      } else {
+        replace("/app");
+      }
     },
     onError: (error) => {
       const problem = error as unknown as ProblemDetails;
