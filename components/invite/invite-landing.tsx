@@ -125,7 +125,8 @@ export function InviteLanding() {
               })}
             </CardDescription>
           </CardHeader>
-          {email && email.toLowerCase() !== currentUser?.email.toLowerCase() ? (
+          {email &&
+          email.toLowerCase() !== currentUser?.email?.toLowerCase() ? (
             <CardContent>
               <Alert>
                 <AlertTitle>{t("emailMismatch.title")}</AlertTitle>
