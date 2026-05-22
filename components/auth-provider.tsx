@@ -62,10 +62,13 @@ type AuthContextValue = {
   completeTwoFactorLogin(code: string, nextPath?: string | null): Promise<void>;
   register(data: RegisterInput): Promise<RegisterResponse>;
   resendEmailConfirmation(email: string): Promise<void>;
-  completeOnboarding(data: {
-    acceptMarketingEmails: boolean;
-    acceptedDocuments: AcceptedLegalDocumentRequest[];
-  }): Promise<void>;
+  completeOnboarding(
+    data: {
+      acceptMarketingEmails: boolean;
+      acceptedDocuments: AcceptedLegalDocumentRequest[];
+    },
+    options?: { next?: string },
+  ): Promise<void>;
   logout(): Promise<void>;
 };
 
@@ -228,13 +231,16 @@ function AuthProviderInner({ children }: { children: ReactNode }) {
           description: t("confirmationSent.description"),
         });
       },
-      async completeOnboarding(data) {
+      async completeOnboarding(data, options) {
         await fetchJson<void>("/api/auth/onboarding", {
           method: "POST",
           body: JSON.stringify(data),
         });
         await queryClient.invalidateQueries({ queryKey: currentUserQueryKey });
-        push("/app");
+        // Default lands on the cross-org dashboard; callers can override
+        // when they want to drop the user into a specific destination
+        // (e.g. the org they just created during onboarding).
+        push(options?.next ?? "/app");
       },
       async logout() {
         await fetch("/api/auth/logout", { method: "POST" });

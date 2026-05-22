@@ -2,7 +2,12 @@
 
 import "@/api/client";
 
-import { CheckIcon, ImageIcon, ShieldCheckIcon } from "lucide-react";
+import {
+  Building2Icon,
+  CheckIcon,
+  ImageIcon,
+  ShieldCheckIcon,
+} from "lucide-react";
 import { useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
@@ -16,6 +21,7 @@ import {
 } from "@/components/legal/legal-acceptance-form";
 import { AvatarUploader } from "@/components/avatar-uploader";
 import { useAuth } from "@/components/auth-provider";
+import { CreateOrgForm } from "@/components/organizations/create-org-form";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -36,9 +42,9 @@ import {
 } from "@/components/ui/field";
 import { cn } from "@/lib/utils";
 
-type Step = "terms" | "avatar" | "complete";
+type Step = "terms" | "avatar" | "createOrg" | "complete";
 
-const STEPS: Step[] = ["terms", "avatar", "complete"];
+const STEPS: Step[] = ["terms", "avatar", "createOrg", "complete"];
 
 export default function OnboardingPage() {
   const t = useTranslations("onboarding.page");
@@ -53,6 +59,10 @@ export default function OnboardingPage() {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [avatarUploading, setAvatarUploading] = useState(false);
+  // Slug of the org the user (optionally) creates in the createOrg
+  // step. If set, finishOnboarding lands the user inside that org;
+  // otherwise they land on the cross-org dashboard.
+  const [createdOrgSlug, setCreatedOrgSlug] = useState<string | null>(null);
 
   const legalQuery = useQuery({
     ...getOnboardingLegalRequirementsOptions(),
@@ -86,10 +96,13 @@ export default function OnboardingPage() {
     }
 
     try {
-      await completeOnboarding({
-        acceptMarketingEmails: marketingAccepted,
-        acceptedDocuments,
-      });
+      await completeOnboarding(
+        {
+          acceptMarketingEmails: marketingAccepted,
+          acceptedDocuments,
+        },
+        createdOrgSlug ? { next: `/app/o/${createdOrgSlug}` } : undefined,
+      );
     } catch (error) {
       const problem = error as ProblemDetails;
       if (problem.status === 400) {
@@ -204,19 +217,53 @@ export default function OnboardingPage() {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => setStep("complete")}
+                  onClick={() => setStep("createOrg")}
                   disabled={avatarUploading}
                 >
                   {t("avatar.skip")}
                 </Button>
                 <Button
                   type="button"
-                  onClick={() => setStep("complete")}
+                  onClick={() => setStep("createOrg")}
                   disabled={avatarUploading}
                 >
                   {t("avatar.continue")}
                 </Button>
               </div>
+            </section>
+          )}
+
+          {step === "createOrg" && (
+            <section className="space-y-5">
+              <div className="flex items-start gap-2 border border-border p-3">
+                <Building2Icon className="mt-0.5 size-4 text-muted-foreground" />
+                <div className="space-y-1 text-xs">
+                  <FieldTitle>{t("createOrg.title")}</FieldTitle>
+                  <FieldDescription>
+                    {t("createOrg.description")}
+                  </FieldDescription>
+                </div>
+              </div>
+              {/* Re-use the standalone form. onSuccess captures the new
+                  slug for the completion step's redirect; onCancel
+                  advances without creating. The form invalidates /my
+                  itself, so the rest of the app will see the
+                  membership as soon as it mounts. */}
+              <CreateOrgForm
+                onSuccess={(data) => {
+                  setCreatedOrgSlug(data.slug);
+                  setStep("complete");
+                }}
+                onCancel={() => setStep("complete")}
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                className="w-full"
+                onClick={() => setStep("complete")}
+              >
+                {t("createOrg.skip")}
+              </Button>
             </section>
           )}
 
