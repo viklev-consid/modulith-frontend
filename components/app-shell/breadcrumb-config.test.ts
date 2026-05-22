@@ -16,15 +16,16 @@ describe("resolveBreadcrumb", () => {
     ]);
   });
 
-  it("returns Settings › Profile for /app/me/settings", () => {
+  it("returns Account › Settings for /app/me/settings", () => {
     expect(resolveBreadcrumb("/app/me/settings")).toEqual([
-      { ns: "app.shell.breadcrumb", key: "settings", href: "/app/me/settings" },
-      { ns: "settings.nav", key: "profile" },
+      { ns: "app.shell.breadcrumb", key: "account", href: "/app/me" },
+      { ns: "app.shell.breadcrumb", key: "settings" },
     ]);
   });
 
-  it("returns Settings › Password for /app/me/settings/password", () => {
+  it("returns Account › Settings › Password for /app/me/settings/password", () => {
     expect(resolveBreadcrumb("/app/me/settings/password")).toEqual([
+      { ns: "app.shell.breadcrumb", key: "account", href: "/app/me" },
       { ns: "app.shell.breadcrumb", key: "settings", href: "/app/me/settings" },
       { ns: "settings.nav", key: "password" },
     ]);
@@ -52,30 +53,16 @@ describe("resolveBreadcrumb", () => {
     ]);
   });
 
-  it("returns Organizations for /app/organizations", () => {
-    expect(resolveBreadcrumb("/app/organizations")).toEqual([
-      { ns: "app.shell.breadcrumb", key: "organizations" },
-    ]);
-  });
-
-  it("returns Organizations › Create for /app/organizations/new", () => {
+  it("returns Dashboard › Create organization for /app/organizations/new", () => {
     expect(resolveBreadcrumb("/app/organizations/new")).toEqual([
-      {
-        ns: "app.shell.breadcrumb",
-        key: "organizations",
-        href: "/app/organizations",
-      },
+      { ns: "app.shell.breadcrumb", key: "dashboard", href: "/app" },
       { ns: "app.shell.breadcrumb", key: "organizationsNew" },
     ]);
   });
 
-  it("returns Organizations › Organization for /app/o/:slug", () => {
+  it("returns Dashboard › Organization for /app/o/:slug", () => {
     expect(resolveBreadcrumb("/app/o/acme")).toEqual([
-      {
-        ns: "app.shell.breadcrumb",
-        key: "organizations",
-        href: "/app/organizations",
-      },
+      { ns: "app.shell.breadcrumb", key: "dashboard", href: "/app" },
       { ns: "app.shell.breadcrumb", key: "organizationsActive" },
     ]);
   });
@@ -86,14 +73,10 @@ describe("resolveBreadcrumb", () => {
     ["audit", "organizationsAudit"],
     ["settings", "organizationsSettings"],
   ])(
-    "returns Organizations › Organization › leaf for /app/o/:slug/%s",
+    "returns Dashboard › Organization › leaf for /app/o/:slug/%s",
     (segment, key) => {
       expect(resolveBreadcrumb(`/app/o/acme/${segment}`)).toEqual([
-        {
-          ns: "app.shell.breadcrumb",
-          key: "organizations",
-          href: "/app/organizations",
-        },
+        { ns: "app.shell.breadcrumb", key: "dashboard", href: "/app" },
         {
           ns: "app.shell.breadcrumb",
           key: "organizationsActive",

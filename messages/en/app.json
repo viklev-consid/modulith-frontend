@@ -33,11 +33,11 @@
     },
     "breadcrumb": {
       "dashboard": "Dashboard",
+      "account": "Account",
       "settings": "Settings",
       "administration": "Administration",
       "notifications": "Notifications",
-      "organizations": "Organizations",
-      "organizationsNew": "Create",
+      "organizationsNew": "Create organization",
       "organizationsActive": "Organization",
       "organizationsMembers": "Members",
       "organizationsInvitations": "Invitations",

@@ -61,8 +61,9 @@ export default function OnboardingPage() {
   const [avatarUploading, setAvatarUploading] = useState(false);
   // Slug of the org the user (optionally) creates in the createOrg
   // step. If set, finishOnboarding lands the user inside that org;
-  // otherwise they land on the cross-org dashboard.
-  const [createdOrgSlug, setCreatedOrgSlug] = useState<string | null>(null);
+  // otherwise they land on the cross-org dashboard. Stored in a ref —
+  // only read in the finishOnboarding event handler, never in render.
+  const createdOrgSlugRef = useRef<string | null>(null);
 
   const legalQuery = useQuery({
     ...getOnboardingLegalRequirementsOptions(),
@@ -96,12 +97,13 @@ export default function OnboardingPage() {
     }
 
     try {
+      const slug = createdOrgSlugRef.current;
       await completeOnboarding(
         {
           acceptMarketingEmails: marketingAccepted,
           acceptedDocuments,
         },
-        createdOrgSlug ? { next: `/app/o/${createdOrgSlug}` } : undefined,
+        slug ? { next: `/app/o/${slug}` } : undefined,
       );
     } catch (error) {
       const problem = error as ProblemDetails;
@@ -251,7 +253,7 @@ export default function OnboardingPage() {
                   membership as soon as it mounts. */}
               <CreateOrgForm
                 onSuccess={(data) => {
-                  setCreatedOrgSlug(data.slug);
+                  createdOrgSlugRef.current = data.slug;
                   setStep("complete");
                 }}
                 onCancel={() => setStep("complete")}

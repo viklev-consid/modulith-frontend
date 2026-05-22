@@ -4,12 +4,29 @@ import {
   type SettingsRouteLabelKey,
 } from "@/lib/settings-routes";
 
+/**
+ * Breadcrumb trail resolver.
+ *
+ * The trail roots vary by scope:
+ *   - Cross-org pages (`/app`, `/app/notifications`, org pages)   → Dashboard › ...
+ *   - Personal pages (`/app/me/*`)                                → Account › ...
+ *   - Admin pages (`/app/admin/*`)                                → Administration › ...
+ *
+ * Trails resolve in order — specific matchers must run before broader
+ * `startsWith` catch-alls. Use the same href ladder pattern (parent +
+ * leaf) so the chevron-separated chain stays clickable.
+ *
+ * Org pages currently render a static "Organization" label rather than
+ * the actual org name. Plumbing the dynamic name through would require
+ * either a hook variant of this resolver or shape changes to the Crumb
+ * type; deferred until there's product pressure for it.
+ */
 type ShellBreadcrumbKey =
   | "dashboard"
+  | "account"
   | "settings"
   | "administration"
   | "notifications"
-  | "organizations"
   | "organizationsNew"
   | "organizationsActive"
   | "organizationsMembers"
@@ -48,11 +65,7 @@ const ORG_SUB_PAGES: ReadonlyArray<[string, ShellBreadcrumbKey]> = [
 
 function orgSubPageCrumbs(slug: string, leafKey: ShellBreadcrumbKey): Crumb[] {
   return [
-    {
-      ns: "app.shell.breadcrumb",
-      key: "organizations",
-      href: "/app/organizations",
-    },
+    { ns: "app.shell.breadcrumb", key: "dashboard", href: "/app" },
     {
       ns: "app.shell.breadcrumb",
       key: "organizationsActive",
@@ -74,9 +87,17 @@ const trails: Trail[] = [
       { ns: "app.shell.breadcrumb", key: "notifications" },
     ],
   },
+  {
+    match: (p) => p === "/app/me" || p === "/app/me/settings",
+    build: () => [
+      { ns: "app.shell.breadcrumb", key: "account", href: "/app/me" },
+      { ns: "app.shell.breadcrumb", key: "settings" },
+    ],
+  },
   ...settingsRoutes.map<Trail>((route) => ({
     match: (p) => p === route.href,
     build: () => [
+      { ns: "app.shell.breadcrumb", key: "account", href: "/app/me" },
       {
         ns: "app.shell.breadcrumb",
         key: "settings",
@@ -101,23 +122,16 @@ const trails: Trail[] = [
     build: () => [{ ns: "app.shell.breadcrumb", key: "administration" }],
   },
   {
-    match: (p) => p === "/app/organizations",
-    build: () => [{ ns: "app.shell.breadcrumb", key: "organizations" }],
-  },
-  {
     match: (p) => p === "/app/organizations/new",
     build: () => [
-      {
-        ns: "app.shell.breadcrumb",
-        key: "organizations",
-        href: "/app/organizations",
-      },
+      { ns: "app.shell.breadcrumb", key: "dashboard", href: "/app" },
       { ns: "app.shell.breadcrumb", key: "organizationsNew" },
     ],
   },
   // Per-org sub-pages. Each leaf links the parent overview so the trail
-  // reads Organizations › <Org> › Members. Order matters: these specific
-  // suffix matchers must run before the catch-all org-overview entry below.
+  // reads Dashboard › Organization › Members. Order matters: these
+  // specific suffix matchers must run before the catch-all org-overview
+  // entry below.
   ...ORG_SUB_PAGES.map<Trail>(([segment, key]) => ({
     match: (p) => {
       const m = p.match(/^\/app\/o\/([^/]+)\/([^/]+)$/);
@@ -131,11 +145,7 @@ const trails: Trail[] = [
   {
     match: (p) => p.startsWith("/app/o/"),
     build: () => [
-      {
-        ns: "app.shell.breadcrumb",
-        key: "organizations",
-        href: "/app/organizations",
-      },
+      { ns: "app.shell.breadcrumb", key: "dashboard", href: "/app" },
       { ns: "app.shell.breadcrumb", key: "organizationsActive" },
     ],
   },
