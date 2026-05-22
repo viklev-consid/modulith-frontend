@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -37,7 +38,7 @@ export function OrgSwitcher() {
   const t = useTranslations("organizations.shell.switcher");
   const { data, isLoading } = useQuery(listMyOrganizationsOptions());
   const pathname = usePathname();
-  const router = useRouter();
+  const { push } = useRouter();
 
   const organizations = data?.organizations ?? [];
 
@@ -61,7 +62,7 @@ export function OrgSwitcher() {
         size="sm"
         variant="outline"
         className="w-full justify-start gap-2"
-        onClick={() => router.push("/app/organizations/new")}
+        onClick={() => push("/app/organizations/new")}
         aria-label={t("create")}
       >
         <PlusIcon className="size-4" />
@@ -94,31 +95,36 @@ export function OrgSwitcher() {
         }
       />
       <DropdownMenuContent align="start" className="w-64">
-        <DropdownMenuLabel>{t("label")}</DropdownMenuLabel>
-        {organizations.map((org) => {
-          const isActive = org.slug === activeSlug;
-          return (
-            <DropdownMenuItem
-              key={org.organizationId}
-              render={
-                <Link
-                  href={`/app/organizations/o/${org.slug}`}
-                  className="flex items-center justify-between gap-2"
-                />
-              }
-            >
-              <span className="flex min-w-0 flex-col">
-                <span className="truncate text-sm">{org.name}</span>
-                <span className="truncate text-xs text-muted-foreground">
-                  /{org.slug}
+        {/* Base UI requires GroupLabel to live inside a Group — wrap the
+            membership list so the section heading attaches to a real group
+            instead of crashing the menu. */}
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>{t("label")}</DropdownMenuLabel>
+          {organizations.map((org) => {
+            const isActive = org.slug === activeSlug;
+            return (
+              <DropdownMenuItem
+                key={org.organizationId}
+                render={
+                  <Link
+                    href={`/app/organizations/o/${org.slug}`}
+                    className="flex items-center justify-between gap-2"
+                  />
+                }
+              >
+                <span className="flex min-w-0 flex-col">
+                  <span className="truncate text-sm">{org.name}</span>
+                  <span className="truncate text-xs text-muted-foreground">
+                    /{org.slug}
+                  </span>
                 </span>
-              </span>
-              {isActive ? (
-                <CheckIcon className="size-4 shrink-0" aria-hidden="true" />
-              ) : null}
-            </DropdownMenuItem>
-          );
-        })}
+                {isActive ? (
+                  <CheckIcon className="size-4 shrink-0" aria-hidden="true" />
+                ) : null}
+              </DropdownMenuItem>
+            );
+          })}
+        </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem render={<Link href="/app/organizations" />}>
           {t("viewAll")}
