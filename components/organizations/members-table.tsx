@@ -107,12 +107,14 @@ export function MembersTable() {
   // this with Organizations.Owner.LastOwnerRequired — we just don't let
   // the user click a button that's guaranteed to fail.
   //
-  // NOTE: this count assumes the members listing is unpaginated, which is
-  // the case in v1 — the API returns every member in a single response.
-  // If pagination is added later, an owner on a subsequent page would not
-  // be counted here and the guard could permit demoting/removing what
-  // looks like the last owner on page 1. When that happens, swap this for
-  // a server-provided ownerCount (or a dedicated endpoint).
+  // TODO(org-pagination): this count assumes the members listing is
+  // unpaginated, which is the case in v1 — the API returns every member
+  // in a single response. If pagination is added later, an owner on a
+  // subsequent page would not be counted here and the guard could permit
+  // demoting/removing what looks like the last owner on page 1. When
+  // that happens, swap this for a server-provided `ownerCount` on the
+  // list response (or a dedicated `GET /organizations/{ref}/owners/count`
+  // endpoint). Tracked in docs/follow-ups.md.
   const activeOwnerCount = useMemo(
     () =>
       members.filter((m) => !m.isAnonymized && m.role.toLowerCase() === "owner")
