@@ -1,8 +1,11 @@
 "use client";
 
-import { useQueryClient, type QueryClient } from "@tanstack/react-query";
+import { useQuery, type QueryClient } from "@tanstack/react-query";
 
-import { listMyOrganizationsQueryKey } from "@/api/generated/@tanstack/react-query.gen";
+import {
+  listMyOrganizationsOptions,
+  listMyOrganizationsQueryKey,
+} from "@/api/generated/@tanstack/react-query.gen";
 import type {
   ListMyOrganizationsResponse,
   MyOrganizationItem,
@@ -67,19 +70,40 @@ export function hasOrgPermission(
   return org ? org.permissions.includes(permission) : false;
 }
 
+/**
+ * Subscribe to `/v1/organizations/my` and project it down to the single
+ * boolean a guard needs. Subscribing (vs reading the cache) means the
+ * consuming component re-renders when `/my` refreshes — for example after
+ * a role change or accept-invite — instead of staying stale until some
+ * unrelated state nudges it.
+ */
 export function useHasOrgPermission(
   organizationId: string | undefined | null,
   permission: string,
 ): boolean {
-  const queryClient = useQueryClient();
-  if (!organizationId) return false;
-  return hasOrgPermission(queryClient, organizationId, permission);
+  const { data } = useQuery({
+    ...listMyOrganizationsOptions(),
+    select: (response) =>
+      organizationId
+        ? (response.organizations
+            .find((org) => org.organizationId === organizationId)
+            ?.permissions.includes(permission) ?? false)
+        : false,
+  });
+  return data ?? false;
 }
 
 export function useMyOrganization(
   organizationId: string | undefined | null,
 ): MyOrganizationItem | undefined {
-  const queryClient = useQueryClient();
-  if (!organizationId) return undefined;
-  return findMyOrganization(queryClient, organizationId);
+  const { data } = useQuery({
+    ...listMyOrganizationsOptions(),
+    select: (response) =>
+      organizationId
+        ? response.organizations.find(
+            (org) => org.organizationId === organizationId,
+          )
+        : undefined,
+  });
+  return data;
 }

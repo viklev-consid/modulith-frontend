@@ -24,6 +24,10 @@
     "removed": {
       "title": "Organization unavailable",
       "description": "It may have been deleted or your membership was removed."
+    },
+    "error": {
+      "title": "Couldn't load this organization",
+      "description": "Something went wrong fetching the organization. Try again in a moment."
     }
   },
   "overview": {
@@ -41,6 +45,10 @@
       "payload": "Payload"
     },
     "system": "System",
+    "payload": {
+      "show": "Show",
+      "hide": "Hide"
+    },
     "empty": {
       "title": "No audit entries",
       "description": "Actions taken in this organization will show up here."

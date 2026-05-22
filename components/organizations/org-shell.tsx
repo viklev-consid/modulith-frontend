@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo } from "react";
 import Link from "next/link";
-import { notFound, usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
@@ -22,7 +22,6 @@ import { OrgRoleBadge } from "@/components/organizations/org-role-badge";
 import { Spinner } from "@/components/ui/spinner";
 import { OrgContext, type OrgContextValue } from "@/lib/org-context";
 import { ORG_PERMISSION } from "@/lib/org-permission-strings";
-import { hasOrgPermission } from "@/lib/org-permissions";
 
 type OrgShellProps = {
   slug: string;
@@ -45,7 +44,7 @@ type OrgShellProps = {
 export function OrgShell({ slug, children }: OrgShellProps) {
   const t = useTranslations("organizations.shell");
   const pathname = usePathname();
-  const router = useRouter();
+  const { replace } = useRouter();
   const queryClient = useQueryClient();
 
   // Always issue the GET, regardless of `/my` cache state, because the
@@ -91,8 +90,8 @@ export function OrgShell({ slug, children }: OrgShellProps) {
       );
     }
     toast.error(t("removed.title"), { description: t("removed.description") });
-    router.replace("/app/organizations");
-  }, [orgQuery.error, myOrgs, queryClient, router, slug, t]);
+    replace("/app/organizations");
+  }, [orgQuery.error, myOrgs, queryClient, replace, slug, t]);
 
   const contextValue = useMemo<OrgContextValue | null>(() => {
     const org = orgQuery.data as GetOrganizationResponse | undefined;
@@ -122,9 +121,26 @@ export function OrgShell({ slug, children }: OrgShellProps) {
     return null;
   }
 
+  if (orgQuery.isError) {
+    // Non-404 error (network, 5xx, etc.) — show a transient error card.
+    // We deliberately don't `notFound()` here: that would steer users to
+    // the route-level not-found UI for what's almost certainly a recoverable
+    // failure.
+    return (
+      <div className="grid min-h-[40vh] place-items-center text-center">
+        <div className="grid gap-1">
+          <p className="text-sm font-medium">{t("error.title")}</p>
+          <p className="text-xs text-muted-foreground">
+            {t("error.description")}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   if (!contextValue) {
-    // Some other error: let Next's standard error UI handle it.
-    notFound();
+    // No data and no error — render nothing while React Query settles.
+    return null;
   }
 
   // Tabs that always render. Each underlying page additionally guards by
@@ -134,12 +150,10 @@ export function OrgShell({ slug, children }: OrgShellProps) {
   // Audit is the exception: it's a narrowly-scoped capability and the page
   // surface itself is dense + slow to load, so we hide the tab when the
   // caller lacks `organizations.audit.read` to avoid teasing UI they can't
-  // use.
-  const canReadAudit = hasOrgPermission(
-    queryClient,
-    contextValue.organizationId,
-    ORG_PERMISSION.AuditRead,
-  );
+  // use. Sourced from the already-subscribed `/my` listing so this stays
+  // reactive when permissions refresh.
+  const canReadAudit =
+    membership?.permissions.includes(ORG_PERMISSION.AuditRead) ?? false;
 
   const tabs = [
     { href: `/app/organizations/o/${slug}`, key: "overview", exact: true },
