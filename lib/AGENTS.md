@@ -72,6 +72,26 @@ unrelated changes to other fields won't re-render the consumer.
 The `<Can inOrg=...>` and `usePermission(perm, orgId)` wrappers in
 `components/can.tsx` go through the subscribing form.
 
+### Active-org checks and PlatformOverride
+
+For UI that gates on a permission inside whichever org is currently
+active — the global sidebar's contextual section is the canonical case
+— use `useCanInActiveOrg(perm)` from `lib/active-org-permissions.ts`
+instead of `<Can inOrg=...>`. The reason is platform admins:
+
+A user acting under `accessMode: PlatformOverride` is **not in `/my`**.
+`ActiveOrgProvider` synthesises a `MyOrganizationItem` for them so the
+sidebar can still render, but its `permissions` array is empty by
+design. A raw `<Can inOrg={activeOrg.id} permission={X}>` therefore
+hides everything from an override admin even though the backend would
+accept their actions.
+
+`useCanInActiveOrg` reads `OrgContext.accessMode` and grants override
+admins through; for ScopedPermission users it falls back to the same
+`useHasOrgPermission` lookup. The non-hook `hasOrgPermission(...)`
+does NOT carry this behaviour — for event handlers that run for both
+member and override admins, branch on `org.accessMode` explicitly.
+
 ## Constants vs magic strings
 
 Every string the backend ships that the UI branches on lives as a named

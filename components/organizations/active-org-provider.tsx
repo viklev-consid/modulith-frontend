@@ -113,8 +113,14 @@ export function ActiveOrgProvider({ children }: { children: ReactNode }) {
       }
       // PlatformOverride: not a member, so not in `/my`. Synthesize a
       // minimal `MyOrganizationItem` so sidebar nav still renders.
-      // `permissions` is empty — guards in the sidebar should fall back
-      // to `OrgContext.accessMode` for override-admin capability checks.
+      // `permissions` is deliberately empty — the user has none on a
+      // per-org basis, they're acting via platform override.
+      //
+      // Permission-gated sidebar items must therefore use
+      // `useCanInActiveOrg(perm)` from `lib/active-org-permissions.ts`,
+      // not a bare `<Can inOrg=...>`. The helper consults
+      // `OrgContext.accessMode` and grants override admins through;
+      // raw `<Can>` would silently hide affordances they can use.
       return {
         activeOrg: {
           organizationId: orgContext.organizationId,
