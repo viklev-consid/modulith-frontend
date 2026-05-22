@@ -90,7 +90,7 @@ export function OrgShell({ slug, children }: OrgShellProps) {
       );
     }
     toast.error(t("removed.title"), { description: t("removed.description") });
-    replace("/app/organizations");
+    replace("/app");
   }, [orgQuery.error, myOrgs, queryClient, replace, slug, t]);
 
   const contextValue = useMemo<OrgContextValue | null>(() => {
