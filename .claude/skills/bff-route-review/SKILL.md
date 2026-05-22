@@ -1,7 +1,10 @@
 ---
 name: bff-route-review
-description: Use after creating or modifying any API route under app/api/. Reviews BFF routes for security, error handling, session management, and token leakage. Run this before committing changes to API routes.
-version: "1.0.0"
+description: |
+  Audit a BFF API route for token leakage, session handling, header-forwarding hygiene, anti-enumeration, and dynamic-rendering correctness. The BFF is the only place auth tokens exist in this app — get this wrong and tokens reach the browser.
+  TRIGGER when an edit touches: any file under `app/api/` (especially `app/api/auth/*` and `app/api/proxy/*`); `proxy.ts` (Next.js Proxy / route guards); `lib/session.ts`, `lib/safe-next-path.ts`, `lib/constants.ts` (session cookie name, redirect validators); or when the user asks to "review the proxy", "check the BFF", "audit auth routes", or mentions session/cookie/token security.
+  SKIP for client components, generated code under `api/generated/`, and pure marketing or onboarding UI that does not touch session or token state.
+version: "1.1.0"
 ---
 
 # BFF Route Reviewer
@@ -10,7 +13,7 @@ Reviews Next.js API routes (`app/api/**`) for security and correctness against t
 
 ## When to use
 
-Run this review after creating or modifying any file under `app/api/auth/` or `app/api/proxy/`.
+Run this review after creating or modifying any file under `app/api/auth/`, `app/api/proxy/`, `proxy.ts`, or the session/redirect helpers in `lib/`.
 
 ## Review checklist
 
