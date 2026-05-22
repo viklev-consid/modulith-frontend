@@ -22,6 +22,28 @@ const nextConfig = {
           },
         ],
       },
+      {
+        // Token-bearing query strings (invite acceptance, register-by-
+        // invitation) must not leak via Referer. Without this header any
+        // third-party sub-resource added later — a font CDN, an analytics
+        // pixel, a remote image — would walk the token off-origin on its
+        // first request. `no-referrer` is the strongest setting and
+        // these routes don't need referer behavior, so the cost is zero.
+        source: "/invite/:path*",
+        headers: [{ key: "Referrer-Policy", value: "no-referrer" }],
+      },
+      {
+        source: "/invite",
+        headers: [{ key: "Referrer-Policy", value: "no-referrer" }],
+      },
+      {
+        source: "/register/:path*",
+        headers: [{ key: "Referrer-Policy", value: "no-referrer" }],
+      },
+      {
+        source: "/register",
+        headers: [{ key: "Referrer-Policy", value: "no-referrer" }],
+      },
     ];
   },
 };
