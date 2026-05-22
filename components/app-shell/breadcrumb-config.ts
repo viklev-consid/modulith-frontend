@@ -11,7 +11,11 @@ type ShellBreadcrumbKey =
   | "notifications"
   | "organizations"
   | "organizationsNew"
-  | "organizationsActive";
+  | "organizationsActive"
+  | "organizationsMembers"
+  | "organizationsInvitations"
+  | "organizationsAudit"
+  | "organizationsSettings";
 
 export type Crumb =
   | {
@@ -30,7 +34,35 @@ export type Crumb =
       href?: string;
     };
 
-const trails: { match: (path: string) => boolean; build: () => Crumb[] }[] = [
+type Trail = {
+  match: (path: string) => boolean;
+  build: (path: string) => Crumb[];
+};
+
+const ORG_SUB_PAGES: ReadonlyArray<[string, ShellBreadcrumbKey]> = [
+  ["members", "organizationsMembers"],
+  ["invitations", "organizationsInvitations"],
+  ["audit", "organizationsAudit"],
+  ["settings", "organizationsSettings"],
+];
+
+function orgSubPageCrumbs(slug: string, leafKey: ShellBreadcrumbKey): Crumb[] {
+  return [
+    {
+      ns: "app.shell.breadcrumb",
+      key: "organizations",
+      href: "/app/organizations",
+    },
+    {
+      ns: "app.shell.breadcrumb",
+      key: "organizationsActive",
+      href: `/app/organizations/o/${slug}`,
+    },
+    { ns: "app.shell.breadcrumb", key: leafKey },
+  ];
+}
+
+const trails: Trail[] = [
   {
     match: (p) => p === "/app",
     build: () => [{ ns: "app.shell.breadcrumb", key: "dashboard" }],
@@ -42,9 +74,9 @@ const trails: { match: (path: string) => boolean; build: () => Crumb[] }[] = [
       { ns: "app.shell.breadcrumb", key: "notifications" },
     ],
   },
-  ...settingsRoutes.map((route) => ({
-    match: (p: string) => p === route.href,
-    build: (): Crumb[] => [
+  ...settingsRoutes.map<Trail>((route) => ({
+    match: (p) => p === route.href,
+    build: () => [
       {
         ns: "app.shell.breadcrumb",
         key: "settings",
@@ -53,9 +85,9 @@ const trails: { match: (path: string) => boolean; build: () => Crumb[] }[] = [
       { ns: "settings.nav", key: route.labelKey },
     ],
   })),
-  ...adminRoutes.map((route) => ({
-    match: (p: string) => p === route.href || p.startsWith(`${route.href}/`),
-    build: (): Crumb[] => [
+  ...adminRoutes.map<Trail>((route) => ({
+    match: (p) => p === route.href || p.startsWith(`${route.href}/`),
+    build: () => [
       {
         ns: "app.shell.breadcrumb",
         key: "administration",
@@ -83,6 +115,19 @@ const trails: { match: (path: string) => boolean; build: () => Crumb[] }[] = [
       { ns: "app.shell.breadcrumb", key: "organizationsNew" },
     ],
   },
+  // Per-org sub-pages. Each leaf links the parent overview so the trail
+  // reads Organizations › <Org> › Members. Order matters: these specific
+  // suffix matchers must run before the catch-all org-overview entry below.
+  ...ORG_SUB_PAGES.map<Trail>(([segment, key]) => ({
+    match: (p) => {
+      const m = p.match(/^\/app\/organizations\/o\/([^/]+)\/([^/]+)$/);
+      return m !== null && m[2] === segment;
+    },
+    build: (p) => {
+      const m = p.match(/^\/app\/organizations\/o\/([^/]+)\//);
+      return orgSubPageCrumbs(m?.[1] ?? "", key);
+    },
+  })),
   {
     match: (p) => p.startsWith("/app/organizations/o/"),
     build: () => [
@@ -98,5 +143,7 @@ const trails: { match: (path: string) => boolean; build: () => Crumb[] }[] = [
 
 export function resolveBreadcrumb(pathname: string): Crumb[] {
   const match = trails.find((entry) => entry.match(pathname));
-  return match?.build() ?? [{ ns: "app.shell.breadcrumb", key: "dashboard" }];
+  return (
+    match?.build(pathname) ?? [{ ns: "app.shell.breadcrumb", key: "dashboard" }]
+  );
 }

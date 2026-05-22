@@ -51,7 +51,7 @@ import { ORG_ERRORS } from "@/lib/org-errors";
  */
 export function InviteLanding() {
   const t = useTranslations("invite");
-  const router = useRouter();
+  const { replace } = useRouter();
   const params = useSearchParams();
   const token = params.get("token") ?? "";
   const email = params.get("email") ?? "";
@@ -68,7 +68,7 @@ export function InviteLanding() {
         queryKey: listMyOrganizationsQueryKey(),
       });
       toast.success(t("acceptedToast"));
-      router.replace("/app/organizations");
+      replace("/app/organizations");
     },
     onError: (error) => {
       const problem = error as unknown as ProblemDetails;
@@ -171,11 +171,12 @@ export function InviteLanding() {
     token,
   )}${email ? `&email=${encodeURIComponent(email)}&lockEmail=1` : ""}`;
   // After sign-in, drop the user back on this exact landing so they
-  // can one-click accept. Matches the URL the backend embeds in
-  // invitation emails.
-  const loginUrl = `/login?next=${encodeURIComponent(
-    `/invite?token=${token}${email ? `&email=${email}` : ""}`,
-  )}`;
+  // can one-click accept. Each value is individually encoded so emails
+  // containing `+`, `&`, or `=` survive the next-param round-trip.
+  const inviteReturnPath = `/invite?token=${encodeURIComponent(token)}${
+    email ? `&email=${encodeURIComponent(email)}` : ""
+  }`;
+  const loginUrl = `/login?next=${encodeURIComponent(inviteReturnPath)}`;
 
   return (
     <Layout>

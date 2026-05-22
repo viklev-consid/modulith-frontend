@@ -49,6 +49,7 @@ function toNumber(value: number | string) {
  * print on render and fall back to the raw string if parsing fails.
  */
 function PayloadCell({ payload }: { payload: string }) {
+  const t = useTranslations("organizations.audit.payload");
   const [open, setOpen] = useState(false);
 
   const formatted = useMemo(() => {
@@ -59,7 +60,7 @@ function PayloadCell({ payload }: { payload: string }) {
     }
   }, [payload]);
 
-  if (!payload) return <span className="text-muted-foreground">—</span>;
+  if (!payload) return <span className="text-muted-foreground">·</span>;
 
   return (
     <div className="grid gap-1">
@@ -76,7 +77,7 @@ function PayloadCell({ payload }: { payload: string }) {
             "size-3 transition-transform " + (open ? "rotate-0" : "-rotate-90")
           }
         />
-        <span>{open ? "Hide" : "Show"}</span>
+        <span>{open ? t("hide") : t("show")}</span>
       </Button>
       {open ? (
         <pre className="max-w-md overflow-auto rounded-md border bg-muted/40 p-2 text-[10px] leading-snug">
@@ -148,7 +149,7 @@ export function OrgAuditTable() {
         cell: ({ row }) => {
           const type = row.original.resourceType;
           const id = row.original.resourceId;
-          if (!type) return <span className="text-muted-foreground">—</span>;
+          if (!type) return <span className="text-muted-foreground">·</span>;
           return (
             <span className="text-xs">
               <span className="font-medium">{type}</span>
@@ -233,7 +234,7 @@ export function OrgAuditTable() {
               variant="outline"
               size="sm"
               disabled={page <= 1}
-              onClick={() => setPage(page - 1)}
+              onClick={() => setPage((prev) => prev - 1)}
               aria-label={t("pagination.prev")}
             >
               <ChevronLeftIcon />
@@ -243,7 +244,7 @@ export function OrgAuditTable() {
               variant="outline"
               size="sm"
               disabled={page >= totalPages}
-              onClick={() => setPage(page + 1)}
+              onClick={() => setPage((prev) => prev + 1)}
               aria-label={t("pagination.next")}
             >
               <ChevronRightIcon />

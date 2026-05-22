@@ -80,6 +80,32 @@ describe("resolveBreadcrumb", () => {
     ]);
   });
 
+  it.each([
+    ["members", "organizationsMembers"],
+    ["invitations", "organizationsInvitations"],
+    ["audit", "organizationsAudit"],
+    ["settings", "organizationsSettings"],
+  ])(
+    "returns Organizations › Organization › leaf for /app/organizations/o/:slug/%s",
+    (segment, key) => {
+      expect(resolveBreadcrumb(`/app/organizations/o/acme/${segment}`)).toEqual(
+        [
+          {
+            ns: "app.shell.breadcrumb",
+            key: "organizations",
+            href: "/app/organizations",
+          },
+          {
+            ns: "app.shell.breadcrumb",
+            key: "organizationsActive",
+            href: "/app/organizations/o/acme",
+          },
+          { ns: "app.shell.breadcrumb", key },
+        ],
+      );
+    },
+  );
+
   it("falls back to Dashboard for unknown paths", () => {
     expect(resolveBreadcrumb("/somewhere/else")).toEqual([
       { ns: "app.shell.breadcrumb", key: "dashboard" },

@@ -3,6 +3,7 @@
 import "@/api/client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   createColumnHelper,
@@ -105,6 +106,13 @@ export function MembersTable() {
   // Leave/Remove/Demote affordances on that row. The backend also enforces
   // this with Organizations.Owner.LastOwnerRequired — we just don't let
   // the user click a button that's guaranteed to fail.
+  //
+  // NOTE: this count assumes the members listing is unpaginated, which is
+  // the case in v1 — the API returns every member in a single response.
+  // If pagination is added later, an owner on a subsequent page would not
+  // be counted here and the guard could permit demoting/removing what
+  // looks like the last owner on page 1. When that happens, swap this for
+  // a server-provided ownerCount (or a dedicated endpoint).
   const activeOwnerCount = useMemo(
     () =>
       members.filter((m) => !m.isAnonymized && m.role.toLowerCase() === "owner")
@@ -360,6 +368,7 @@ function RemoveMemberDialog({
   const tCommon = useTranslations("common.actions");
   const org = useActiveOrg();
   const queryClient = useQueryClient();
+  const { replace } = useRouter();
 
   const mutation = useMutation({
     ...removeOrganizationMemberMutation(),
@@ -380,10 +389,9 @@ function RemoveMemberDialog({
         await queryClient.invalidateQueries({
           queryKey: listMyOrganizationsQueryKey(),
         });
-        // After we leave, we no longer have access to this org — bounce out.
-        if (typeof window !== "undefined") {
-          window.location.assign("/app/organizations");
-        }
+        // After we leave, we no longer have access to this org — route out
+        // via the App Router so we don't pay for a full bundle re-boot.
+        replace("/app/organizations");
       }
       onClose();
     },

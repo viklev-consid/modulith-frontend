@@ -112,11 +112,12 @@ function CreateInviteContent({ onClose }: { onClose: () => void }) {
     // Mirror the URL pattern the backend embeds in its own invitation
     // emails so the manual copy-and-share path produces an identical
     // experience to the auto-sent link.
+    // This panel only renders inside an open Dialog, which only mounts
+    // client-side — no SSR guard needed for `window`.
     const path = `/invite?token=${encodeURIComponent(
       result.rawToken,
     )}&email=${encodeURIComponent(result.email)}`;
-    const inviteUrl =
-      typeof window !== "undefined" ? `${window.location.origin}${path}` : path;
+    const inviteUrl = `${window.location.origin}${path}`;
 
     return (
       <>

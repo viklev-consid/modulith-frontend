@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "@tanstack/react-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -44,7 +44,10 @@ export function CreateOrgForm() {
   // Track whether the user has manually touched the slug. While they
   // haven't, we keep suggesting one from the name. Once they edit the slug,
   // we stop overwriting it so we don't undo their work mid-typing.
-  const [slugTouched, setSlugTouched] = useState(false);
+  //
+  // useRef rather than useState because we read this from event handlers,
+  // never from JSX — no need to re-render on toggle.
+  const slugTouchedRef = useRef(false);
 
   const mutation = useMutation({
     ...createOrganizationMutation(),
@@ -139,12 +142,11 @@ export function CreateOrgForm() {
                       onChange={(event) => {
                         const next = event.target.value;
                         field.handleChange(next);
-                        if (!slugTouched) {
+                        if (!slugTouchedRef.current) {
                           form.setFieldValue("slug", suggestSlug(next));
                         }
                       }}
                       aria-invalid={Boolean(fieldErrors.name)}
-                      autoFocus
                     />
                     <FieldDescription>{t("name.hint")}</FieldDescription>
                     <FieldError>{fieldErrors.name}</FieldError>
@@ -165,8 +167,11 @@ export function CreateOrgForm() {
                       value={field.state.value}
                       placeholder={t("slug.placeholder")}
                       onChange={(event) => {
-                        setSlugTouched(true);
-                        field.handleChange(event.target.value);
+                        const next = event.target.value;
+                        // Clearing the slug field resumes name-driven
+                        // suggestions; any non-empty edit locks them off.
+                        slugTouchedRef.current = next.length > 0;
+                        field.handleChange(next);
                       }}
                       aria-invalid={Boolean(fieldErrors.slug)}
                     />

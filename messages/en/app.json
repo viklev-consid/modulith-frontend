@@ -33,7 +33,11 @@
       "notifications": "Notifications",
       "organizations": "Organizations",
       "organizationsNew": "Create",
-      "organizationsActive": "Organization"
+      "organizationsActive": "Organization",
+      "organizationsMembers": "Members",
+      "organizationsInvitations": "Invitations",
+      "organizationsAudit": "Audit",
+      "organizationsSettings": "Settings"
     }
   }
 }
