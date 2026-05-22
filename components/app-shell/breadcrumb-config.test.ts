@@ -16,16 +16,16 @@ describe("resolveBreadcrumb", () => {
     ]);
   });
 
-  it("returns Settings › Profile for /app/settings", () => {
-    expect(resolveBreadcrumb("/app/settings")).toEqual([
-      { ns: "app.shell.breadcrumb", key: "settings", href: "/app/settings" },
+  it("returns Settings › Profile for /app/me/settings", () => {
+    expect(resolveBreadcrumb("/app/me/settings")).toEqual([
+      { ns: "app.shell.breadcrumb", key: "settings", href: "/app/me/settings" },
       { ns: "settings.nav", key: "profile" },
     ]);
   });
 
-  it("returns Settings › Password for /app/settings/password", () => {
-    expect(resolveBreadcrumb("/app/settings/password")).toEqual([
-      { ns: "app.shell.breadcrumb", key: "settings", href: "/app/settings" },
+  it("returns Settings › Password for /app/me/settings/password", () => {
+    expect(resolveBreadcrumb("/app/me/settings/password")).toEqual([
+      { ns: "app.shell.breadcrumb", key: "settings", href: "/app/me/settings" },
       { ns: "settings.nav", key: "password" },
     ]);
   });

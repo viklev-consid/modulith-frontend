@@ -61,7 +61,7 @@ export function ProfileMenu() {
         </div>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem render={<Link href="/app/settings" />}>
+          <DropdownMenuItem render={<Link href="/app/me/settings" />}>
             <UserIcon />
             {t("settings")}
           </DropdownMenuItem>

@@ -25,15 +25,23 @@ export type SettingsRoute = {
 };
 
 export const settingsRoutes = [
-  { href: "/app/settings", labelKey: "profile", icon: UserIcon },
-  { href: "/app/settings/password", labelKey: "password", icon: KeyRoundIcon },
-  { href: "/app/settings/email", labelKey: "email", icon: MailIcon },
-  { href: "/app/settings/security", labelKey: "security", icon: ShieldIcon },
-  { href: "/app/settings/activity", labelKey: "activity", icon: ActivityIcon },
+  { href: "/app/me/settings", labelKey: "profile", icon: UserIcon },
   {
-    href: "/app/settings/notifications",
+    href: "/app/me/settings/password",
+    labelKey: "password",
+    icon: KeyRoundIcon,
+  },
+  { href: "/app/me/settings/email", labelKey: "email", icon: MailIcon },
+  { href: "/app/me/settings/security", labelKey: "security", icon: ShieldIcon },
+  {
+    href: "/app/me/settings/activity",
+    labelKey: "activity",
+    icon: ActivityIcon,
+  },
+  {
+    href: "/app/me/settings/notifications",
     labelKey: "notifications",
     icon: BellIcon,
   },
-  { href: "/app/settings/data", labelKey: "data", icon: DatabaseIcon },
+  { href: "/app/me/settings/data", labelKey: "data", icon: DatabaseIcon },
 ] as const satisfies readonly SettingsRoute[];

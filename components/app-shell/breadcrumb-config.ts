@@ -80,7 +80,7 @@ const trails: Trail[] = [
       {
         ns: "app.shell.breadcrumb",
         key: "settings",
-        href: "/app/settings",
+        href: "/app/me/settings",
       },
       { ns: "settings.nav", key: route.labelKey },
     ],

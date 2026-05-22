@@ -18,7 +18,7 @@ reads `auth.json` → `login.title`.
 | `authComponents.json`  | `components/auth/*`                                 |
 | `onboarding.json`      | `app/(onboarding)/*`                                |
 | `app.json`             | `app/(app)/app/*` top-level pages                   |
-| `settings.json`        | `app/(app)/app/settings/*` pages                    |
+| `settings.json`        | `app/(app)/app/me/settings/*` pages                 |
 | `settingsForms.json`   | `components/settings/*` forms                       |
 | `admin.json`           | `app/(app)/app/admin/*` pages                       |
 | `adminComponents.json` | `components/admin/*`                                |

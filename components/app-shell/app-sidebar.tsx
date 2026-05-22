@@ -142,9 +142,9 @@ export function AppSidebar({ onSearchOpen }: { onSearchOpen: () => void }) {
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton
-                isActive={isActive("/app/settings")}
+                isActive={isActive("/app/me/settings")}
                 tooltip={t("mySettings")}
-                render={<Link href="/app/settings" />}
+                render={<Link href="/app/me/settings" />}
               >
                 <SettingsIcon />
                 <span>{t("mySettings")}</span>
