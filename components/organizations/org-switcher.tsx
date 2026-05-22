@@ -9,6 +9,7 @@ import {
   CheckIcon,
   ChevronsUpDownIcon,
   PlusIcon,
+  SettingsIcon,
 } from "lucide-react";
 
 import { listMyOrganizationsOptions } from "@/api/generated/@tanstack/react-query.gen";
@@ -102,26 +103,40 @@ export function OrgSwitcher() {
           <DropdownMenuLabel>{t("label")}</DropdownMenuLabel>
           {organizations.map((org) => {
             const isActive = org.slug === activeSlug;
+            // Row + gear pair: the row navigates to the org's overview
+            // (and pins it via URL → ActiveOrg sync), the gear jumps
+            // straight to settings for quick management without clicking
+            // through. Both affordances are real <Link>s so middle-click
+            // / cmd-click open in new tabs as expected.
             return (
-              <DropdownMenuItem
-                key={org.organizationId}
-                render={
-                  <Link
-                    href={`/app/o/${org.slug}`}
-                    className="flex items-center justify-between gap-2"
-                  />
-                }
-              >
-                <span className="flex min-w-0 flex-col">
-                  <span className="truncate text-sm">{org.name}</span>
-                  <span className="truncate text-xs text-muted-foreground">
-                    /{org.slug}
+              <div key={org.organizationId} className="flex items-center gap-1">
+                <DropdownMenuItem
+                  className="flex-1"
+                  render={
+                    <Link
+                      href={`/app/o/${org.slug}`}
+                      className="flex items-center justify-between gap-2"
+                    />
+                  }
+                >
+                  <span className="flex min-w-0 flex-col">
+                    <span className="truncate text-sm">{org.name}</span>
+                    <span className="truncate text-xs text-muted-foreground">
+                      /{org.slug}
+                    </span>
                   </span>
-                </span>
-                {isActive ? (
-                  <CheckIcon className="size-4 shrink-0" aria-hidden="true" />
-                ) : null}
-              </DropdownMenuItem>
+                  {isActive ? (
+                    <CheckIcon className="size-4 shrink-0" aria-hidden="true" />
+                  ) : null}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="shrink-0 px-2"
+                  aria-label={t("manage")}
+                  render={<Link href={`/app/o/${org.slug}/settings`} />}
+                >
+                  <SettingsIcon className="size-4" aria-hidden="true" />
+                </DropdownMenuItem>
+              </div>
             );
           })}
         </DropdownMenuGroup>

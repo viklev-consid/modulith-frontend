@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  BellIcon,
   Building2Icon,
   GaugeIcon,
   HelpCircleIcon,
@@ -13,6 +14,7 @@ import {
 import { useTranslations } from "next-intl";
 
 import { Can } from "@/components/can";
+import { OrgNav } from "@/components/app-shell/org-nav";
 import { ProfileMenu } from "@/components/app-shell/profile-menu";
 import { OrgSwitcher } from "@/components/organizations/org-switcher";
 import {
@@ -30,6 +32,15 @@ import { adminRoutes } from "@/lib/admin-routes";
 
 const ADMIN_PERMISSIONS = adminRoutes.map((route) => route.permission);
 
+/**
+ * Sidebar shape:
+ *   Header — brand + cross-org links (Dashboard, Notifications) + Picker
+ *   Content — active-org contextual nav (rendered by <OrgNav/>)
+ *   Footer — Search, Administration, Personal group, Help, ProfileMenu
+ *
+ * The cross-org/personal/active-org split corresponds to the three
+ * scope categories the app exposes (see lib/active-org-context.ts).
+ */
 export function AppSidebar({ onSearchOpen }: { onSearchOpen: () => void }) {
   const t = useTranslations("app.shell");
   const pathname = usePathname();
@@ -53,14 +64,8 @@ export function AppSidebar({ onSearchOpen }: { onSearchOpen: () => void }) {
             </span>
           </div>
         </div>
-        <div className="px-2 group-data-[collapsible=icon]:hidden">
-          <OrgSwitcher />
-        </div>
-      </SidebarHeader>
 
-      <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>{t("workspaceLabel")}</SidebarGroupLabel>
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton
@@ -70,6 +75,16 @@ export function AppSidebar({ onSearchOpen }: { onSearchOpen: () => void }) {
               >
                 <GaugeIcon />
                 <span>{t("dashboard")}</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                isActive={isActive("/app/notifications")}
+                tooltip={t("notifications")}
+                render={<Link href="/app/notifications" />}
+              >
+                <BellIcon />
+                <span>{t("notifications")}</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
@@ -84,6 +99,14 @@ export function AppSidebar({ onSearchOpen }: { onSearchOpen: () => void }) {
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup>
+
+        <div className="px-2 group-data-[collapsible=icon]:hidden">
+          <OrgSwitcher />
+        </div>
+      </SidebarHeader>
+
+      <SidebarContent>
+        <OrgNav />
       </SidebarContent>
 
       <SidebarFooter>
@@ -112,16 +135,25 @@ export function AppSidebar({ onSearchOpen }: { onSearchOpen: () => void }) {
               </SidebarMenuButton>
             </SidebarMenuItem>
           </Can>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              isActive={isActive("/app/settings")}
-              tooltip={t("settings")}
-              render={<Link href="/app/settings" />}
-            >
-              <SettingsIcon />
-              <span>{t("settings")}</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+        </SidebarMenu>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>{t("personal")}</SidebarGroupLabel>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                isActive={isActive("/app/settings")}
+                tooltip={t("mySettings")}
+                render={<Link href="/app/settings" />}
+              >
+                <SettingsIcon />
+                <span>{t("mySettings")}</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroup>
+
+        <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
               type="button"

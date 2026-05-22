@@ -10,8 +10,13 @@
     "search": "Search",
     "dashboard": "Dashboard",
     "organizations": "Organizations",
+    "notifications": "Notifications",
     "administration": "Administration",
     "settings": "Settings",
+    "personal": "Personal",
+    "mySettings": "My settings",
+    "orgNavLabel": "Organization",
+    "orgOverview": "Overview",
     "help": "Get help",
     "signOut": "Sign out",
     "profileMenu": {
