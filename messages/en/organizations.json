@@ -48,7 +48,8 @@
     "system": "System",
     "payload": {
       "show": "Show",
-      "hide": "Hide"
+      "hide": "Hide",
+      "truncated": "Payload truncated for display. Use the API for the full event."
     },
     "empty": {
       "title": "No audit entries",

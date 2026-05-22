@@ -47,16 +47,32 @@ function toNumber(value: number | string) {
  * The backend ships `payload` as a JSON string (not a parsed object) to
  * keep the wire shape stable as event schemas evolve. We parse + pretty-
  * print on render and fall back to the raw string if parsing fails.
+ *
+ * Payloads above MAX_PAYLOAD_BYTES are shown truncated, raw — both
+ * JSON.parse and JSON.stringify can block the main thread on multi-MB
+ * inputs, and that's not what this UI is for. Real auditors who need
+ * the full event should fetch it through the API directly.
  */
+const MAX_PAYLOAD_BYTES = 64 * 1024;
+
 function PayloadCell({ payload }: { payload: string }) {
   const t = useTranslations("organizations.audit.payload");
   const [open, setOpen] = useState(false);
 
-  const formatted = useMemo(() => {
+  const { formatted, truncated } = useMemo(() => {
+    if (payload.length > MAX_PAYLOAD_BYTES) {
+      return {
+        formatted: payload.slice(0, MAX_PAYLOAD_BYTES),
+        truncated: true,
+      };
+    }
     try {
-      return JSON.stringify(JSON.parse(payload), null, 2);
+      return {
+        formatted: JSON.stringify(JSON.parse(payload), null, 2),
+        truncated: false,
+      };
     } catch {
-      return payload;
+      return { formatted: payload, truncated: false };
     }
   }, [payload]);
 
@@ -80,9 +96,16 @@ function PayloadCell({ payload }: { payload: string }) {
         <span>{open ? t("hide") : t("show")}</span>
       </Button>
       {open ? (
-        <pre className="max-w-md overflow-auto rounded-md border bg-muted/40 p-2 text-[10px] leading-snug">
-          <code>{formatted}</code>
-        </pre>
+        <div className="grid gap-1">
+          {truncated ? (
+            <p className="text-[10px] text-muted-foreground" role="status">
+              {t("truncated")}
+            </p>
+          ) : null}
+          <pre className="max-w-md overflow-auto rounded-md border bg-muted/40 p-2 text-[10px] leading-snug">
+            <code>{formatted}</code>
+          </pre>
+        </div>
       ) : null}
     </div>
   );
