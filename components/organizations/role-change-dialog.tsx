@@ -29,7 +29,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useOrg } from "@/lib/org-context";
-import { formatRoleLabel, rolesBelow, type OrgRole } from "@/lib/org-roles";
+import {
+  formatRoleLabel,
+  ORG_ROLES,
+  rolesBelow,
+  type OrgRole,
+} from "@/lib/org-roles";
 
 type RoleChangeDialogProps = {
   open: boolean;
@@ -92,8 +97,12 @@ function RoleChangeForm({
   // admins; in that case we can't enforce escalation client-side, so we
   // fall back to allowing all role tiers and rely on the backend's
   // EscalationForbidden response if the call would actually escalate.
+  // An empty list here would dead-end the dialog for override admins, so
+  // the fallback is the full ORG_ROLES, not [].
   const callerRole = org.role;
-  const candidateRoles: OrgRole[] = callerRole ? rolesBelow(callerRole) : [];
+  const candidateRoles: OrgRole[] = callerRole
+    ? rolesBelow(callerRole)
+    : [...ORG_ROLES];
 
   const mutation = useMutation({
     ...changeOrganizationMemberRoleMutation(),
