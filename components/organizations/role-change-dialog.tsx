@@ -28,7 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useActiveOrg } from "@/lib/org-context";
+import { useOrg } from "@/lib/org-context";
 import { formatRoleLabel, rolesBelow, type OrgRole } from "@/lib/org-roles";
 
 type RoleChangeDialogProps = {
@@ -84,7 +84,7 @@ function RoleChangeForm({
 }) {
   const t = useTranslations("organizations.members.roleChange");
   const tCommon = useTranslations("common.actions");
-  const org = useActiveOrg();
+  const org = useOrg();
   const queryClient = useQueryClient();
   const [role, setRole] = useState(currentRole);
 

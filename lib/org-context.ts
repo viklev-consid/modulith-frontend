@@ -28,16 +28,16 @@ export type OrgContextValue = {
 
 export const OrgContext = createContext<OrgContextValue | null>(null);
 
-export function useActiveOrg(): OrgContextValue {
+export function useOrg(): OrgContextValue {
   const value = use(OrgContext);
   if (!value) {
     throw new Error(
-      "useActiveOrg must be used within an organization shell (o/[slug]/layout).",
+      "useOrg must be used within an organization shell (o/[slug]/layout).",
     );
   }
   return value;
 }
 
-export function useActiveOrgOptional(): OrgContextValue | null {
+export function useOrgOptional(): OrgContextValue | null {
   return use(OrgContext);
 }

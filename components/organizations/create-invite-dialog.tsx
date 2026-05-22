@@ -42,7 +42,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useActiveOrg } from "@/lib/org-context";
+import { useOrg } from "@/lib/org-context";
 import { formatRoleLabel, rolesBelow, type OrgRole } from "@/lib/org-roles";
 
 /**
@@ -75,7 +75,7 @@ export function CreateInviteDialog({
 function CreateInviteContent({ onClose }: { onClose: () => void }) {
   const t = useTranslations("organizations.invitations.create");
   const tCommon = useTranslations("common.actions");
-  const org = useActiveOrg();
+  const org = useOrg();
   const queryClient = useQueryClient();
 
   const callerRole = org.role ?? "";

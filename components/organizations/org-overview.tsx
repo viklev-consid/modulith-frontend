@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useActiveOrg } from "@/lib/org-context";
+import { useOrg } from "@/lib/org-context";
 
 /**
  * Minimal org landing page. Members, invitations, settings live in
@@ -19,7 +19,7 @@ import { useActiveOrg } from "@/lib/org-context";
  */
 export function OrgOverview() {
   const t = useTranslations("organizations.overview");
-  const org = useActiveOrg();
+  const org = useOrg();
 
   return (
     <Card>

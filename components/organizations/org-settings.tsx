@@ -13,7 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Empty, EmptyDescription, EmptyTitle } from "@/components/ui/empty";
-import { useActiveOrg } from "@/lib/org-context";
+import { useOrg } from "@/lib/org-context";
 import { ORG_PERMISSION } from "@/lib/org-permission-strings";
 
 /**
@@ -32,7 +32,7 @@ import { ORG_PERMISSION } from "@/lib/org-permission-strings";
  */
 export function OrgSettings() {
   const t = useTranslations("organizations.settings");
-  const org = useActiveOrg();
+  const org = useOrg();
   const canUpdate = usePermission(ORG_PERMISSION.OrgWrite, org.organizationId);
   const canDelete = usePermission(ORG_PERMISSION.OrgDelete, org.organizationId);
 

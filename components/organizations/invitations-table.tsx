@@ -45,7 +45,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useActiveOrg } from "@/lib/org-context";
+import { useOrg } from "@/lib/org-context";
 import { ORG_PERMISSION } from "@/lib/org-permission-strings";
 import { useHasOrgPermission } from "@/lib/org-permissions";
 
@@ -59,7 +59,7 @@ import { useHasOrgPermission } from "@/lib/org-permissions";
 export function InvitationsTable() {
   const t = useTranslations("organizations.invitations.table");
   const tActions = useTranslations("organizations.invitations.actions");
-  const org = useActiveOrg();
+  const org = useOrg();
   const canManage = useHasOrgPermission(
     org.organizationId,
     ORG_PERMISSION.InvitationsManage,
@@ -199,7 +199,7 @@ function RevokeInvitationDialog({
 }) {
   const t = useTranslations("organizations.invitations.revoke");
   const tCommon = useTranslations("common.actions");
-  const org = useActiveOrg();
+  const org = useOrg();
   const queryClient = useQueryClient();
 
   const mutation = useMutation({

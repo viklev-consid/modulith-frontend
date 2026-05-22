@@ -31,7 +31,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { useActiveOrg } from "@/lib/org-context";
+import { useOrg } from "@/lib/org-context";
 
 /**
  * Soft-delete the active organization.
@@ -48,7 +48,7 @@ import { useActiveOrg } from "@/lib/org-context";
 export function DeleteOrgDialog() {
   const t = useTranslations("organizations.settings.delete");
   const tCommon = useTranslations("common.actions");
-  const org = useActiveOrg();
+  const org = useOrg();
   const { push } = useRouter();
   const queryClient = useQueryClient();
   const [confirmSlug, setConfirmSlug] = useState("");

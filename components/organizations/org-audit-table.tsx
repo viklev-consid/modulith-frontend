@@ -31,7 +31,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useActiveOrg } from "@/lib/org-context";
+import { useOrg } from "@/lib/org-context";
 
 const DEFAULT_PAGE_SIZE = 20;
 
@@ -100,7 +100,7 @@ function PayloadCell({ payload }: { payload: string }) {
  */
 export function OrgAuditTable() {
   const t = useTranslations("organizations.audit");
-  const org = useActiveOrg();
+  const org = useOrg();
 
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
 

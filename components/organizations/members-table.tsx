@@ -55,7 +55,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useActiveOrg } from "@/lib/org-context";
+import { useOrg } from "@/lib/org-context";
 import { ORG_PERMISSION } from "@/lib/org-permission-strings";
 import { useHasOrgPermission } from "@/lib/org-permissions";
 import { roleRank } from "@/lib/org-roles";
@@ -80,7 +80,7 @@ type PendingDialog =
 export function MembersTable() {
   const t = useTranslations("organizations.members.table");
   const tActions = useTranslations("organizations.members.actions");
-  const org = useActiveOrg();
+  const org = useOrg();
   const { currentUser } = useAuth();
   const canManage = useHasOrgPermission(
     org.organizationId,
@@ -366,7 +366,7 @@ function RemoveMemberDialog({
 }) {
   const t = useTranslations("organizations.members.remove");
   const tCommon = useTranslations("common.actions");
-  const org = useActiveOrg();
+  const org = useOrg();
   const queryClient = useQueryClient();
   const { replace } = useRouter();
 
