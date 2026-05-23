@@ -23,14 +23,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useActiveOrg } from "@/lib/active-org-context";
+import { orgSwitchTarget } from "@/lib/org-switch-target";
 
 /**
  * Organization switcher.
  *
- * Reads `/v1/organizations/my` from the cache (the auth provider prefetches
- * it). The active organization is inferred from the current URL slug
- * (`/app/o/:slug/...`) — there is no separate server-side
- * "active org" state in v1. The switcher just routes to the chosen slug.
+ * Reads `/v1/organizations/my` from the cache and the app-level active-org
+ * context. Selecting an org pins it for cross-org / personal routes; when the
+ * user is already in an org-scoped route, selection preserves the current
+ * sub-page under the newly selected slug.
  *
  * When the user has no organizations, the trigger collapses to a
  * "Create organization" CTA.
@@ -40,19 +42,9 @@ export function OrgSwitcher() {
   const { data, isLoading } = useQuery(listMyOrganizationsOptions());
   const pathname = usePathname();
   const { push } = useRouter();
+  const { activeOrg, pin } = useActiveOrg();
 
   const organizations = data?.organizations ?? [];
-
-  // Extract the active slug from the URL so the trigger reflects whatever
-  // org the user is currently inside. Matches `/app/o/:slug`.
-  const activeSlug = (() => {
-    const match = pathname.match(/^\/app\/o\/([^/]+)/);
-    return match ? match[1] : null;
-  })();
-
-  const activeOrg = activeSlug
-    ? organizations.find((org) => org.slug === activeSlug)
-    : null;
 
   if (!isLoading && organizations.length === 0) {
     // No memberships: surface the create affordance directly. The switcher
@@ -102,22 +94,22 @@ export function OrgSwitcher() {
         <DropdownMenuGroup>
           <DropdownMenuLabel>{t("label")}</DropdownMenuLabel>
           {organizations.map((org) => {
-            const isActive = org.slug === activeSlug;
-            // Row + gear pair: the row navigates to the org's overview
-            // (and pins it via URL → ActiveOrg sync), the gear jumps
-            // straight to settings for quick management without clicking
-            // through. Both affordances are real <Link>s so middle-click
-            // / cmd-click open in new tabs as expected.
+            const isActive = org.organizationId === activeOrg?.organizationId;
+            // Row + gear pair: the row updates app-level selected org. If the
+            // current page is org-scoped, it also preserves the current
+            // sub-page under the newly selected slug. The gear remains a real
+            // link for quick management and direct tab-opening.
             return (
               <div key={org.organizationId} className="flex items-center gap-1">
                 <DropdownMenuItem
                   className="flex-1"
-                  render={
-                    <Link
-                      href={`/app/o/${org.slug}`}
-                      className="flex items-center justify-between gap-2"
-                    />
-                  }
+                  onClick={() => {
+                    pin(org.slug);
+                    const target = orgSwitchTarget(pathname, org.slug);
+                    if (target && target !== pathname) {
+                      push(target);
+                    }
+                  }}
                 >
                   <span className="flex min-w-0 flex-col">
                     <span className="truncate text-sm">{org.name}</span>
