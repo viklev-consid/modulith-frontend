@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  BellIcon,
   GaugeIcon,
   HelpCircleIcon,
   SearchIcon,
@@ -33,7 +32,7 @@ const ADMIN_PERMISSIONS = adminRoutes.map((route) => route.permission);
 
 /**
  * Sidebar shape:
- *   Header — brand + cross-org links (Dashboard, Notifications) + Picker
+ *   Header — brand + Dashboard + Picker
  *   Content — active-org contextual nav (rendered by <OrgNav/>)
  *   Footer — Search, Administration, Personal group, Help, ProfileMenu
  *
@@ -74,16 +73,6 @@ export function AppSidebar({ onSearchOpen }: { onSearchOpen: () => void }) {
               >
                 <GaugeIcon />
                 <span>{t("dashboard")}</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                isActive={isActive("/app/notifications")}
-                tooltip={t("notifications")}
-                render={<Link href="/app/notifications" />}
-              >
-                <BellIcon />
-                <span>{t("notifications")}</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
