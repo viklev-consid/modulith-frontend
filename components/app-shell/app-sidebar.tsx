@@ -64,7 +64,7 @@ export function AppSidebar({ onSearchOpen }: { onSearchOpen: () => void }) {
           </div>
         </div>
 
-        <SidebarGroup>
+        <SidebarGroup className="p-0">
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton
@@ -89,7 +89,7 @@ export function AppSidebar({ onSearchOpen }: { onSearchOpen: () => void }) {
           </SidebarMenu>
         </SidebarGroup>
 
-        <div className="px-2 group-data-[collapsible=icon]:hidden">
+        <div className="group-data-[collapsible=icon]:hidden">
           <OrgSwitcher />
         </div>
       </SidebarHeader>
@@ -126,7 +126,7 @@ export function AppSidebar({ onSearchOpen }: { onSearchOpen: () => void }) {
           </Can>
         </SidebarMenu>
 
-        <SidebarGroup>
+        <SidebarGroup className="p-0">
           <SidebarGroupLabel>{t("personal")}</SidebarGroupLabel>
           <SidebarMenu>
             <SidebarMenuItem>

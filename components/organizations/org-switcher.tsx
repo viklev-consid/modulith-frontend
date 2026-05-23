@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import {
@@ -40,7 +40,6 @@ import { orgSwitchTarget } from "@/lib/org-switch-target";
 export function OrgSwitcher() {
   const t = useTranslations("organizations.shell.switcher");
   const { data, isLoading } = useQuery(listMyOrganizationsOptions());
-  const pathname = usePathname();
   const { push } = useRouter();
   const { activeOrg, pin } = useActiveOrg();
 
@@ -105,6 +104,7 @@ export function OrgSwitcher() {
                   className="flex-1"
                   onClick={() => {
                     pin(org.slug);
+                    const pathname = window.location.pathname;
                     const target = orgSwitchTarget(pathname, org.slug);
                     if (target && target !== pathname) {
                       push(target);
