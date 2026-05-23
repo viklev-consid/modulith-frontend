@@ -30,6 +30,8 @@ Authentication, onboarding, and permissions are split by layer:
 
 The session cookie stores access token, refresh token, expiry, and minimal public identity. Permissions are fetched from `GET /v1/users/me` through the BFF boundary and hydrated into React Query for protected routes.
 
+> **Update (ADR 0010):** Per-org scoped permissions are now a first-class second layer, sourced from `GET /v1/organizations/my`. The table above and the `<Can>` row in particular describe the global layer only. See [ADR 0010](0010-org-scoped-permissions-and-platform-override.md) for the org-scoped guards (`<Can inOrg=...>`, `useHasOrgPermission`, `useCanInActiveOrg`) and the `PlatformOverride` carve-out.
+
 ## Consequences
 
 The cookie remains small and sensitive data stays out of client JavaScript. Permission checks can evolve with backend claims without changing the cookie format.

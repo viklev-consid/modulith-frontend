@@ -12,6 +12,8 @@ ADRs capture decisions that future humans and agents should preserve unless ther
 - [0006 - Verify Changes By Risk And Boundary](./0006-verification-and-agent-workflow.md)
 - [0007 - Use App Router Route Groups And Next Proxy Deliberately](./0007-app-router-route-groups-and-next-proxy.md)
 - [0008 - Track Documentation Drift As A First-Class Maintenance Concern](./0008-documentation-drift.md)
+- [0009 - Prefer Server Defaults With React Query Hydration](./0009-server-default-query-hydration.md)
+- [0010 - Org-Scoped Permissions And PlatformOverride](./0010-org-scoped-permissions-and-platform-override.md)
 
 ## Template
 
