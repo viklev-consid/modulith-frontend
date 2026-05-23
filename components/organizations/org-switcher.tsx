@@ -9,7 +9,6 @@ import {
   CheckIcon,
   ChevronsUpDownIcon,
   PlusIcon,
-  SettingsIcon,
 } from "lucide-react";
 
 import { listMyOrganizationsOptions } from "@/api/generated/@tanstack/react-query.gen";
@@ -94,41 +93,32 @@ export function OrgSwitcher() {
           <DropdownMenuLabel>{t("label")}</DropdownMenuLabel>
           {organizations.map((org) => {
             const isActive = org.organizationId === activeOrg?.organizationId;
-            // Row + gear pair: the row updates app-level selected org. If the
-            // current page is org-scoped, it also preserves the current
-            // sub-page under the newly selected slug. The gear remains a real
-            // link for quick management and direct tab-opening.
+            // The row updates app-level selected org. If the current page is
+            // org-scoped, it also preserves the current sub-page under the
+            // newly selected slug.
             return (
-              <div key={org.organizationId} className="flex items-center gap-1">
-                <DropdownMenuItem
-                  className="flex-1"
-                  onClick={() => {
-                    pin(org.slug);
-                    const pathname = window.location.pathname;
-                    const target = orgSwitchTarget(pathname, org.slug);
-                    if (target && target !== pathname) {
-                      push(target);
-                    }
-                  }}
-                >
-                  <span className="flex min-w-0 flex-col">
-                    <span className="truncate text-sm">{org.name}</span>
-                    <span className="truncate text-xs text-muted-foreground">
-                      /{org.slug}
-                    </span>
+              <DropdownMenuItem
+                key={org.organizationId}
+                className="items-center justify-between gap-2"
+                onClick={() => {
+                  pin(org.slug);
+                  const pathname = window.location.pathname;
+                  const target = orgSwitchTarget(pathname, org.slug);
+                  if (target && target !== pathname) {
+                    push(target);
+                  }
+                }}
+              >
+                <span className="flex min-w-0 flex-col">
+                  <span className="truncate text-sm">{org.name}</span>
+                  <span className="truncate text-xs text-muted-foreground">
+                    /{org.slug}
                   </span>
-                  {isActive ? (
-                    <CheckIcon className="size-4 shrink-0" aria-hidden="true" />
-                  ) : null}
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="shrink-0 px-2"
-                  aria-label={t("manage")}
-                  render={<Link href={`/app/o/${org.slug}/settings`} />}
-                >
-                  <SettingsIcon className="size-4" aria-hidden="true" />
-                </DropdownMenuItem>
-              </div>
+                </span>
+                {isActive ? (
+                  <CheckIcon className="size-4 shrink-0" aria-hidden="true" />
+                ) : null}
+              </DropdownMenuItem>
             );
           })}
         </DropdownMenuGroup>

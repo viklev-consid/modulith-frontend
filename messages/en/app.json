@@ -1,7 +1,47 @@
 {
   "dashboard": {
     "title": "Dashboard",
-    "body": "The application shell will grow here once profile, notifications, and admin workflows are wired."
+    "body": "A placeholder operations view for the selected organization context.",
+    "placeholder": "Placeholder",
+    "stats": {
+      "activeUsers": "Active users",
+      "activeUsersDetail": "+12% from last month",
+      "workflowRuns": "Workflow runs",
+      "workflowRunsDetail": "Across all demo modules",
+      "approvals": "Pending approvals",
+      "approvalsDetail": "Typical dashboard signal"
+    },
+    "activity": {
+      "title": "Recent activity",
+      "description": "Fictional events showing where operational updates will live.",
+      "items": {
+        "invites": {
+          "title": "Invitations reviewed",
+          "body": "Three pending collaborators were prepared for manager approval.",
+          "time": "12m ago"
+        },
+        "audit": {
+          "title": "Audit export prepared",
+          "body": "A weekly compliance package is ready for download.",
+          "time": "1h ago"
+        },
+        "policy": {
+          "title": "Policy check completed",
+          "body": "No critical configuration drift was detected.",
+          "time": "Today"
+        }
+      }
+    },
+    "health": {
+      "title": "Workspace health",
+      "description": "Demo readiness indicators for the app shell.",
+      "ok": "OK",
+      "items": {
+        "sync": "Directory sync",
+        "permissions": "Permissions model",
+        "notifications": "Notification stream"
+      }
+    }
   },
   "shell": {
     "brand": "Modulith",
