@@ -38,6 +38,7 @@ import { Input } from "@/components/ui/input";
 import { isValidSlug, suggestSlug } from "@/lib/slug";
 
 type CreateOrgFormProps = {
+  variant?: "card" | "plain";
   /**
    * Called after a successful create. When provided, replaces the
    * default navigation to `/app/o/<slug>`. The modal variant uses this
@@ -53,6 +54,7 @@ type CreateOrgFormProps = {
 };
 
 export function CreateOrgForm({
+  variant = "card",
   onSuccess,
   onCancel,
 }: CreateOrgFormProps = {}) {
@@ -135,99 +137,115 @@ export function CreateOrgForm({
     },
   });
 
-  return (
-    <Card>
-      <CardHeader>
+  const header =
+    variant === "card" ? (
+      <>
         <CardTitle>{t("title")}</CardTitle>
         <CardDescription>{t("description")}</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form
-          className="grid max-w-xl gap-5"
-          onSubmit={(event) => {
-            event.preventDefault();
-            void form.handleSubmit();
-          }}
-        >
-          <FieldGroup>
-            <form.Field name="name">
-              {(field) => (
-                <Field data-invalid={Boolean(fieldErrors.name)}>
-                  <FieldLabel htmlFor={field.name}>
-                    {t("name.label")}
-                  </FieldLabel>
-                  <FieldContent>
-                    <Input
-                      id={field.name}
-                      type="text"
-                      value={field.state.value}
-                      placeholder={t("name.placeholder")}
-                      onChange={(event) => {
-                        const next = event.target.value;
-                        field.handleChange(next);
-                        if (!slugTouchedRef.current) {
-                          form.setFieldValue("slug", suggestSlug(next));
-                        }
-                      }}
-                      aria-invalid={Boolean(fieldErrors.name)}
-                    />
-                    <FieldDescription>{t("name.hint")}</FieldDescription>
-                    <FieldError>{fieldErrors.name}</FieldError>
-                  </FieldContent>
-                </Field>
-              )}
-            </form.Field>
-            <form.Field name="slug">
-              {(field) => (
-                <Field data-invalid={Boolean(fieldErrors.slug)}>
-                  <FieldLabel htmlFor={field.name}>
-                    {t("slug.label")}
-                  </FieldLabel>
-                  <FieldContent>
-                    <Input
-                      id={field.name}
-                      type="text"
-                      value={field.state.value}
-                      placeholder={t("slug.placeholder")}
-                      onChange={(event) => {
-                        const next = event.target.value;
-                        // Clearing the slug field resumes name-driven
-                        // suggestions; any non-empty edit locks them off.
-                        slugTouchedRef.current = next.length > 0;
-                        field.handleChange(next);
-                      }}
-                      aria-invalid={Boolean(fieldErrors.slug)}
-                    />
-                    <FieldDescription>{t("slug.hint")}</FieldDescription>
-                    <FieldError>{fieldErrors.slug}</FieldError>
-                  </FieldContent>
-                </Field>
-              )}
-            </form.Field>
-          </FieldGroup>
-          <div className="flex gap-2">
-            <form.Subscribe selector={(state) => state.isSubmitting}>
-              {(isSubmitting) => (
-                <Button
-                  type="submit"
-                  disabled={isSubmitting || mutation.isPending}
-                >
-                  {isSubmitting || mutation.isPending
-                    ? t("submitting")
-                    : t("submit")}
-                </Button>
-              )}
-            </form.Subscribe>
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => (onCancel ? onCancel() : push("/app"))}
-            >
-              {t("cancel")}
+      </>
+    ) : (
+      <div className="grid gap-1">
+        <h2 className="font-heading text-sm font-medium">{t("title")}</h2>
+        <p className="text-xs/relaxed text-muted-foreground">
+          {t("description")}
+        </p>
+      </div>
+    );
+
+  const formFields = (
+    <form
+      className="grid max-w-xl gap-5"
+      onSubmit={(event) => {
+        event.preventDefault();
+        void form.handleSubmit();
+      }}
+    >
+      <FieldGroup>
+        <form.Field name="name">
+          {(field) => (
+            <Field data-invalid={Boolean(fieldErrors.name)}>
+              <FieldLabel htmlFor={field.name}>{t("name.label")}</FieldLabel>
+              <FieldContent>
+                <Input
+                  id={field.name}
+                  type="text"
+                  value={field.state.value}
+                  placeholder={t("name.placeholder")}
+                  onChange={(event) => {
+                    const next = event.target.value;
+                    field.handleChange(next);
+                    if (!slugTouchedRef.current) {
+                      form.setFieldValue("slug", suggestSlug(next));
+                    }
+                  }}
+                  aria-invalid={Boolean(fieldErrors.name)}
+                />
+                <FieldDescription>{t("name.hint")}</FieldDescription>
+                <FieldError>{fieldErrors.name}</FieldError>
+              </FieldContent>
+            </Field>
+          )}
+        </form.Field>
+        <form.Field name="slug">
+          {(field) => (
+            <Field data-invalid={Boolean(fieldErrors.slug)}>
+              <FieldLabel htmlFor={field.name}>{t("slug.label")}</FieldLabel>
+              <FieldContent>
+                <Input
+                  id={field.name}
+                  type="text"
+                  value={field.state.value}
+                  placeholder={t("slug.placeholder")}
+                  onChange={(event) => {
+                    const next = event.target.value;
+                    // Clearing the slug field resumes name-driven
+                    // suggestions; any non-empty edit locks them off.
+                    slugTouchedRef.current = next.length > 0;
+                    field.handleChange(next);
+                  }}
+                  aria-invalid={Boolean(fieldErrors.slug)}
+                />
+                <FieldDescription>{t("slug.hint")}</FieldDescription>
+                <FieldError>{fieldErrors.slug}</FieldError>
+              </FieldContent>
+            </Field>
+          )}
+        </form.Field>
+      </FieldGroup>
+      <div className="flex gap-2">
+        <form.Subscribe selector={(state) => state.isSubmitting}>
+          {(isSubmitting) => (
+            <Button type="submit" disabled={isSubmitting || mutation.isPending}>
+              {isSubmitting || mutation.isPending
+                ? t("submitting")
+                : t("submit")}
             </Button>
-          </div>
-        </form>
-      </CardContent>
+          )}
+        </form.Subscribe>
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={() => (onCancel ? onCancel() : push("/app"))}
+        >
+          {t("cancel")}
+        </Button>
+      </div>
+    </form>
+  );
+
+  if (variant === "plain") {
+    return (
+      <div className="grid gap-4">
+        {header}
+        {formFields}
+      </div>
+    );
+  }
+
+  return (
+    <Card>
+      <CardHeader>{header}</CardHeader>
+      <CardContent>{formFields}</CardContent>
     </Card>
   );
 }
