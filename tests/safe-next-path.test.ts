@@ -31,8 +31,8 @@ describe("safeNextPath", () => {
   });
 
   it("preserves a path with multiple query params", () => {
-    expect(safeNextPath("/app/settings?tab=email&from=invite")).toBe(
-      "/app/settings?tab=email&from=invite",
+    expect(safeNextPath("/app/me/settings?tab=email&from=invite")).toBe(
+      "/app/me/settings?tab=email&from=invite",
     );
   });
 

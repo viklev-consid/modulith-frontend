@@ -5,6 +5,7 @@
     "steps": {
       "terms": "Terms",
       "avatar": "Photo",
+      "createOrg": "Organization",
       "complete": "Complete"
     },
     "terms": {
@@ -23,6 +24,11 @@
       "description": "Optional. You can change it later in Profile settings.",
       "skip": "Skip for now",
       "continue": "Continue"
+    },
+    "createOrg": {
+      "title": "Create your first organization",
+      "description": "Optional. Organizations are workspaces where you collaborate with others. You can also create or join one later from the picker.",
+      "skip": "I'll do this later"
     },
     "complete": {
       "title": "Ready to enter Modulith",

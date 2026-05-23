@@ -19,6 +19,15 @@ export const zAcceptLegalDocumentsRequest = z.object({
   acceptedDocuments: z.array(zAcceptedLegalDocumentRequest).optional(),
 });
 
+export const zAcceptOrganizationInvitationRequest = z.object({
+  invitationToken: z.string(),
+});
+
+export const zAcceptOrganizationInvitationResponse = z.object({
+  organizationId: z.uuid(),
+  role: z.string(),
+});
+
 export const zAuditEntryDto = z.object({
   id: z.uuid(),
   eventType: z.string(),
@@ -26,6 +35,15 @@ export const zAuditEntryDto = z.object({
   resourceType: z.string().nullable(),
   resourceId: z.uuid().nullable(),
   occurredAt: z.iso.datetime(),
+});
+
+export const zChangeOrganizationMemberRoleRequest = z.object({
+  role: z.string(),
+});
+
+export const zChangeOrganizationMemberRoleResponse = z.object({
+  userId: z.uuid(),
+  role: z.string(),
 });
 
 export const zChangePasswordRequest = z.object({
@@ -87,6 +105,31 @@ export const zCreateInvitationResponse = z.object({
   email: z.string(),
   token: z.string(),
   expiresAt: z.iso.datetime(),
+});
+
+export const zCreateOrganizationInvitationRequest = z.object({
+  email: z.string(),
+  role: z.string(),
+});
+
+export const zCreateOrganizationInvitationResponse = z.object({
+  invitationId: z.uuid(),
+  email: z.string(),
+  role: z.string(),
+  expiresAt: z.iso.datetime(),
+  rawToken: z.string(),
+});
+
+export const zCreateOrganizationRequest = z.object({
+  name: z.string(),
+  slug: z.string().nullish(),
+});
+
+export const zCreateOrganizationResponse = z.object({
+  organizationId: z.uuid(),
+  name: z.string(),
+  slug: z.string(),
+  role: z.string(),
 });
 
 export const zCreateProductRequest = z.object({
@@ -252,6 +295,13 @@ export const zGetLegalDocumentResponse = z.object({
   publishedAt: z.iso.datetime(),
   contentHash: z.string(),
   markdown: z.string(),
+});
+
+export const zGetOrganizationResponse = z.object({
+  organizationId: z.uuid(),
+  name: z.string(),
+  slug: z.string(),
+  accessMode: z.string(),
 });
 
 export const zGetProductByIdResponse = z.object({
@@ -476,6 +526,19 @@ export const zLogoutResponse = z.object({
   message: z.string().optional().default("Logged out successfully."),
 });
 
+export const zMyOrganizationItem = z.object({
+  organizationId: z.uuid(),
+  name: z.string(),
+  slug: z.string(),
+  role: z.string(),
+  permissions: z.array(z.string()),
+  permissionsVersion: z.string(),
+});
+
+export const zListMyOrganizationsResponse = z.object({
+  organizations: z.array(zMyOrganizationItem),
+});
+
 export const zNotificationCategory = z.int();
 
 export const zMyNotificationPreferenceResponse = z.object({
@@ -526,6 +589,80 @@ export const zOnboardingLegalDocumentResponse = z.object({
 
 export const zGetOnboardingLegalRequirementsResponse = z.object({
   documents: z.array(zOnboardingLegalDocumentResponse),
+});
+
+export const zOrganizationAuditEntryDto = z.object({
+  id: z.uuid(),
+  eventType: z.string(),
+  actorId: z.uuid().nullable(),
+  resourceType: z.string().nullable(),
+  resourceId: z.uuid().nullable(),
+  occurredAt: z.iso.datetime(),
+  payload: z.string(),
+});
+
+export const zGetOrganizationAuditResponse = z.object({
+  organizationId: z.uuid(),
+  accessMode: z.string(),
+  entries: z.array(zOrganizationAuditEntryDto),
+  total: z.union([
+    z
+      .int()
+      .min(-2147483648, {
+        error: "Invalid value: Expected int32 to be >= -2147483648",
+      })
+      .max(2147483647, {
+        error: "Invalid value: Expected int32 to be <= 2147483647",
+      }),
+    z.string().regex(/^-?(?:0|[1-9]\d*)$/),
+  ]),
+  page: z.union([
+    z
+      .int()
+      .min(-2147483648, {
+        error: "Invalid value: Expected int32 to be >= -2147483648",
+      })
+      .max(2147483647, {
+        error: "Invalid value: Expected int32 to be <= 2147483647",
+      }),
+    z.string().regex(/^-?(?:0|[1-9]\d*)$/),
+  ]),
+  pageSize: z.union([
+    z
+      .int()
+      .min(-2147483648, {
+        error: "Invalid value: Expected int32 to be >= -2147483648",
+      })
+      .max(2147483647, {
+        error: "Invalid value: Expected int32 to be <= 2147483647",
+      }),
+    z.string().regex(/^-?(?:0|[1-9]\d*)$/),
+  ]),
+});
+
+export const zOrganizationInvitationItem = z.object({
+  invitationId: z.uuid(),
+  email: z.string(),
+  role: z.string(),
+  expiresAt: z.iso.datetime(),
+  isPending: z.boolean(),
+});
+
+export const zListOrganizationInvitationsResponse = z.object({
+  invitations: z.array(zOrganizationInvitationItem),
+});
+
+export const zOrganizationMemberItem = z.object({
+  userId: z.uuid().nullable(),
+  role: z.string(),
+  joinedAt: z.iso.datetime(),
+  isAnonymized: z.boolean(),
+  displayName: z.string().nullable(),
+  email: z.string().nullable(),
+});
+
+export const zListOrganizationMembersResponse = z.object({
+  members: z.array(zOrganizationMemberItem),
 });
 
 export const zPersonalDataExport = z.object({
@@ -599,6 +736,7 @@ export const zRegisterRequest = z.object({
   password: z.string(),
   displayName: z.string(),
   invitationToken: z.string().nullish(),
+  organizationInvitationToken: z.string().nullish(),
 });
 
 export const zRegisterResponse = z.object({
@@ -720,6 +858,17 @@ export const zUpdateMyNotificationPreferenceRequest = z.object({
 
 export const zUpdateMyNotificationPreferencesRequest = z.object({
   preferences: z.array(zUpdateMyNotificationPreferenceRequest),
+});
+
+export const zUpdateOrganizationRequest = z.object({
+  name: z.string(),
+  slug: z.string(),
+});
+
+export const zUpdateOrganizationResponse = z.object({
+  organizationId: z.uuid(),
+  name: z.string(),
+  slug: z.string(),
 });
 
 export const zUpdateProfileRequest = z.object({
@@ -1104,6 +1253,161 @@ export const zUpdateMyNotificationPreferencesBody =
  * No Content
  */
 export const zUpdateMyNotificationPreferencesResponse = z.void();
+
+export const zCreateOrganizationBody = zCreateOrganizationRequest;
+
+/**
+ * Created
+ */
+export const zCreateOrganizationResponse2 = zCreateOrganizationResponse;
+
+/**
+ * OK
+ */
+export const zListMyOrganizationsResponse2 = zListMyOrganizationsResponse;
+
+export const zDeleteOrganizationPath = z.object({
+  organizationRef: z.string(),
+});
+
+/**
+ * No Content
+ */
+export const zDeleteOrganizationResponse = z.void();
+
+export const zGetOrganizationPath = z.object({
+  organizationRef: z.string(),
+});
+
+/**
+ * OK
+ */
+export const zGetOrganizationResponse2 = zGetOrganizationResponse;
+
+export const zUpdateOrganizationBody = zUpdateOrganizationRequest;
+
+export const zUpdateOrganizationPath = z.object({
+  organizationRef: z.string(),
+});
+
+/**
+ * OK
+ */
+export const zUpdateOrganizationResponse2 = zUpdateOrganizationResponse;
+
+export const zListOrganizationMembersPath = z.object({
+  organizationRef: z.string(),
+});
+
+/**
+ * OK
+ */
+export const zListOrganizationMembersResponse2 =
+  zListOrganizationMembersResponse;
+
+export const zChangeOrganizationMemberRoleBody =
+  zChangeOrganizationMemberRoleRequest;
+
+export const zChangeOrganizationMemberRolePath = z.object({
+  organizationRef: z.string(),
+  userId: z.uuid(),
+});
+
+/**
+ * OK
+ */
+export const zChangeOrganizationMemberRoleResponse2 =
+  zChangeOrganizationMemberRoleResponse;
+
+export const zRemoveOrganizationMemberPath = z.object({
+  organizationRef: z.string(),
+  userId: z.uuid(),
+});
+
+/**
+ * No Content
+ */
+export const zRemoveOrganizationMemberResponse = z.void();
+
+export const zListOrganizationInvitationsPath = z.object({
+  organizationRef: z.string(),
+});
+
+/**
+ * OK
+ */
+export const zListOrganizationInvitationsResponse2 =
+  zListOrganizationInvitationsResponse;
+
+export const zCreateOrganizationInvitationBody =
+  zCreateOrganizationInvitationRequest;
+
+export const zCreateOrganizationInvitationPath = z.object({
+  organizationRef: z.string(),
+});
+
+/**
+ * OK
+ */
+export const zCreateOrganizationInvitationResponse2 =
+  zCreateOrganizationInvitationResponse;
+
+export const zAcceptOrganizationInvitationBody =
+  zAcceptOrganizationInvitationRequest;
+
+/**
+ * OK
+ */
+export const zAcceptOrganizationInvitationResponse2 =
+  zAcceptOrganizationInvitationResponse;
+
+export const zRevokeOrganizationInvitationPath = z.object({
+  organizationRef: z.string(),
+  invitationId: z.uuid(),
+});
+
+/**
+ * No Content
+ */
+export const zRevokeOrganizationInvitationResponse = z.void();
+
+export const zGetOrganizationAuditPath = z.object({
+  organizationRef: z.string(),
+});
+
+export const zGetOrganizationAuditQuery = z.object({
+  page: z
+    .union([
+      z
+        .int()
+        .min(-2147483648, {
+          error: "Invalid value: Expected int32 to be >= -2147483648",
+        })
+        .max(2147483647, {
+          error: "Invalid value: Expected int32 to be <= 2147483647",
+        }),
+      z.string().regex(/^-?(?:0|[1-9]\d*)$/),
+    ])
+    .optional(),
+  pageSize: z
+    .union([
+      z
+        .int()
+        .min(-2147483648, {
+          error: "Invalid value: Expected int32 to be >= -2147483648",
+        })
+        .max(2147483647, {
+          error: "Invalid value: Expected int32 to be <= 2147483647",
+        }),
+      z.string().regex(/^-?(?:0|[1-9]\d*)$/),
+    ])
+    .optional(),
+});
+
+/**
+ * OK
+ */
+export const zGetOrganizationAuditResponse2 = zGetOrganizationAuditResponse;
 
 export const zRegisterBody = zRegisterRequest;
 

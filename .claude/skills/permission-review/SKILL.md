@@ -1,7 +1,10 @@
 ---
 name: permission-review
-description: Use when creating or modifying components that use the <Can> component, usePermission hook, or hasPermission checks. Validates permission strings against the backend API and checks for consistent usage patterns.
-version: "1.0.0"
+description: |
+  Audit permission strings and guard placement in UI code. Catches typos, stale strings, duplicated checks, and missing scope (e.g. `inOrg=` omitted on a per-org check).
+  TRIGGER when an edit touches: `components/can.tsx`; any file containing `<Can`, `usePermission(`, `useHasOrgPermission(`, or `hasOrgPermission(`; `lib/org-permissions.ts`, `lib/org-permission-strings.ts`, `lib/org-roles.ts`; anything under `components/organizations/` or `app/(app)/app/organizations/`; or when the user asks to "audit permissions", "check permission strings", or "verify guards".
+  SKIP when changes are styling-only, copy-only, or limited to generated files under `api/generated/`.
+version: "1.1.0"
 ---
 
 # Permission-Aware Component Reviewer
@@ -12,9 +15,10 @@ Validates that permission strings used in UI components are correct and consiste
 
 Run this review after creating or modifying any component that:
 
-- Uses `<Can permission="...">`
-- Calls `usePermission("...")`
-- Accesses `permissions` from `useAuth()`
+- Uses `<Can permission="...">` or `<Can anyOf={[...]} inOrg={orgId}>`
+- Calls `usePermission("...")` or `usePermission("...", orgId)`
+- Calls `useHasOrgPermission(orgId, "...")` or the imperative `hasOrgPermission(qc, orgId, "...")`
+- Accesses `permissions` from `useAuth()` (global / platform checks)
 
 ## Review steps
 
@@ -22,8 +26,8 @@ Run this review after creating or modifying any component that:
 
 ```bash
 grep -rn 'permission=' --include="*.tsx" --include="*.ts" app/ components/ | grep -v node_modules | grep -v api/generated
-grep -rn 'usePermission(' --include="*.tsx" --include="*.ts" app/ components/ | grep -v node_modules | grep -v api/generated
-grep -rn 'hasPermission(' --include="*.tsx" --include="*.ts" app/ components/ | grep -v node_modules | grep -v api/generated
+grep -rn 'usePermission(\|useHasOrgPermission(\|hasOrgPermission(\|hasPermission(' --include="*.tsx" --include="*.ts" app/ components/ lib/ | grep -v node_modules | grep -v api/generated
+grep -rn 'ORG_PERMISSION\.' --include="*.tsx" --include="*.ts" app/ components/ lib/ | grep -v node_modules | grep -v api/generated
 ```
 
 ### 2. Cross-reference against the backend API

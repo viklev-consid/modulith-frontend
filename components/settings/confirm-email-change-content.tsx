@@ -91,7 +91,7 @@ export function ConfirmEmailChangeContent() {
       <CardContent className="flex flex-col gap-3">
         {isConfirmed || isError ? (
           <Link
-            href={isConfirmed ? "/app" : "/app/settings/email"}
+            href={isConfirmed ? "/app" : "/app/me/settings/email"}
             className={buttonVariants()}
           >
             {isConfirmed ? t("success.cta") : t("error.cta")}

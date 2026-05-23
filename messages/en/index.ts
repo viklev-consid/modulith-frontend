@@ -6,9 +6,11 @@ import authComponents from "./authComponents.json";
 import common from "./common.json";
 import components from "./components.json";
 import errors from "./errors.json";
+import invite from "./invite.json";
 import marketing from "./marketing.json";
 import metadata from "./metadata.json";
 import onboarding from "./onboarding.json";
+import organizations from "./organizations.json";
 import settings from "./settings.json";
 import settingsForms from "./settingsForms.json";
 
@@ -21,9 +23,11 @@ const messages = {
   common,
   components,
   errors,
+  invite,
   marketing,
   metadata,
   onboarding,
+  organizations,
   settings,
   settingsForms,
 } as const;

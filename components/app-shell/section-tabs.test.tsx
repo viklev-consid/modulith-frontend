@@ -4,24 +4,24 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { SectionTabs } from "@/components/app-shell/section-tabs";
 
-let mockPath = "/app/settings";
+let mockPath = "/app/me/settings";
 vi.mock("next/navigation", () => ({
   usePathname: () => mockPath,
 }));
 
 const tabs = [
-  { href: "/app/settings", label: "Profile", icon: UserIcon },
-  { href: "/app/settings/password", label: "Password", icon: KeyRoundIcon },
-  { href: "/app/settings/email", label: "Email", icon: MailIcon },
+  { href: "/app/me/settings", label: "Profile", icon: UserIcon },
+  { href: "/app/me/settings/password", label: "Password", icon: KeyRoundIcon },
+  { href: "/app/me/settings/email", label: "Email", icon: MailIcon },
 ];
 
 describe("SectionTabs", () => {
   beforeEach(() => {
-    mockPath = "/app/settings";
+    mockPath = "/app/me/settings";
   });
 
   it("marks the section root active only on its exact path", () => {
-    mockPath = "/app/settings";
+    mockPath = "/app/me/settings";
     render(<SectionTabs tabs={tabs} />);
     expect(screen.getByRole("link", { name: /Profile/ })).toHaveAttribute(
       "aria-current",
@@ -33,7 +33,7 @@ describe("SectionTabs", () => {
   });
 
   it("does NOT keep the section root active on sub-paths", () => {
-    mockPath = "/app/settings/password";
+    mockPath = "/app/me/settings/password";
     render(<SectionTabs tabs={tabs} />);
     expect(screen.getByRole("link", { name: /Profile/ })).not.toHaveAttribute(
       "aria-current",
@@ -45,7 +45,7 @@ describe("SectionTabs", () => {
   });
 
   it("marks a leaf tab active on nested paths", () => {
-    mockPath = "/app/settings/password/extra";
+    mockPath = "/app/me/settings/password/extra";
     render(<SectionTabs tabs={tabs} />);
     expect(screen.getByRole("link", { name: /Password/ })).toHaveAttribute(
       "aria-current",

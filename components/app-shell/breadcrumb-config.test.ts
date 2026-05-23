@@ -16,16 +16,17 @@ describe("resolveBreadcrumb", () => {
     ]);
   });
 
-  it("returns Settings › Profile for /app/settings", () => {
-    expect(resolveBreadcrumb("/app/settings")).toEqual([
-      { ns: "app.shell.breadcrumb", key: "settings", href: "/app/settings" },
-      { ns: "settings.nav", key: "profile" },
+  it("returns Account › Settings for /app/me/settings", () => {
+    expect(resolveBreadcrumb("/app/me/settings")).toEqual([
+      { ns: "app.shell.breadcrumb", key: "account", href: "/app/me" },
+      { ns: "app.shell.breadcrumb", key: "settings" },
     ]);
   });
 
-  it("returns Settings › Password for /app/settings/password", () => {
-    expect(resolveBreadcrumb("/app/settings/password")).toEqual([
-      { ns: "app.shell.breadcrumb", key: "settings", href: "/app/settings" },
+  it("returns Account › Settings › Password for /app/me/settings/password", () => {
+    expect(resolveBreadcrumb("/app/me/settings/password")).toEqual([
+      { ns: "app.shell.breadcrumb", key: "account", href: "/app/me" },
+      { ns: "app.shell.breadcrumb", key: "settings", href: "/app/me/settings" },
       { ns: "settings.nav", key: "password" },
     ]);
   });
@@ -51,6 +52,40 @@ describe("resolveBreadcrumb", () => {
       { ns: "admin.nav", key: "users" },
     ]);
   });
+
+  it("returns Dashboard › Create organization for /app/organizations/new", () => {
+    expect(resolveBreadcrumb("/app/organizations/new")).toEqual([
+      { ns: "app.shell.breadcrumb", key: "dashboard", href: "/app" },
+      { ns: "app.shell.breadcrumb", key: "organizationsNew" },
+    ]);
+  });
+
+  it("returns Dashboard › Organization for /app/o/:slug", () => {
+    expect(resolveBreadcrumb("/app/o/acme")).toEqual([
+      { ns: "app.shell.breadcrumb", key: "dashboard", href: "/app" },
+      { ns: "app.shell.breadcrumb", key: "organizationsActive" },
+    ]);
+  });
+
+  it.each([
+    ["members", "organizationsMembers"],
+    ["invitations", "organizationsInvitations"],
+    ["audit", "organizationsAudit"],
+    ["settings", "organizationsSettings"],
+  ])(
+    "returns Dashboard › Organization › leaf for /app/o/:slug/%s",
+    (segment, key) => {
+      expect(resolveBreadcrumb(`/app/o/acme/${segment}`)).toEqual([
+        { ns: "app.shell.breadcrumb", key: "dashboard", href: "/app" },
+        {
+          ns: "app.shell.breadcrumb",
+          key: "organizationsActive",
+          href: "/app/o/acme",
+        },
+        { ns: "app.shell.breadcrumb", key },
+      ]);
+    },
+  );
 
   it("falls back to Dashboard for unknown paths", () => {
     expect(resolveBreadcrumb("/somewhere/else")).toEqual([

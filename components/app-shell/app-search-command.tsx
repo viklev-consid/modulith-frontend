@@ -85,7 +85,7 @@ export function AppSearchCommand({
           )}
           <CommandSeparator />
           <CommandGroup heading={t("settings")}>
-            <CommandItem onSelect={() => go("/app/settings")}>
+            <CommandItem onSelect={() => go("/app/me/settings")}>
               <SettingsIcon />
               <span>{tNav("settings")}</span>
             </CommandItem>

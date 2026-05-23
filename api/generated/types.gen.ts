@@ -21,6 +21,15 @@ export type AcceptLegalDocumentsRequest = {
   acceptedDocuments?: Array<AcceptedLegalDocumentRequest>;
 };
 
+export type AcceptOrganizationInvitationRequest = {
+  invitationToken: string;
+};
+
+export type AcceptOrganizationInvitationResponse = {
+  organizationId: string;
+  role: string;
+};
+
 export type AuditEntryDto = {
   id: string;
   eventType: string;
@@ -28,6 +37,15 @@ export type AuditEntryDto = {
   resourceType: null | string;
   resourceId: null | string;
   occurredAt: string;
+};
+
+export type ChangeOrganizationMemberRoleRequest = {
+  role: string;
+};
+
+export type ChangeOrganizationMemberRoleResponse = {
+  userId: string;
+  role: string;
 };
 
 export type ChangePasswordRequest = {
@@ -86,6 +104,31 @@ export type CreateInvitationResponse = {
   email: string;
   token: string;
   expiresAt: string;
+};
+
+export type CreateOrganizationInvitationRequest = {
+  email: string;
+  role: string;
+};
+
+export type CreateOrganizationInvitationResponse = {
+  invitationId: string;
+  email: string;
+  role: string;
+  expiresAt: string;
+  rawToken: string;
+};
+
+export type CreateOrganizationRequest = {
+  name: string;
+  slug?: null | string;
+};
+
+export type CreateOrganizationResponse = {
+  organizationId: string;
+  name: string;
+  slug: string;
+  role: string;
 };
 
 export type CreateProductRequest = {
@@ -220,6 +263,22 @@ export type GetOnboardingLegalRequirementsResponse = {
   documents: Array<OnboardingLegalDocumentResponse>;
 };
 
+export type GetOrganizationAuditResponse = {
+  organizationId: string;
+  accessMode: string;
+  entries: Array<OrganizationAuditEntryDto>;
+  total: number | string;
+  page: number | string;
+  pageSize: number | string;
+};
+
+export type GetOrganizationResponse = {
+  organizationId: string;
+  name: string;
+  slug: string;
+  accessMode: string;
+};
+
 export type GetProductByIdResponse = {
   id: string;
   sku: string;
@@ -285,6 +344,18 @@ export type ListInvitationsResponse = {
 export type ListMyNotificationsResponse = {
   items: Array<MyNotificationResponse>;
   nextBefore: null | string;
+};
+
+export type ListMyOrganizationsResponse = {
+  organizations: Array<MyOrganizationItem>;
+};
+
+export type ListOrganizationInvitationsResponse = {
+  invitations: Array<OrganizationInvitationItem>;
+};
+
+export type ListOrganizationMembersResponse = {
+  members: Array<OrganizationMemberItem>;
 };
 
 export type ListProductsResponse = {
@@ -378,6 +449,15 @@ export type MyNotificationResponse = {
   readAt: null | string;
 };
 
+export type MyOrganizationItem = {
+  organizationId: string;
+  name: string;
+  slug: string;
+  role: string;
+  permissions: Array<string>;
+  permissionsVersion: string;
+};
+
 export type NotificationCategory = number;
 
 export type NotificationLinkDto = {
@@ -395,6 +475,33 @@ export type OnboardingLegalDocumentResponse = {
   effectiveAt: string;
   contentHash: string;
   markdown: string;
+};
+
+export type OrganizationAuditEntryDto = {
+  id: string;
+  eventType: string;
+  actorId: null | string;
+  resourceType: null | string;
+  resourceId: null | string;
+  occurredAt: string;
+  payload: string;
+};
+
+export type OrganizationInvitationItem = {
+  invitationId: string;
+  email: string;
+  role: string;
+  expiresAt: string;
+  isPending: boolean;
+};
+
+export type OrganizationMemberItem = {
+  userId: null | string;
+  role: string;
+  joinedAt: string;
+  isAnonymized: boolean;
+  displayName: null | string;
+  email: null | string;
 };
 
 export type PersonalDataExport = {
@@ -447,6 +554,7 @@ export type RegisterRequest = {
   password: string;
   displayName: string;
   invitationToken?: null | string;
+  organizationInvitationToken?: null | string;
 };
 
 export type RegisterResponse = {
@@ -514,6 +622,17 @@ export type UpdateMyNotificationPreferenceRequest = {
 
 export type UpdateMyNotificationPreferencesRequest = {
   preferences: Array<UpdateMyNotificationPreferenceRequest>;
+};
+
+export type UpdateOrganizationRequest = {
+  name: string;
+  slug: string;
+};
+
+export type UpdateOrganizationResponse = {
+  organizationId: string;
+  name: string;
+  slug: string;
 };
 
 export type UpdateProfileRequest = {
@@ -1412,6 +1531,263 @@ export type UpdateMyNotificationPreferencesResponses = {
 
 export type UpdateMyNotificationPreferencesResponse =
   UpdateMyNotificationPreferencesResponses[keyof UpdateMyNotificationPreferencesResponses];
+
+export type CreateOrganizationData = {
+  body: CreateOrganizationRequest;
+  path?: never;
+  query?: never;
+  url: "/v1/organizations";
+};
+
+export type CreateOrganizationErrors = {
+  /**
+   * Unprocessable Entity
+   */
+  422: HttpValidationProblemDetails;
+};
+
+export type CreateOrganizationError =
+  CreateOrganizationErrors[keyof CreateOrganizationErrors];
+
+export type CreateOrganizationResponses = {
+  /**
+   * Created
+   */
+  201: CreateOrganizationResponse;
+};
+
+export type CreateOrganizationResponse2 =
+  CreateOrganizationResponses[keyof CreateOrganizationResponses];
+
+export type ListMyOrganizationsData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/v1/organizations/my";
+};
+
+export type ListMyOrganizationsResponses = {
+  /**
+   * OK
+   */
+  200: ListMyOrganizationsResponse;
+};
+
+export type ListMyOrganizationsResponse2 =
+  ListMyOrganizationsResponses[keyof ListMyOrganizationsResponses];
+
+export type DeleteOrganizationData = {
+  body?: never;
+  path: {
+    organizationRef: string;
+  };
+  query?: never;
+  url: "/v1/organizations/{organizationRef}";
+};
+
+export type DeleteOrganizationResponses = {
+  /**
+   * No Content
+   */
+  204: void;
+};
+
+export type DeleteOrganizationResponse =
+  DeleteOrganizationResponses[keyof DeleteOrganizationResponses];
+
+export type GetOrganizationData = {
+  body?: never;
+  path: {
+    organizationRef: string;
+  };
+  query?: never;
+  url: "/v1/organizations/{organizationRef}";
+};
+
+export type GetOrganizationResponses = {
+  /**
+   * OK
+   */
+  200: GetOrganizationResponse;
+};
+
+export type GetOrganizationResponse2 =
+  GetOrganizationResponses[keyof GetOrganizationResponses];
+
+export type UpdateOrganizationData = {
+  body: UpdateOrganizationRequest;
+  path: {
+    organizationRef: string;
+  };
+  query?: never;
+  url: "/v1/organizations/{organizationRef}";
+};
+
+export type UpdateOrganizationResponses = {
+  /**
+   * OK
+   */
+  200: UpdateOrganizationResponse;
+};
+
+export type UpdateOrganizationResponse2 =
+  UpdateOrganizationResponses[keyof UpdateOrganizationResponses];
+
+export type ListOrganizationMembersData = {
+  body?: never;
+  path: {
+    organizationRef: string;
+  };
+  query?: never;
+  url: "/v1/organizations/{organizationRef}/members";
+};
+
+export type ListOrganizationMembersResponses = {
+  /**
+   * OK
+   */
+  200: ListOrganizationMembersResponse;
+};
+
+export type ListOrganizationMembersResponse2 =
+  ListOrganizationMembersResponses[keyof ListOrganizationMembersResponses];
+
+export type ChangeOrganizationMemberRoleData = {
+  body: ChangeOrganizationMemberRoleRequest;
+  path: {
+    organizationRef: string;
+    userId: string;
+  };
+  query?: never;
+  url: "/v1/organizations/{organizationRef}/members/{userId}/role";
+};
+
+export type ChangeOrganizationMemberRoleResponses = {
+  /**
+   * OK
+   */
+  200: ChangeOrganizationMemberRoleResponse;
+};
+
+export type ChangeOrganizationMemberRoleResponse2 =
+  ChangeOrganizationMemberRoleResponses[keyof ChangeOrganizationMemberRoleResponses];
+
+export type RemoveOrganizationMemberData = {
+  body?: never;
+  path: {
+    organizationRef: string;
+    userId: string;
+  };
+  query?: never;
+  url: "/v1/organizations/{organizationRef}/members/{userId}";
+};
+
+export type RemoveOrganizationMemberResponses = {
+  /**
+   * No Content
+   */
+  204: void;
+};
+
+export type RemoveOrganizationMemberResponse =
+  RemoveOrganizationMemberResponses[keyof RemoveOrganizationMemberResponses];
+
+export type ListOrganizationInvitationsData = {
+  body?: never;
+  path: {
+    organizationRef: string;
+  };
+  query?: never;
+  url: "/v1/organizations/{organizationRef}/invitations";
+};
+
+export type ListOrganizationInvitationsResponses = {
+  /**
+   * OK
+   */
+  200: ListOrganizationInvitationsResponse;
+};
+
+export type ListOrganizationInvitationsResponse2 =
+  ListOrganizationInvitationsResponses[keyof ListOrganizationInvitationsResponses];
+
+export type CreateOrganizationInvitationData = {
+  body: CreateOrganizationInvitationRequest;
+  path: {
+    organizationRef: string;
+  };
+  query?: never;
+  url: "/v1/organizations/{organizationRef}/invitations";
+};
+
+export type CreateOrganizationInvitationResponses = {
+  /**
+   * OK
+   */
+  200: CreateOrganizationInvitationResponse;
+};
+
+export type CreateOrganizationInvitationResponse2 =
+  CreateOrganizationInvitationResponses[keyof CreateOrganizationInvitationResponses];
+
+export type AcceptOrganizationInvitationData = {
+  body: AcceptOrganizationInvitationRequest;
+  path?: never;
+  query?: never;
+  url: "/v1/organizations/invitations/accept";
+};
+
+export type AcceptOrganizationInvitationResponses = {
+  /**
+   * OK
+   */
+  200: AcceptOrganizationInvitationResponse;
+};
+
+export type AcceptOrganizationInvitationResponse2 =
+  AcceptOrganizationInvitationResponses[keyof AcceptOrganizationInvitationResponses];
+
+export type RevokeOrganizationInvitationData = {
+  body?: never;
+  path: {
+    organizationRef: string;
+    invitationId: string;
+  };
+  query?: never;
+  url: "/v1/organizations/{organizationRef}/invitations/{invitationId}";
+};
+
+export type RevokeOrganizationInvitationResponses = {
+  /**
+   * No Content
+   */
+  204: void;
+};
+
+export type RevokeOrganizationInvitationResponse =
+  RevokeOrganizationInvitationResponses[keyof RevokeOrganizationInvitationResponses];
+
+export type GetOrganizationAuditData = {
+  body?: never;
+  path: {
+    organizationRef: string;
+  };
+  query?: {
+    page?: number | string;
+    pageSize?: number | string;
+  };
+  url: "/v1/organizations/{organizationRef}/audit";
+};
+
+export type GetOrganizationAuditResponses = {
+  /**
+   * OK
+   */
+  200: GetOrganizationAuditResponse;
+};
+
+export type GetOrganizationAuditResponse2 =
+  GetOrganizationAuditResponses[keyof GetOrganizationAuditResponses];
 
 export type RegisterData = {
   body: RegisterRequest;

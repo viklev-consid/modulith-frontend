@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useMemo, use, type ReactNode } from "react";
+import { createContext, useEffect, useMemo, use, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -12,6 +12,7 @@ import type {
   GetCurrentUserResponse,
   RegisterResponse,
 } from "@/api/generated";
+import { listMyOrganizationsOptions } from "@/api/generated/@tanstack/react-query.gen";
 import {
   currentUserQueryKey,
   fetchCurrentUserQuery,
@@ -36,7 +37,15 @@ type RegisterInput = {
   displayName: string;
   email: string;
   password: string;
+  /** Token for an existing pending system-level user invitation. */
   invitationToken?: string | null;
+  /**
+   * Token from an organization invitation link
+   * (`/invite?token=...`). The server cross-validates this against the
+   * Organizations module, creates the account, then auto-consumes the
+   * invite — joining the user to the inviting org as part of registration.
+   */
+  organizationInvitationToken?: string | null;
 };
 
 type AuthContextValue = {
@@ -53,10 +62,13 @@ type AuthContextValue = {
   completeTwoFactorLogin(code: string, nextPath?: string | null): Promise<void>;
   register(data: RegisterInput): Promise<RegisterResponse>;
   resendEmailConfirmation(email: string): Promise<void>;
-  completeOnboarding(data: {
-    acceptMarketingEmails: boolean;
-    acceptedDocuments: AcceptedLegalDocumentRequest[];
-  }): Promise<void>;
+  completeOnboarding(
+    data: {
+      acceptMarketingEmails: boolean;
+      acceptedDocuments: AcceptedLegalDocumentRequest[];
+    },
+    options?: { next?: string },
+  ): Promise<void>;
   logout(): Promise<void>;
 };
 
@@ -109,6 +121,15 @@ function AuthProviderInner({ children }: { children: ReactNode }) {
     retry: false,
   });
 
+  // Prefetch the caller's organizations once the user resolves. Scoped
+  // permissions live on these entries and are needed by `<Can inOrg>` /
+  // `usePermission(_, orgId)` everywhere under `/app`. We also re-trigger on
+  // currentUser changes so a re-login picks up a fresh list.
+  useEffect(() => {
+    if (!currentUserQuery.data) return;
+    void queryClient.prefetchQuery(listMyOrganizationsOptions());
+  }, [currentUserQuery.data, queryClient]);
+
   const value = useMemo<AuthContextValue>(
     () => ({
       user: sessionQuery.data ?? null,
@@ -146,6 +167,9 @@ function AuthProviderInner({ children }: { children: ReactNode }) {
           queryKey: currentUserQueryKey,
           queryFn: fetchCurrentUserQuery,
         });
+        if (profile.hasCompletedOnboarding) {
+          await queryClient.prefetchQuery(listMyOrganizationsOptions());
+        }
         push(
           profile.hasCompletedOnboarding
             ? safeNextPath(nextPath)
@@ -181,6 +205,9 @@ function AuthProviderInner({ children }: { children: ReactNode }) {
           queryKey: currentUserQueryKey,
           queryFn: fetchCurrentUserQuery,
         });
+        if (profile.hasCompletedOnboarding) {
+          await queryClient.prefetchQuery(listMyOrganizationsOptions());
+        }
         const target = nextPath ?? challenge.nextPath;
         push(
           profile.hasCompletedOnboarding ? safeNextPath(target) : "/onboarding",
@@ -204,13 +231,16 @@ function AuthProviderInner({ children }: { children: ReactNode }) {
           description: t("confirmationSent.description"),
         });
       },
-      async completeOnboarding(data) {
+      async completeOnboarding(data, options) {
         await fetchJson<void>("/api/auth/onboarding", {
           method: "POST",
           body: JSON.stringify(data),
         });
         await queryClient.invalidateQueries({ queryKey: currentUserQueryKey });
-        push("/app");
+        // Default lands on the cross-org dashboard; callers can override
+        // when they want to drop the user into a specific destination
+        // (e.g. the org they just created during onboarding).
+        push(options?.next ?? "/app");
       },
       async logout() {
         await fetch("/api/auth/logout", { method: "POST" });

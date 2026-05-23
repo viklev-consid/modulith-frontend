@@ -5,22 +5,20 @@ import { usePathname } from "next/navigation";
 import {
   GaugeIcon,
   HelpCircleIcon,
-  PlusIcon,
   SearchIcon,
-  SettingsIcon,
   ShieldIcon,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Can } from "@/components/can";
+import { OrgNav } from "@/components/app-shell/org-nav";
 import { ProfileMenu } from "@/components/app-shell/profile-menu";
-import { Button } from "@/components/ui/button";
+import { OrgSwitcher } from "@/components/organizations/org-switcher";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -30,6 +28,15 @@ import { adminRoutes } from "@/lib/admin-routes";
 
 const ADMIN_PERMISSIONS = adminRoutes.map((route) => route.permission);
 
+/**
+ * Sidebar shape:
+ *   Header — brand + Dashboard + Picker
+ *   Content — active-org contextual nav (rendered by <OrgNav/>)
+ *   Footer — Search, Administration, Help, ProfileMenu
+ *
+ * The cross-org/personal/active-org split corresponds to the three
+ * scope categories the app exposes (see lib/active-org-context.ts).
+ */
 export function AppSidebar({ onSearchOpen }: { onSearchOpen: () => void }) {
   const t = useTranslations("app.shell");
   const pathname = usePathname();
@@ -53,26 +60,8 @@ export function AppSidebar({ onSearchOpen }: { onSearchOpen: () => void }) {
             </span>
           </div>
         </div>
-        <div className="px-2 group-data-[collapsible=icon]:px-0">
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            disabled
-            aria-label={t("quickCreate")}
-            className="w-full justify-start gap-2 group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
-          >
-            <PlusIcon className="size-4" />
-            <span className="group-data-[collapsible=icon]:hidden">
-              {t("quickCreate")}
-            </span>
-          </Button>
-        </div>
-      </SidebarHeader>
 
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>{t("workspaceLabel")}</SidebarGroupLabel>
+        <SidebarGroup className="p-0">
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton
@@ -86,6 +75,14 @@ export function AppSidebar({ onSearchOpen }: { onSearchOpen: () => void }) {
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup>
+
+        <div className="group-data-[collapsible=icon]:hidden">
+          <OrgSwitcher />
+        </div>
+      </SidebarHeader>
+
+      <SidebarContent>
+        <OrgNav />
       </SidebarContent>
 
       <SidebarFooter>
@@ -114,16 +111,9 @@ export function AppSidebar({ onSearchOpen }: { onSearchOpen: () => void }) {
               </SidebarMenuButton>
             </SidebarMenuItem>
           </Can>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              isActive={isActive("/app/settings")}
-              tooltip={t("settings")}
-              render={<Link href="/app/settings" />}
-            >
-              <SettingsIcon />
-              <span>{t("settings")}</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+        </SidebarMenu>
+
+        <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
               type="button"
