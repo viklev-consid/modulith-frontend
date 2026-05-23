@@ -6,7 +6,6 @@ import {
   GaugeIcon,
   HelpCircleIcon,
   SearchIcon,
-  SettingsIcon,
   ShieldIcon,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -20,7 +19,6 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -34,7 +32,7 @@ const ADMIN_PERMISSIONS = adminRoutes.map((route) => route.permission);
  * Sidebar shape:
  *   Header — brand + Dashboard + Picker
  *   Content — active-org contextual nav (rendered by <OrgNav/>)
- *   Footer — Search, Administration, Personal group, Help, ProfileMenu
+ *   Footer — Search, Administration, Help, ProfileMenu
  *
  * The cross-org/personal/active-org split corresponds to the three
  * scope categories the app exposes (see lib/active-org-context.ts).
@@ -114,22 +112,6 @@ export function AppSidebar({ onSearchOpen }: { onSearchOpen: () => void }) {
             </SidebarMenuItem>
           </Can>
         </SidebarMenu>
-
-        <SidebarGroup className="p-0">
-          <SidebarGroupLabel>{t("personal")}</SidebarGroupLabel>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                isActive={isActive("/app/me/settings")}
-                tooltip={t("mySettings")}
-                render={<Link href="/app/me/settings" />}
-              >
-                <SettingsIcon />
-                <span>{t("mySettings")}</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarGroup>
 
         <SidebarMenu>
           <SidebarMenuItem>
