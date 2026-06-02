@@ -4,6 +4,10 @@ const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Emit a self-contained server bundle (.next/standalone) so the Docker
+  // runtime image only needs Node + the traced dependencies, not the full
+  // node_modules tree. Required by the Dockerfile's runner stage.
+  output: "standalone",
   logging: {
     browserToTerminal: true,
   },
