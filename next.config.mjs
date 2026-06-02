@@ -44,6 +44,16 @@ const nextConfig = {
         source: "/register",
         headers: [{ key: "Referrer-Policy", value: "no-referrer" }],
       },
+      {
+        source:
+          "/:authRoute(login|reset-password|confirm-email|confirm-email-change)/:path*",
+        headers: [{ key: "Referrer-Policy", value: "no-referrer" }],
+      },
+      {
+        source:
+          "/:authRoute(login|reset-password|confirm-email|confirm-email-change)",
+        headers: [{ key: "Referrer-Policy", value: "no-referrer" }],
+      },
     ];
   },
 };
