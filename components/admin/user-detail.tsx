@@ -47,17 +47,26 @@ function ActivityRow({ entry }: { entry: AuditEntryDto }) {
   );
 }
 
-export function UserDetail({ userId }: { userId: string }) {
+export function UserDetail({
+  userId,
+  canReadAudit,
+  canChangeRole,
+}: {
+  userId: string;
+  canReadAudit: boolean;
+  canChangeRole: boolean;
+}) {
   const t = useTranslations("adminComponents.userDetail");
   const format = useFormatter();
   const [roleDialogOpen, setRoleDialogOpen] = useState(false);
 
   const userQuery = useQuery(getUserByIdOptions({ path: { userId } }));
-  const activityQuery = useQuery(
-    getAuditTrailOptions({
+  const activityQuery = useQuery({
+    ...getAuditTrailOptions({
       query: { actorId: userId, page: 1, pageSize: 5 },
     }),
-  );
+    enabled: canReadAudit,
+  });
 
   if (userQuery.isLoading) {
     return (
@@ -135,50 +144,56 @@ export function UserDetail({ userId }: { userId: string }) {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("actions.title")}</CardTitle>
-          <CardDescription>{t("actions.description")}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Button onClick={() => setRoleDialogOpen(true)}>
-            {t("actions.changeRole")}
-          </Button>
-        </CardContent>
-      </Card>
+      {canChangeRole ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("actions.title")}</CardTitle>
+            <CardDescription>{t("actions.description")}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button onClick={() => setRoleDialogOpen(true)}>
+              {t("actions.changeRole")}
+            </Button>
+          </CardContent>
+        </Card>
+      ) : null}
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("activity.title")}</CardTitle>
-          <CardDescription>{t("activity.description")}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {activityQuery.isLoading ? (
-            <div className="grid gap-2">
-              <Skeleton className="h-5" />
-              <Skeleton className="h-5" />
-            </div>
-          ) : activity.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              {t("activity.empty")}
-            </p>
-          ) : (
-            <ul className="grid">
-              {activity.map((entry) => (
-                <ActivityRow key={entry.id} entry={entry} />
-              ))}
-            </ul>
-          )}
-        </CardContent>
-      </Card>
+      {canReadAudit ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("activity.title")}</CardTitle>
+            <CardDescription>{t("activity.description")}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {activityQuery.isLoading ? (
+              <div className="grid gap-2">
+                <Skeleton className="h-5" />
+                <Skeleton className="h-5" />
+              </div>
+            ) : activity.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                {t("activity.empty")}
+              </p>
+            ) : (
+              <ul className="grid">
+                {activity.map((entry) => (
+                  <ActivityRow key={entry.id} entry={entry} />
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
+      ) : null}
 
-      <RoleChangeDialog
-        open={roleDialogOpen}
-        onOpenChange={setRoleDialogOpen}
-        userId={user.userId}
-        userName={user.displayName || user.email}
-        currentRole={user.role}
-      />
+      {canChangeRole ? (
+        <RoleChangeDialog
+          open={roleDialogOpen}
+          onOpenChange={setRoleDialogOpen}
+          userId={user.userId}
+          userName={user.displayName || user.email}
+          currentRole={user.role}
+        />
+      ) : null}
     </div>
   );
 }

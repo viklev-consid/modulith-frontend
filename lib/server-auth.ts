@@ -1,6 +1,7 @@
 import "server-only";
 
 import { cache } from "react";
+import { redirect } from "next/navigation";
 
 import type { GetCurrentUserResponse } from "@/api/generated";
 import { fetchBackend, publicUser, refreshSession } from "@/lib/backend";
@@ -61,6 +62,16 @@ export async function getServerCurrentUser() {
   }
 
   return (await response.json()) as GetCurrentUserResponse;
+}
+
+export async function requireServerPermission(permission: string) {
+  const currentUser = await getServerCurrentUser();
+
+  if (!currentUser?.permissions.includes(permission)) {
+    redirect("/app");
+  }
+
+  return currentUser;
 }
 
 export async function syncServerOnboardingState(

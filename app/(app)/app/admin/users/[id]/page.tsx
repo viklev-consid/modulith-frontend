@@ -9,6 +9,7 @@ import {
 } from "@/api/generated/@tanstack/react-query.gen";
 import { UserDetail } from "@/components/admin/user-detail";
 import { createQueryClient } from "@/lib/query-client";
+import { requireServerPermission } from "@/lib/server-auth";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("metadata.admin");
@@ -21,7 +22,9 @@ export default async function AdminUserDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const currentUser = await requireServerPermission("users.users.read");
   const queryClient = createQueryClient();
+  const canReadAudit = currentUser.permissions.includes("audit.trail.read");
 
   await Promise.all([
     queryClient.prefetchQuery(
@@ -30,17 +33,23 @@ export default async function AdminUserDetailPage({
         path: { userId: id },
       }),
     ),
-    queryClient.prefetchQuery(
-      getAuditTrailOptions({
-        client: serverClient,
-        query: { actorId: id, page: 1, pageSize: 5 },
-      }),
-    ),
+    canReadAudit
+      ? queryClient.prefetchQuery(
+          getAuditTrailOptions({
+            client: serverClient,
+            query: { actorId: id, page: 1, pageSize: 5 },
+          }),
+        )
+      : Promise.resolve(),
   ]);
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <UserDetail userId={id} />
+      <UserDetail
+        userId={id}
+        canReadAudit={canReadAudit}
+        canChangeRole={currentUser.role === "Admin"}
+      />
     </HydrationBoundary>
   );
 }
