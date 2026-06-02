@@ -29,8 +29,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { GLOBAL_ROLE } from "@/lib/global-roles";
 
-const ROLE_OPTIONS = [{ value: "Admin" }, { value: "User" }] as const;
+const ROLE_OPTIONS = [
+  { value: GLOBAL_ROLE.Admin },
+  { value: GLOBAL_ROLE.User },
+] as const;
 
 type RoleKey = (typeof ROLE_OPTIONS)[number]["value"];
 

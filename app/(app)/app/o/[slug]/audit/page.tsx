@@ -8,13 +8,6 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t("audit") };
 }
 
-export default async function OrgAuditPage({
-  params,
-  searchParams,
-}: {
-  params: Promise<{ slug: string }>;
-  searchParams: Promise<{ page?: string | string[] }>;
-}) {
-  await Promise.all([params, searchParams]);
+export default function OrgAuditPage() {
   return <OrgAuditTable />;
 }

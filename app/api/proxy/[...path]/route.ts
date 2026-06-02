@@ -71,12 +71,15 @@ async function proxyRequest(request: Request, context: ProxyContext) {
     await session.save();
   }
 
+  const accessToken = session.accessToken;
+  if (!accessToken) return unauthorized();
+
   const { path } = await context.params;
   const incomingUrl = new URL(request.url);
   const target = new URL(backendUrl(path.join("/")));
   target.search = incomingUrl.search;
 
-  const headers = proxyRequestHeaders(request, session.accessToken!);
+  const headers = proxyRequestHeaders(request, accessToken);
 
   const hasBody =
     !["GET", "HEAD"].includes(request.method) && request.body !== null;

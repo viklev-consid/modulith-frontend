@@ -8,6 +8,7 @@ import {
   getUserByIdOptions,
 } from "@/api/generated/@tanstack/react-query.gen";
 import { UserDetail } from "@/components/admin/user-detail";
+import { GLOBAL_ROLE } from "@/lib/global-roles";
 import { createQueryClient } from "@/lib/query-client";
 import { requireServerPermission } from "@/lib/server-auth";
 
@@ -50,7 +51,7 @@ export default async function AdminUserDetailPage({
       <UserDetail
         userId={id}
         canReadAudit={canReadAudit}
-        canChangeRole={currentUser.role === "Admin"}
+        canChangeRole={currentUser.role === GLOBAL_ROLE.Admin}
       />
     </HydrationBoundary>
   );
