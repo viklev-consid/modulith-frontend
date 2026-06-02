@@ -181,9 +181,17 @@ export function RegisterContent() {
               />
             </FieldGroup>
 
-            <Button className="w-full" type="submit">
-              {t("submit")}
-            </Button>
+            <form.Subscribe selector={(state) => state.isSubmitting}>
+              {(isSubmitting) => (
+                <Button
+                  className="w-full"
+                  type="submit"
+                  disabled={isSubmitting}
+                >
+                  {t("submit")}
+                </Button>
+              )}
+            </form.Subscribe>
 
             <p className="text-center text-xs text-muted-foreground">
               {t("haveAccount")}{" "}

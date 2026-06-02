@@ -60,9 +60,11 @@ export function ProfileSettingsForm() {
       return;
     }
 
-    form.reset({
-      displayName: currentUser.displayName,
-    });
+    if (!form.state.isDirty) {
+      form.reset({
+        displayName: currentUser.displayName,
+      });
+    }
   }, [currentUser, form]);
 
   return (

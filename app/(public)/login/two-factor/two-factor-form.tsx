@@ -1,7 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { useTranslations } from "next-intl";
 
 import { mapProblemToFieldErrors, type ProblemDetails } from "@/api/problems";
@@ -117,6 +123,7 @@ export function TwoFactorForm() {
   const [mode, setMode] = useState<Mode>("totp");
   const [code, setCode] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const submittingRef = useRef(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   function reset() {
@@ -125,6 +132,8 @@ export function TwoFactorForm() {
   }
 
   async function submit(value: string) {
+    if (submittingRef.current) return;
+    submittingRef.current = true;
     setSubmitting(true);
     setFieldErrors({});
 
@@ -136,6 +145,7 @@ export function TwoFactorForm() {
         code: mapped.code ?? (error as ProblemDetails)?.detail ?? "",
       });
     } finally {
+      submittingRef.current = false;
       setSubmitting(false);
     }
   }

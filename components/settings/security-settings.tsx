@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { CheckIcon, CopyIcon, DownloadIcon, ShieldIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -287,9 +287,12 @@ function SetupConfirmStep({
   const t = useTranslations("settingsForms.security.confirm");
   const [code, setCode] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const submittingRef = useRef(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   async function submit(value: string) {
+    if (submittingRef.current) return;
+    submittingRef.current = true;
     setSubmitting(true);
     setFieldErrors({});
     try {
@@ -309,6 +312,7 @@ function SetupConfirmStep({
         code: mapped.code ?? fieldMessage(problem, "code", t("wrongCode")),
       });
     } finally {
+      submittingRef.current = false;
       setSubmitting(false);
     }
   }
