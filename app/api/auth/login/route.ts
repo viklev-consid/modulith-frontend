@@ -2,7 +2,7 @@ import type { LoginResponse } from "@/api/generated";
 import {
   fetchBackend,
   getHasCompletedOnboarding,
-  problemResponse,
+  publicAuthProblemResponse,
   publicUser,
   readJsonBody,
   sessionFromTokenResponse,
@@ -13,6 +13,7 @@ export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
   const body = await readJsonBody(request);
+  if (body instanceof Response) return body;
   const response = await fetchBackend("/v1/users/login", {
     method: "POST",
     body: JSON.stringify(body),
@@ -22,7 +23,7 @@ export async function POST(request: Request) {
   });
 
   if (!response.ok) {
-    return problemResponse(response);
+    return publicAuthProblemResponse(response);
   }
 
   const payload = (await response.json()) as LoginResponse;
