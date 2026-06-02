@@ -1,22 +1,28 @@
 import "server-only";
 
+import { cache } from "react";
+
 import type { GetCurrentUserResponse } from "@/api/generated";
 import { fetchBackend, publicUser, refreshSession } from "@/lib/backend";
-import { getSession, hasUsableSession } from "@/lib/session";
+import {
+  getSession,
+  hasRefreshableSession,
+  hasUsableSession,
+  shouldRefreshSession,
+} from "@/lib/session";
 
-export async function getUsableServerSession() {
+export const getUsableServerSession = cache(async () => {
   const session = await getSession();
 
-  if (!hasUsableSession(session)) {
+  if (!hasRefreshableSession(session)) {
     return null;
   }
 
-  if (session.expiresAt && session.expiresAt * 1000 - Date.now() < 60_000) {
+  if (!hasUsableSession(session) || shouldRefreshSession(session)) {
     const nextSession = await refreshSession(session);
 
     if (!nextSession) {
       session.destroy();
-      await session.save();
       return null;
     }
 
@@ -25,7 +31,7 @@ export async function getUsableServerSession() {
   }
 
   return session;
-}
+});
 
 export async function getServerSessionUser() {
   const session = await getUsableServerSession();

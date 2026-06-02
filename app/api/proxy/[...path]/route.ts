@@ -1,5 +1,10 @@
 import { backendFetch, backendUrl, refreshSession } from "@/lib/backend";
-import { getSession, hasUsableSession } from "@/lib/session";
+import {
+  getSession,
+  hasRefreshableSession,
+  hasUsableSession,
+  shouldRefreshSession,
+} from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
@@ -18,25 +23,48 @@ const hopByHopHeaders = new Set([
   "upgrade",
 ]);
 
+const forwardedRequestHeaders = new Set([
+  "accept",
+  "accept-language",
+  "content-type",
+  "if-match",
+  "if-none-match",
+  "last-event-id",
+  "user-agent",
+]);
+
+function proxyRequestHeaders(request: Request, accessToken: string) {
+  const headers = new Headers();
+
+  for (const [key, value] of request.headers) {
+    if (forwardedRequestHeaders.has(key)) {
+      headers.set(key, value);
+    }
+  }
+
+  headers.set("authorization", `Bearer ${accessToken}`);
+  return headers;
+}
+
+function unauthorized() {
+  return Response.json({ title: "Unauthorized", status: 401 }, { status: 401 });
+}
+
 async function proxyRequest(request: Request, context: ProxyContext) {
   const session = await getSession();
 
-  if (!hasUsableSession(session)) {
-    return Response.json(
-      { title: "Unauthorized", status: 401 },
-      { status: 401 },
-    );
-  }
+  if (!hasRefreshableSession(session)) return unauthorized();
 
-  if (session.expiresAt && session.expiresAt * 1000 - Date.now() < 60_000) {
+  if (!hasUsableSession(session) || shouldRefreshSession(session)) {
     const nextSession = await refreshSession(session);
 
     if (!nextSession) {
-      session.destroy();
-      return Response.json(
-        { title: "Unauthorized", status: 401 },
-        { status: 401 },
-      );
+      // Do not mutate session state from generic GET requests. The explicit
+      // refresh endpoint can destroy a rejected session cookie.
+      if (request.method !== "GET") {
+        session.destroy();
+      }
+      return unauthorized();
     }
 
     Object.assign(session, nextSession);
@@ -48,10 +76,7 @@ async function proxyRequest(request: Request, context: ProxyContext) {
   const target = new URL(backendUrl(path.join("/")));
   target.search = incomingUrl.search;
 
-  const headers = new Headers(request.headers);
-  headers.set("authorization", `Bearer ${session.accessToken}`);
-  headers.delete("host");
-  headers.delete("cookie");
+  const headers = proxyRequestHeaders(request, session.accessToken!);
 
   const hasBody =
     !["GET", "HEAD"].includes(request.method) && request.body !== null;
@@ -65,6 +90,7 @@ async function proxyRequest(request: Request, context: ProxyContext) {
   } as RequestInit & { duplex?: "half" });
 
   const responseHeaders = new Headers(response.headers);
+  responseHeaders.delete("set-cookie");
   for (const header of hopByHopHeaders) {
     responseHeaders.delete(header);
   }

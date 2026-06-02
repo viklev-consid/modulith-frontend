@@ -4,14 +4,14 @@ import {
   problemResponse,
   readJsonBody,
 } from "@/lib/backend";
-import { getSession } from "@/lib/session";
+import { getUsableServerSession } from "@/lib/server-auth";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
-  const session = await getSession();
+  const session = await getUsableServerSession();
 
-  if (!session.accessToken) {
+  if (!session?.accessToken) {
     return Response.json(
       { title: "Unauthorized", status: 401 },
       { status: 401 },
@@ -39,9 +39,9 @@ export async function POST(request: Request) {
 }
 
 export async function PUT() {
-  const session = await getSession();
+  const session = await getUsableServerSession();
 
-  if (!session.accessToken) {
+  if (!session?.accessToken) {
     return Response.json(
       { title: "Unauthorized", status: 401 },
       { status: 401 },
