@@ -338,7 +338,7 @@ interface Store {
 const StoreContext = React.createContext<Store | null>(null);
 
 function useStoreContext(consumerName: string) {
-  const context = React.useContext(StoreContext);
+  const context = React.use(StoreContext);
   if (!context) {
     throw new Error(`\`${consumerName}\` must be used within \`${ROOT_NAME}\``);
   }
@@ -375,7 +375,7 @@ interface CropperContextValue {
 const CropperContext = React.createContext<CropperContextValue | null>(null);
 
 function useCropperContext(consumerName: string) {
-  const context = React.useContext(CropperContext);
+  const context = React.use(CropperContext);
   if (!context) {
     throw new Error(`\`${consumerName}\` must be used within \`${ROOT_NAME}\``);
   }

@@ -21,8 +21,10 @@ export default async function AdminUserDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { id } = await params;
-  const currentUser = await requireServerPermission("users.users.read");
+  const [{ id }, currentUser] = await Promise.all([
+    params,
+    requireServerPermission("users.users.read"),
+  ]);
   const queryClient = createQueryClient();
   const canReadAudit = currentUser.permissions.includes("audit.trail.read");
 
