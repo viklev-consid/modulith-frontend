@@ -124,7 +124,9 @@ export function NotificationPreferencesForm() {
                   <TableCell>
                     <Checkbox
                       checked={preference.bellEnabled}
-                      disabled={preference.isLocked}
+                      disabled={
+                        preference.isLocked || updatePreferences.isPending
+                      }
                       onCheckedChange={(checked) =>
                         updatePreference(
                           preference.category,
@@ -137,7 +139,9 @@ export function NotificationPreferencesForm() {
                   <TableCell>
                     <Checkbox
                       checked={preference.emailEnabled}
-                      disabled={preference.isLocked}
+                      disabled={
+                        preference.isLocked || updatePreferences.isPending
+                      }
                       onCheckedChange={(checked) =>
                         updatePreference(
                           preference.category,

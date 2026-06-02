@@ -21,6 +21,7 @@ import { AccessModeBadge } from "@/components/organizations/access-mode-badge";
 import { OrgRoleBadge } from "@/components/organizations/org-role-badge";
 import { Spinner } from "@/components/ui/spinner";
 import { OrgContext, type OrgContextValue } from "@/lib/org-context";
+import { isPlatformOverride } from "@/lib/org-access-mode";
 import { ORG_PERMISSION } from "@/lib/org-permission-strings";
 
 type OrgShellProps = {
@@ -52,10 +53,10 @@ export function OrgShell({ slug, children }: OrgShellProps) {
   // QueryClient's 30s staleTime.
   const orgQuery = useQuery({
     ...getOrganizationOptions({ path: { organizationRef: slug } }),
-    retry: (_attemptIndex, error) => {
+    retry: (attemptIndex, error) => {
       // 404 is terminal — no point retrying.
       const status = (error as unknown as ProblemDetails)?.status;
-      return status !== 404;
+      return ![401, 403, 404].includes(status) && attemptIndex < 2;
     },
   });
 
@@ -153,7 +154,8 @@ export function OrgShell({ slug, children }: OrgShellProps) {
   // use. Sourced from the already-subscribed `/my` listing so this stays
   // reactive when permissions refresh.
   const canReadAudit =
-    membership?.permissions.includes(ORG_PERMISSION.AuditRead) ?? false;
+    isPlatformOverride(orgQuery.data?.accessMode) ||
+    (membership?.permissions.includes(ORG_PERMISSION.AuditRead) ?? false);
 
   const tabs = [
     { href: `/app/o/${slug}`, key: "overview", exact: true },

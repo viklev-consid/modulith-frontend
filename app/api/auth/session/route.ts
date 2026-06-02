@@ -1,12 +1,12 @@
 import { publicUser } from "@/lib/backend";
-import { getSession, hasUsableSession } from "@/lib/session";
+import { getUsableServerSession } from "@/lib/server-auth";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const session = await getSession();
+  const session = await getUsableServerSession();
 
-  if (!hasUsableSession(session) || !session.user) {
+  if (!session?.user) {
     return Response.json(
       { title: "Unauthorized", status: 401 },
       { status: 401 },

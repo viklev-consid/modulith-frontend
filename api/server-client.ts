@@ -9,7 +9,10 @@ function proxyPathFromUrl(input: RequestInfo | URL) {
   const value = input instanceof Request ? input.url : input.toString();
   const url = new URL(value, "http://localhost");
 
-  if (!url.pathname.startsWith("/api/proxy")) {
+  if (
+    url.pathname !== "/api/proxy" &&
+    !url.pathname.startsWith("/api/proxy/")
+  ) {
     return null;
   }
 

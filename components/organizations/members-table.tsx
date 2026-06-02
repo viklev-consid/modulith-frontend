@@ -57,7 +57,7 @@ import {
 } from "@/components/ui/table";
 import { useOrg } from "@/lib/org-context";
 import { ORG_PERMISSION } from "@/lib/org-permission-strings";
-import { useHasOrgPermission } from "@/lib/org-permissions";
+import { useCanInActiveOrg } from "@/lib/active-org-permissions";
 import { roleRank } from "@/lib/org-roles";
 
 const columnHelper = createColumnHelper<OrganizationMemberItem>();
@@ -82,10 +82,7 @@ export function MembersTable() {
   const tActions = useTranslations("organizations.members.actions");
   const org = useOrg();
   const { currentUser } = useAuth();
-  const canManage = useHasOrgPermission(
-    org.organizationId,
-    ORG_PERMISSION.MembersManage,
-  );
+  const canManage = useCanInActiveOrg(ORG_PERMISSION.MembersManage);
 
   const [dialog, setDialog] = useState<PendingDialog>({ kind: "none" });
 

@@ -67,7 +67,10 @@ export function LegalDocumentSheet(props: LegalDocumentSheetProps) {
         {/* Keying on (type,version) remounts the inner body so per-document
             state (acknowledgement, submit error) resets without a
             setState-in-effect. */}
-        <LegalDocumentSheetBody key={`${type}@${version}`} {...props} />
+        <LegalDocumentSheetBody
+          key={`${type}@${version}@${props.contentHash ?? ""}`}
+          {...props}
+        />
       </SheetContent>
     </Sheet>
   );

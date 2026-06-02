@@ -6,6 +6,7 @@ import type {
   ListMyOrganizationsResponse,
   MyOrganizationItem,
 } from "@/api/generated";
+import { ORG_PERMISSION } from "@/lib/org-permission-strings";
 
 import {
   findMyOrganization,
@@ -21,7 +22,7 @@ function makeOrg(
     name: "Acme",
     slug: "acme",
     role: "Owner",
-    permissions: ["organizations.members.read", "organizations.members.invite"],
+    permissions: [ORG_PERMISSION.MembersRead, ORG_PERMISSION.InvitationsManage],
     permissionsVersion: "v1abc",
     ...overrides,
   };
@@ -63,7 +64,7 @@ describe("org-permissions", () => {
       hasOrgPermission(
         client,
         "00000000-0000-0000-0000-000000000001",
-        "organizations.members.invite",
+        ORG_PERMISSION.InvitationsManage,
       ),
     ).toBe(true);
   });

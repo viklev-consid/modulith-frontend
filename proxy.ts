@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 import { SESSION_COOKIE_NAME } from "@/lib/constants";
-import { hasUsableSession, unsealSessionCookie } from "@/lib/session";
+import { hasRefreshableSession, unsealSessionCookie } from "@/lib/session";
 
 const publicRoutes = new Set([
   "/",
@@ -31,7 +31,9 @@ export async function proxy(request: NextRequest) {
   const session = await unsealSessionCookie(
     request.cookies.get(SESSION_COOKIE_NAME)?.value,
   );
-  const hasSession = Boolean(session && hasUsableSession(session));
+  // Optimistic routing guard only. Route handlers and server data loaders
+  // validate or refresh the access token before reaching protected data.
+  const hasSession = Boolean(session && hasRefreshableSession(session));
 
   if (!hasSession && !isPublicRoute(pathname)) {
     const loginUrl = new URL("/login", request.url);

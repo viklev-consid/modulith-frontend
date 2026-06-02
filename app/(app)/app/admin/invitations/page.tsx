@@ -6,6 +6,7 @@ import { serverClient } from "@/api/server-client";
 import { listInvitationsOptions } from "@/api/generated/@tanstack/react-query.gen";
 import { InvitationsPage } from "@/components/admin/invitations-page";
 import { createQueryClient } from "@/lib/query-client";
+import { requireServerPermission } from "@/lib/server-auth";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("metadata.admin");
@@ -13,6 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function AdminInvitationsPage() {
+  await requireServerPermission("users.invitations.write");
   const queryClient = createQueryClient();
 
   await queryClient.prefetchQuery(

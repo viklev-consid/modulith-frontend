@@ -7,6 +7,7 @@ import { serverClient } from "@/api/server-client";
 import { listUsersOptions } from "@/api/generated/@tanstack/react-query.gen";
 import { UsersTable } from "@/components/admin/users-table";
 import { createQueryClient } from "@/lib/query-client";
+import { requireServerPermission } from "@/lib/server-auth";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("metadata.admin");
@@ -34,6 +35,7 @@ export default async function AdminUsersPage({
     search?: string | string[];
   }>;
 }) {
+  await requireServerPermission("users.users.read");
   const params = await searchParams;
   const page = toPositiveInteger(params.page);
   const search = firstValue(params.search)?.trim();

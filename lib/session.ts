@@ -57,10 +57,19 @@ export async function getSession(): Promise<IronSession<SessionData>> {
 export function hasUsableSession(session: SessionData) {
   return Boolean(
     session.accessToken &&
-    session.refreshToken &&
     session.user &&
     session.expiresAt &&
     session.expiresAt * 1000 > Date.now(),
+  );
+}
+
+export function hasRefreshableSession(session: SessionData) {
+  return Boolean(session.refreshToken && session.user);
+}
+
+export function shouldRefreshSession(session: SessionData) {
+  return Boolean(
+    session.expiresAt && session.expiresAt * 1000 - Date.now() < 60_000,
   );
 }
 

@@ -2,7 +2,6 @@
 
 import { useTranslations } from "next-intl";
 
-import { usePermission } from "@/components/can";
 import { DeleteOrgDialog } from "@/components/organizations/delete-org-dialog";
 import { EditOrgForm } from "@/components/organizations/edit-org-form";
 import {
@@ -13,8 +12,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Empty, EmptyDescription, EmptyTitle } from "@/components/ui/empty";
-import { useOrg } from "@/lib/org-context";
 import { ORG_PERMISSION } from "@/lib/org-permission-strings";
+import { useCanInActiveOrg } from "@/lib/active-org-permissions";
 
 /**
  * Org settings page.
@@ -32,9 +31,8 @@ import { ORG_PERMISSION } from "@/lib/org-permission-strings";
  */
 export function OrgSettings() {
   const t = useTranslations("organizations.settings");
-  const org = useOrg();
-  const canUpdate = usePermission(ORG_PERMISSION.OrgWrite, org.organizationId);
-  const canDelete = usePermission(ORG_PERMISSION.OrgDelete, org.organizationId);
+  const canUpdate = useCanInActiveOrg(ORG_PERMISSION.OrgWrite);
+  const canDelete = useCanInActiveOrg(ORG_PERMISSION.OrgDelete);
 
   if (!canUpdate && !canDelete) {
     return (

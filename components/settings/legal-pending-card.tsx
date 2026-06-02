@@ -60,7 +60,9 @@ export function LegalPendingCard() {
       const queryKey = getLegalDocumentQueryKey({
         path: { type: doc.type, version: doc.version },
       });
-      if (queryClient.getQueryData(queryKey)) continue;
+      const cached =
+        queryClient.getQueryData<GetLegalDocumentResponse>(queryKey);
+      if (cached?.contentHash === doc.contentHash) continue;
       const seeded: GetLegalDocumentResponse = {
         id: doc.id,
         type: doc.type,

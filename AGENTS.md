@@ -48,7 +48,7 @@ Do not skip verification steps. The PreCommit hook runs typecheck + lint + tests
 
 # React Doctor conventions
 
-This project uses [react-doctor](https://github.com/millionco/react-doctor) for health scoring. The config (`react-doctor.config.json`) excludes `api/generated/**` since those files are auto-generated.
+This project uses [react-doctor](https://github.com/millionco/react-doctor) for health scoring. The config (`doctor.config.json`) excludes `api/generated/**` since those files are auto-generated.
 
 Rules to pay attention to when writing React code:
 

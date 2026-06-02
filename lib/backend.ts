@@ -128,9 +128,16 @@ export async function backendFetch(
   });
 }
 
-export async function readJsonBody<T>(request: Request): Promise<T> {
+export async function readJsonBody<T>(request: Request): Promise<T | Response> {
   const text = await request.text();
-  return text ? (JSON.parse(text) as T) : ({} as T);
+  try {
+    return text ? (JSON.parse(text) as T) : ({} as T);
+  } catch {
+    return Response.json(
+      { title: "Invalid JSON", status: 400 },
+      { status: 400, headers: { "content-type": "application/problem+json" } },
+    );
+  }
 }
 
 export async function problemResponse(response: Response) {
@@ -148,6 +155,16 @@ export async function problemResponse(response: Response) {
           ? contentType
           : "application/problem+json",
       },
+    },
+  );
+}
+
+export function publicAuthProblemResponse(response: Response) {
+  return Response.json(
+    { title: "Unable to complete request", status: response.status },
+    {
+      status: response.status,
+      headers: { "content-type": "application/problem+json" },
     },
   );
 }
