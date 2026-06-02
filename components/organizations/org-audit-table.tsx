@@ -23,6 +23,7 @@ import type { OrganizationAuditEntryDto } from "@/api/generated";
 import { Button } from "@/components/ui/button";
 import { Empty, EmptyDescription, EmptyTitle } from "@/components/ui/empty";
 import { Spinner } from "@/components/ui/spinner";
+import { useCanInActiveOrg } from "@/lib/active-org-permissions";
 import {
   Table,
   TableBody,
@@ -32,6 +33,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useOrg } from "@/lib/org-context";
+import { ORG_PERMISSION } from "@/lib/org-permission-strings";
 
 const DEFAULT_PAGE_SIZE = 20;
 
@@ -118,21 +120,23 @@ function PayloadCell({ payload }: { payload: string }) {
  * works and deep links are stable. pageSize is fixed at 20 in v1; the
  * backend response carries `total` so we can compute the last page.
  *
- * Permission gate happens at the page level via `<Can permission=
- * "organizations.audit.read" inOrg=...>`.
+ * The query is gated locally so direct navigation cannot start it before
+ * permissions resolve.
  */
 export function OrgAuditTable() {
   const t = useTranslations("organizations.audit");
   const org = useOrg();
+  const canReadAudit = useCanInActiveOrg(ORG_PERMISSION.AuditRead);
 
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
 
-  const { data, isLoading } = useQuery(
-    getOrganizationAuditOptions({
+  const { data, isLoading } = useQuery({
+    ...getOrganizationAuditOptions({
       path: { organizationRef: org.slug },
       query: { page, pageSize: DEFAULT_PAGE_SIZE },
     }),
-  );
+    enabled: canReadAudit,
+  });
 
   const entries = useMemo(() => data?.entries ?? [], [data?.entries]);
   const total = data ? toNumber(data.total) : 0;

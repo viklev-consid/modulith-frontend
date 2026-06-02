@@ -47,7 +47,7 @@ import {
 } from "@/components/ui/table";
 import { useOrg } from "@/lib/org-context";
 import { ORG_PERMISSION } from "@/lib/org-permission-strings";
-import { useHasOrgPermission } from "@/lib/org-permissions";
+import { useCanInActiveOrg } from "@/lib/active-org-permissions";
 
 /**
  * Pending-invitations surface for the active organization.
@@ -60,10 +60,7 @@ export function InvitationsTable() {
   const t = useTranslations("organizations.invitations.table");
   const tActions = useTranslations("organizations.invitations.actions");
   const org = useOrg();
-  const canManage = useHasOrgPermission(
-    org.organizationId,
-    ORG_PERMISSION.InvitationsManage,
-  );
+  const canManage = useCanInActiveOrg(ORG_PERMISSION.InvitationsManage);
 
   const [createOpen, setCreateOpen] = useState(false);
   const [revokeTarget, setRevokeTarget] =
